@@ -99,31 +99,31 @@ object Drivetrain : SubsystemBase() {
             if(fieldOriented) swerveDrive.driveFieldOriented(velocity); else swerveDrive.drive(velocity)
         }
 
-        /**
-         * Return SysID command for drive motors from YAGSL
-         * @return A command that SysIDs the drive motors.
-         */
-        fun sysIdDriveMotor(): Command? {
-            return SwerveDriveTest.generateSysIdCommand(
-                SwerveDriveTest.setDriveSysIdRoutine(
-                    SysIdRoutine.Config(),
-                    this,
-                    swerveDrive, 12.0),
-                3.0, 5.0, 3.0
-            )
-        }
+    /**
+     * Return SysID command for drive motors from YAGSL
+     * @return A command that SysIDs the drive motors.
+     */
+//    fun sysIdDriveMotor(): Command? {
+//        return SwerveDriveTest.generateSysIdCommand(
+//            SwerveDriveTest.setDriveSysIdRoutine(
+//                SysIdRoutine.Config(),
+//                this,
+//                swerveDrive, 12.0),
+//            3.0, 5.0, 3.0
+//        )
+//    }
 
-        /**
-         * Return SysID command for angle motors from YAGSL
-         * @return A command that SysIDs the angle1 motors.
-         */
-        fun sysIdAngleMotorCommand(): Command {
-            return SwerveDriveTest.generateSysIdCommand(
-                SwerveDriveTest.setAngleSysIdRoutine(
-                    SysIdRoutine.Config(),
-                    this, swerveDrive
-                ),
-                3.0, 5.0, 3.0
-            )
-        }
+    /**
+     * Return SysID command for angle motors from YAGSL
+     * @return A command that SysIDs the angle1 motors.
+     */
+    fun sysIdAngleMotorCommand(): Command {
+        return SwerveDriveTest.generateSysIdCommand(
+            SwerveDriveTest.setAngleSysIdRoutine(
+                SysIdRoutine.Config(),
+                this, swerveDrive
+            ),
+            3.0, 5.0, 3.0
+        )
+    }
 }
