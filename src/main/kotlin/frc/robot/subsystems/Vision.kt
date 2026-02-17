@@ -1,7 +1,6 @@
 package frc.robot.subsystems
 
-import Engine.BeaverPhotonVision
-import Engine.VisionCamera
+import beaverlib.odometry.BeaverPhotonVision
 import beaverlib.utils.Units.Angular.AngleUnit
 import beaverlib.utils.Units.Angular.degrees
 import beaverlib.utils.Units.Linear.DistanceUnit
@@ -13,6 +12,7 @@ import edu.wpi.first.apriltag.AprilTagFields
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.geometry.Transform3d
+import frc.robot.beaverlib.odometry.BeaverVisionCamera
 import org.photonvision.PhotonPoseEstimator
 
 class TargetPoseProvider(
@@ -39,7 +39,7 @@ class TargetPoseProvider(
 }
 
 val Vision = BeaverPhotonVision(
-    VisionCamera(
+    BeaverVisionCamera(
         name = "Arducam_OV9281_USB_Camera - Camronny",
         // 12.5 inches backwards, 7.0 inches right, 22.5 inches up on the robot
         robotToCamera = Transform3d(

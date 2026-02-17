@@ -22,7 +22,7 @@ object `according to all known laws of aviation, our robot should not be able to
                     !result.multitagResult.isPresent && (result.targets.first().poseAmbiguity > 0.3)
                 )
                     return
-                val newPose = camera.getEstimatedRobotPose(result) ?: return
+                val newPose = camera.getMultiTagPoseWithFallback(result) ?: return
                 addVisionMeasurement(newPose.toPose2d(), result.timestampSeconds, true)
             },
         )

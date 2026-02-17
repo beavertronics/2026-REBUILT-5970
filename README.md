@@ -1,13 +1,5 @@
-# Beavertronics Swerve
-This is the command-based swerve code for 5970, using the swerve library YAGSL.
-This project includes the following:
-- Swerve
-- Vision
-- Swank (Swerve-tank)
-- Swar (Swerve-car), and FS-Swar (Foursteer-swerve-car)
-- Additional "child mode" drive command
-- Example pneumatics subsystem
-
+# 2026-REBUILT-5970
+Repostiory for 5970's code for REBUILT!
 
 ## Beaverlib
 **Updating beaverlib** <br>
@@ -29,10 +21,5 @@ For us specifically, the full command is:
 - `git submodule add https://github.com/beavertronics/beaverlib.git ./src/main/kotlin/beaverlib`
 
 JVM: corretto-17.0.14, found in .jdks under user account
-JVM: consider WPI jdk for simulation which is under wpilib/(year)/jdk
 
-## Instructions / information
-- [Instructions on Swerve setup](/docs/Swerve.md)
-- [Information on Swank](/docs/Swank.md)
-- [Information on Swar and FS-Swar](/docs/Swar.md)
-- [Information on child mode]
+JVM: consider WPI jdk for simulation which is under wpilib/(year)/jdk
