@@ -1,9 +1,3 @@
-[submodule "beaverlib"]
-	path = beaverlib
-	url = https://github.com/beavertronics/beaverlib.git
-[submodule "src/kotlin"]
-	path = src/kotlin
-	url = https://github.com/beavertronics/beaverlib.git
 [submodule "src/main/kotlin/beaverlib"]
 	path = src/main/kotlin/beaverlib
 	url = https://github.com/beavertronics/beaverlib.git
