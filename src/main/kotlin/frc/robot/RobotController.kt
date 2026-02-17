@@ -13,6 +13,7 @@ import frc.robot.commands.general.Move
 import frc.robot.commands.vision.AlignToTag
 import frc.robot.commands.tests.Wait
 import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Phatplanner
 import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
 
@@ -42,6 +43,7 @@ object RobotController : TimedRobot() {
         TeleOp
         `according to all known laws of aviation, our robot should not be able to fly`
         Phatplanner
+        Intake
 
         // start drive cam // todo replaced by vision feed
         // CameraServer.startAutomaticCapture(0)

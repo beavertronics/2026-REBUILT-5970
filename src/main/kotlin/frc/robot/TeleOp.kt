@@ -2,8 +2,6 @@ package frc.robot
 
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
@@ -14,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.SwankDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
-import frc.robot.commands.vision.AlignToTag
 import frc.robot.subsystems.Drivetrain
 
 /*
@@ -63,17 +60,7 @@ object TeleOp {
      * configures things to run on specific inputs
      */
     fun configureBindings() {
-        OI.C_LB.whileTrue(AlignToTag(
-            aprilTagID = 26,
-            speedLimit = 2.5,
-            offsets = Pose2d(2.0, 0.0, Rotation2d(0.0, 0.0)),
-            end = false
-        ))
         OI.C_RB.whileTrue(InstantCommand(Drivetrain::lock, Drivetrain))
-//        OI.movement.whileTrue(Move(1.0, 0.0, 0.0))
-//        OI.driveCircle.whileTrue(Circle())
-//        OI.lowerIntake.whileTrue(MoveIntake(DoubleSolenoid.Value.kForward))
-//        OI.raiseIntake.whileTrue(MoveIntake(DoubleSolenoid.Value.kReverse))
     }
 
     /**
