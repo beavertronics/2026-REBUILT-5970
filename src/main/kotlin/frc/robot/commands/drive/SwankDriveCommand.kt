@@ -11,6 +11,7 @@ import java.util.function.DoubleSupplier
  * @param vLeft the controller input for left drive
  * @param vRight the controller input for right drive
  * @param slowMode the toggle for enabling slow mode
+ * @see Drivetrain
  */
 class SwankDriveCommand(
     var vLeft: DoubleSupplier,

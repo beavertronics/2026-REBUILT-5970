@@ -39,7 +39,7 @@ deploy {
                     files = project.fileTree('src/main/deploy')
                     directory = '/home/lvuser/deploy'
                     deleteOldFiles = true // Change to true to delete files on roboRIO that no
-                    // longer exist in deploy directory of this project
+                                           // longer exist in deploy directory of this project
                 }
             }
         }
@@ -48,8 +48,12 @@ deploy {
 
 def deployArtifact = deploy.targets.roborio.artifacts.frcJava
 
-// Set to true to use debug for JNI.
+// Set to true to use debug for all targets including JNI, which will drastically impact
+// performance.
 wpi.java.debugJni = false
+
+// Set this to true to enable desktop support.
+def includeDesktopSupport = true
 
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
@@ -85,7 +89,6 @@ test {
  * simulation stuff
  */
 // set up stuff for simulation with Autodesk synthesis
-def includeDesktopSupport = true
 wpi.sim.environment.put("HALSIMWS_HOST", "127.0.0.1")
 wpi.sim.addWebsocketsServer().defaultEnabled = true
 
