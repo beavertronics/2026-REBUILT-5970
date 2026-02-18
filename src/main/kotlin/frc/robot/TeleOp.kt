@@ -1,10 +1,10 @@
 package frc.robot
 
-import kotlin.math.*
 import beaverlib.utils.Sugar.within
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.Commands.runOnce
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick
@@ -13,6 +13,8 @@ import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.SwankDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
 import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.Intake
+import kotlin.math.*
 
 /*
 Sets up the operator interface (controller inputs), as well as
@@ -61,6 +63,8 @@ object TeleOp {
      */
     fun configureBindings() {
         OI.C_RB.whileTrue(InstantCommand(Drivetrain::lock, Drivetrain))
+//        OI.C_LB.whileTrue(runOnce({ Intake.moveIntake(false) }, Intake))
+//        OI.C_LT.whileTrue(runOnce({ Intake.moveIntake(true) }, Intake))
     }
 
     /**

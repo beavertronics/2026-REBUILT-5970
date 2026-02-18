@@ -9,20 +9,22 @@ import frc.engine.utils.initMotorControllers
 import kotlin.math.abs
 
 object IntakeConstants {
-    val moveIntakeMotorID = 0 // TODO
-    val runIntakeMotorID = 0 // TODO
+    val leftMoveIntakeID = 0 // TODO
+    val rightMoveIntakeID = 0 // TODO
+    val runIntakeID = 0 // TODO
     val upperLimitSwitchID = 0 // TODO
     val lowerLimitSwitchID = 0 // TODO
 }
 
 object Intake : SubsystemBase() {
-    private val moveIntakeMotor = SparkMax(IntakeConstants.moveIntakeMotorID, SparkLowLevel.MotorType.kBrushed) // 775
-    private val runIntakeMotor = SparkMax(IntakeConstants.runIntakeMotorID, SparkLowLevel.MotorType.kBrushed) // 775
+    private val leftIntakeMotor = SparkMax(IntakeConstants.leftMoveIntakeID, SparkLowLevel.MotorType.kBrushed) // 775
+    private val rightIntakeMotor = SparkMax(IntakeConstants.rightMoveIntakeID, SparkLowLevel.MotorType.kBrushed) // 775
+    private val runIntakeMotor = SparkMax(IntakeConstants.runIntakeID, SparkLowLevel.MotorType.kBrushed) // 775
     private val upperLimitSwitch = DigitalInput(IntakeConstants.upperLimitSwitchID)
     private val lowerLimitSwitch = DigitalInput(IntakeConstants.lowerLimitSwitchID)
 
     init {
-        initMotorControllers(30, SparkBaseConfig.IdleMode.kBrake, moveIntakeMotor)
+        initMotorControllers(30, SparkBaseConfig.IdleMode.kBrake, leftIntakeMotor, rightIntakeMotor)
         initMotorControllers(30, SparkBaseConfig.IdleMode.kCoast, runIntakeMotor)
     }
 
@@ -40,11 +42,20 @@ object Intake : SubsystemBase() {
             true -> upperLimitSwitch
             false -> lowerLimitSwitch
         }
-        while (!limitSwitch.get()) { moveIntakeMotor.setVoltage(voltage * direction) }
-        moveIntakeMotor.stopMotor()
+        while (!limitSwitch.get()) {
+            leftIntakeMotor.setVoltage(voltage * direction)
+            rightIntakeMotor.setVoltage(voltage * direction)
+        }
+        leftIntakeMotor.stopMotor()
+        rightIntakeMotor.stopMotor()
         return
     }
 
+    /**
+     * Runs the intake wheels.
+     * @param intake whether to intake our outtake game pieces.
+     * @param voltage the voltage to run the motors at.
+     */
     fun runIntake(intake: Boolean = true, voltage: Double = 1.0) {
         val direction = when (intake) { // TODO figure out sign
             true -> 1.0

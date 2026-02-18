@@ -43,7 +43,7 @@ object RobotController : TimedRobot() {
         TeleOp
         `according to all known laws of aviation, our robot should not be able to fly`
         Phatplanner
-        Intake
+//        Intake
 
         // start drive cam // todo replaced by vision feed
         // CameraServer.startAutomaticCapture(0)
