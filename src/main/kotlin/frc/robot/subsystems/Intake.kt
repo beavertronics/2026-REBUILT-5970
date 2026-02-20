@@ -43,8 +43,8 @@ object Intake : SubsystemBase() {
             false -> lowerLimitSwitch
         }
         while (!limitSwitch.get()) {
-            leftIntakeMotor.setVoltage(voltage * direction)
-            rightIntakeMotor.setVoltage(voltage * direction)
+            leftIntakeMotor.setVoltage(abs(voltage) * direction)
+            rightIntakeMotor.setVoltage(abs(voltage) * direction)
         }
         leftIntakeMotor.stopMotor()
         rightIntakeMotor.stopMotor()
