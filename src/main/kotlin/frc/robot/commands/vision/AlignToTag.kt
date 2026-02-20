@@ -2,10 +2,6 @@ package frc.robot.commands.vision
 
 import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Sugar.roundTo
-import beaverlib.utils.Units.Angular.asRotations
-import beaverlib.utils.Units.Angular.degrees
-import beaverlib.utils.Units.Angular.radians
-import beaverlib.utils.Units.years
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
@@ -31,7 +27,7 @@ class AlignToTag(
 ) : Command() {
     var firstCalculation = false
     val rotateKP = 1.5  // 0.45
-    val rotateKD = 0.5 // 0.1
+    val rotateKD = 0.0 // 0.1
     val xKP = 2.0
     val yKP = 2.0
     val rotatePID = PIDController(rotateKP, 0.0, rotateKD)
@@ -43,11 +39,13 @@ class AlignToTag(
 
     // add the needed subsystems to requirements
     init {
+        timer.reset()
+        timer.restart()
         addRequirements(Drivetrain)
         // give it some deadzone
         rotatePID.setTolerance(0.075) // degrees // NOTE NOT USED FOR DEADZONE ONLY FOR FINISH!
-        xPID.setTolerance(0.15) // meters
-        yPID.setTolerance(0.15) // meters
+        xPID.setTolerance(0.175) // meters
+        yPID.setTolerance(0.175) // meters
     }
 
     // get the correct april tag
@@ -65,7 +63,7 @@ class AlignToTag(
                 }
                 timeSinceTagSeen = timer.get()
                 desiredTag = desiredTagA.first()
-                // val robotToTag = camera.poseEstimator.update(result)
+//                 val robotToTag = camera.poseEstimator.update(result)
             },
         )
 
@@ -82,9 +80,13 @@ class AlignToTag(
     // align with tag in respects to X, Y, and rotation
     override fun execute() {
         // if we lost the april tag, stop driving (and don't ram into things!)
-        if (desiredTag == null || timer.get() - timeSinceTagSeen > 0.1) {
+        if (
+            (desiredTag == null || timer.get() - timeSinceTagSeen > 0.1) // doesnt see tag OR time since tag > 0.1
+            ||
+            (desiredTag == null && timer.get() - timeSinceTagSeen > 0.1) // doesnt see tag AND time since tag > 0.1
+        ) {
             Drivetrain.stop()
-            println("No tag found")
+            println("Tag " + aprilTagID + " is not found! is coprocessor online?")
             return
         }
 
@@ -119,12 +121,14 @@ class AlignToTag(
             driveY = 0.0
         }
 
-        println("Rotation error, x error, y error: "
-            + calculatedRotate.roundTo(3)
-            + ", "
-            + calculatedX.roundTo(3)
-            + ", "
-            + calculatedY.roundTo(3)
+        println("Tag, rotation error, x error, y error: "
+                + aprilTagID
+                + ", "
+                + calculatedRotate.roundTo(3)
+                + ", "
+                + calculatedX.roundTo(3)
+                + ", "
+                + calculatedY.roundTo(3)
         )
 
         // add everything into a chassis speed and drive robot
@@ -140,8 +144,8 @@ class AlignToTag(
             yPID.atSetpoint() &&
             rotatePID.atSetpoint() &&
             firstCalculation &&
-            end &&
-            desiredTag != null
+            end
+//            && desiredTag != null
         ) {
             println("Done for tag: " + aprilTagID)
             return true
