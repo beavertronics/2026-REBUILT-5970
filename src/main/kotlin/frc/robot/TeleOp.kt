@@ -1,6 +1,12 @@
 package frc.robot
 
+import kotlin.math.*
 import beaverlib.utils.Sugar.within
+import beaverlib.utils.Units.Angular.degrees
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Transform2d
+import edu.wpi.first.units.measure.Angle
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
@@ -11,8 +17,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.SwankDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
+import frc.robot.commands.vision.AlignToTag
 import frc.robot.subsystems.Drivetrain
-import kotlin.math.*
 
 /*
 Sets up the operator interface (controller inputs), as well as
@@ -60,7 +66,16 @@ object TeleOp {
      * configures things to run on specific inputs
      */
     fun configureBindings() {
-        OI.C_RB.whileTrue(InstantCommand( { Drivetrain.lock() }, Drivetrain))
+        OI.C_LB.whileTrue(AlignToTag(
+            aprilTagID = 26,
+            speedLimit = 2.0,
+            offsets = Pose2d(2.0, 0.0, Rotation2d(0.0, 0.0)),
+            end = true
+        ))
+        OI.C_RB.whileTrue(InstantCommand(Drivetrain::lock, Drivetrain))
+//        OI.driveCircle.whileTrue(Circle())
+//        OI.lowerIntake.whileTrue(MoveIntake(DoubleSolenoid.Value.kForward))
+//        OI.raiseIntake.whileTrue(MoveIntake(DoubleSolenoid.Value.kReverse))
     }
 
     /**
@@ -143,6 +158,7 @@ object TeleOp {
         val LJS_X get() = leftJoystick.x.processInput()
         val LJS_Y get() = leftJoystick.y.processInput()
         val RJS_X get() = rightJoystick.x.processInput()
+        val C_A get() = xboxController.a()
         val RJS_Y get() = rightJoystick.y.processInput()
         //===== SUBSYSTEMS =====//
     }

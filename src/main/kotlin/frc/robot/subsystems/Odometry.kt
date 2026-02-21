@@ -26,10 +26,7 @@ object `according to all known laws of aviation, our robot should not be able to
                 addVisionMeasurement(newPose.toPose2d(), result.timestampSeconds, true)
             },
         )
-        setVisionMeasurementStdDevs(3.0, 4.0, 5.0)
-
-        // sets the offset of the gyro
-//        Drivetrain.swerveDrive.setGyroOffset(Rotation3d(0.0, 0.0, PI)) // TODO
+        setVisionMeasurementStdDevs(5.0, 5.0, 5.0) // todo tune
     }
 
     // pose of the robot
@@ -88,5 +85,5 @@ object `according to all known laws of aviation, our robot should not be able to
             builder.addDoubleProperty("x", { pose.x }, null)
             builder.addDoubleProperty("y", { pose.y }, null)
             builder.addDoubleProperty("rotation", { pose.rotation.radians }, null)}
-        }
+    }
 }
