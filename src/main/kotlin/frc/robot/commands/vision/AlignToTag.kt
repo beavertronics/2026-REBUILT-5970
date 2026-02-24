@@ -15,9 +15,19 @@ import kotlin.random.Random
 
 /**
  * Aligns to a given april tag with the set up FRC field.
+ * @param aprilTagID the April Tag ID to align to.
+ * @param speedLimit the max speed (in meters per second) to run the robot at.
  * @param offsets the offsets from the april tag in a Pose2D.
- * A Pose2d of (1.0, 0.0, Rotation2d(45)) will be 1 meter away from the tag and 45 degrees rotated from facing the tag.
- * X and Y are in meters and rotation is in degrees.
+ * - A Pose2d(0.0, -1.0) will move the robot to the left of the tag by a meter.
+ * - A Pose2d(0.0, 1.0) will move the robot to the right of the tag by a meter.
+ * - A Pose2d(1.0, 0.0) will move the robot away from the tag by a meter.
+ * - A Pose2d(-1.0, 0.0) will move the robot towards the tag by a meter.
+ *
+ * An example offset of Pose2d(2.0, 1.0, Rotation2d(0.0)) will move the robot:
+ * - 2 meters away from the tag
+ * - 1 meter to the right of the tag
+ * - 0.0 radians rotated
+ * @param end whether to end after aligning to the April Tag or not.
  */
 class AlignToTag(
     val aprilTagID: Int,
