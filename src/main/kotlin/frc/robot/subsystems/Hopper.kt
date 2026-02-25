@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
 
 object HopperConstants {
-    val hopperID = 0 // todo
+    val hopperID = 15
 }
 
 object Hopper : SubsystemBase() {
@@ -20,6 +20,8 @@ object Hopper : SubsystemBase() {
     /**
      * Runs the hopper as the inputted voltage.
      * @param voltage the voltage to run the motor at.
+     *
+     * NOTE: Running hopper has a 6:1 gear ratio.
      */
     fun runHopper(voltage: Double = 1.0) { hopperMotor.setVoltage(voltage) } // todo figure out sign
 }

@@ -39,10 +39,12 @@ object Shooter : SubsystemBase() {
 
     init {
         // configure motors
-        initMotorControllers(30, SparkBaseConfig.IdleMode.kCoast, hoodMotor, shooterMotor, feedMotor)
+        initMotorControllers(30, SparkBaseConfig.IdleMode.kCoast, hoodMotor, feedMotor)
         // configure the shooter flywheel to ramp up its speed instead of going straight to max speed
         shooterMotor.configure(
             SparkMaxConfig()
+                .smartCurrentLimit(30)
+                .idleMode(SparkBaseConfig.IdleMode.kCoast)
                 .closedLoopRampRate(2.0), // time to go from 0 to max speed, in seconds
         ResetMode.kNoResetSafeParameters,
         PersistMode.kNoPersistParameters
@@ -55,30 +57,35 @@ object Shooter : SubsystemBase() {
     /**
      * Runs the shooter flywheel.
      * @param voltage the voltage to run the motor at.
-     * Positive is to shoot, negative is to outtake.
+     * Positive is to shoot, negative is to outtake. // todo figure out if true
      */
     fun runShooter(voltage: Double = 1.0) { shooterMotor.setVoltage(-voltage); return } // todo figure out sign
 
     /**
      * Runs the feed motor for the shooter.
      * @param voltage the voltage to run the motor at.
-     * Positive is to intake, negative is to outtake.
+     * Positive is to intake, negative is to outtake. // todo figure out if true
+     *
+     * NOTE: Running feeder has a 10:1 gear ratio.
      */
     fun runFeed(voltage: Double = 1.0) { feedMotor.set(voltage); return } // todo figure out sign
 
     /**
      * Runs the hood motor at a given voltage.
      * @param voltage the voltage to run the motor at.
-     * Positive to extend the hood, negative to retract the hood.
+     * Positive to extend the hood, negative to retract the hood. // todo figure out if true
+     *
+     * NOTE: Running hood has a 87/4 gear ratio (but should not affect encoder).
       */
     fun runHood(voltage: Double = 1.0) { hoodMotor.set(voltage); return } // todo figure out sign
 
     /**
      * Moves the hood to the inputted angle.
      * @param angle the angle, in degrees, of which to move the hood to.
+     * - 0 degrees will have the hood be fully retracted. // todo figure out if true
+     * - ~55 degrees will have the hood be fully extended. // todo figure out if true
      * @param voltage the voltage at which to run the motor at.
-     * 0 degrees will have the hood be fully retracted.
-     * ~55 degrees will have the hood be fully extended.
+     * - Positive to extend the hood, negative to retract the hood. // todo figure out if true
      */
     fun moveHoodToAngle(angle: Double = 0.0, voltage: Double = 1.0) {
         val clamped = (angle - zeroValue)
@@ -95,8 +102,8 @@ object Shooter : SubsystemBase() {
     /**
      * Zeros the hood, then moves to the inputted angle.
      * @param angle the angle, in degrees, of to move the hood to after zeroing it.
-     * 0 degrees will have the hood be fully retracted.
-     * ~55 degrees will have the hood be fully extended.
+     * - 0 degrees will have the hood be fully retracted. // todo figure out if true
+     * - ~55 degrees will have the hood be fully extended. // todo figure out if true
      */
     fun zeroHood(angle: Double = 0.0) {
         while (!lowerLimitSwitch.get()) { runShooter(-1.0) } // todo figure out sign

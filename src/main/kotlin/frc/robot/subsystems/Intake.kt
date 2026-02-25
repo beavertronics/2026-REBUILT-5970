@@ -9,11 +9,11 @@ import frc.engine.utils.initMotorControllers
 import kotlin.math.abs
 
 object IntakeConstants {
-    val leftMoveIntakeID = 0 // TODO
-    val rightMoveIntakeID = 0 // TODO
-    val runIntakeID = 0 // TODO
-    val upperLimitSwitchID = 0 // TODO
-    val lowerLimitSwitchID = 0 // TODO
+    val leftMoveIntakeID = 12
+    val rightMoveIntakeID = 13
+    val runIntakeID = 14
+    val upperLimitSwitchID = 1
+    val lowerLimitSwitchID = 2
 }
 
 object Intake : SubsystemBase() {
@@ -32,6 +32,8 @@ object Intake : SubsystemBase() {
      * Moves the intake to the up or down position.
      * @param up whether the intake should be moved up or not.
      * @param voltage the voltage to run the motor at.
+     *
+     * NOTE: Moving intake has a 35:1 gear ratio.
      */
     fun moveIntake(up: Boolean = true, voltage: Double = 1.0) {
         val direction = when (up) { // TODO figure out sign
@@ -55,6 +57,7 @@ object Intake : SubsystemBase() {
      * Runs the intake wheels.
      * @param intake whether to intake our outtake game pieces.
      * @param voltage the voltage to run the motors at.
+     * NOTE: Running intake has a 10:1 gear ratio.
      */
     fun runIntake(intake: Boolean = true, voltage: Double = 1.0) {
         val direction = when (intake) { // TODO figure out sign
