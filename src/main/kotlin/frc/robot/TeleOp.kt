@@ -61,9 +61,6 @@ object TeleOp {
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
         Drivetrain.defaultCommand = teleOpDrive
-
-        Orchestrator.load("orchestra/never_gonna_give_you_up.chrp")
-//        Orchestrator.load("orchestra/silver_springs_fleetwood_mac.chrp")
     }
 
     /**

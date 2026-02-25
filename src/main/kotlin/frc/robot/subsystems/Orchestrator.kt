@@ -32,11 +32,12 @@ object Orchestrator : SubsystemBase() {
      * Loads the music file to play (.chrp file).
      * Any files put into the deploy directory will be in the default folder.
      * Any path must include "orchestra/(filename).(file extension)"
+     * @param filepath the filepath to the song, from deploy/
      */
     fun load(filepath: String) {
         val status = orchestra.loadMusic(filepath)
         if (!status.isOK()) {
-            println(status.description) // todo
+            println(status.description)
             return
         }
     }
@@ -44,6 +45,17 @@ object Orchestrator : SubsystemBase() {
      * Plays the loaded music file.
      */
     fun play() : StatusCode { return orchestra.play() }
+
+    /**
+     * Both loads and plays the music from the filepath.
+     * This function just runs load, then play.
+     * @param filepath the filepath to the song, from deploy/
+     */
+    fun loadnplay(filepath: String) {
+        load(filepath)
+        play()
+        return
+    }
 
     /**
      * Stops the loaded music file.
