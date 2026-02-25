@@ -13,10 +13,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
 
 object ShooterConstants {
-    val hoodID = 11 // todo
-    val shooterID = 9 // todo
-    val feederID = 10 // todo
-    val hoodLimitSwitchID = 0 // todo
+    val hoodID = 11
+    val shooterID = 9
+    val feederID = 10
+    val hoodLimitSwitchID = 0
 }
 
 object Shooter : SubsystemBase() {
@@ -55,7 +55,7 @@ object Shooter : SubsystemBase() {
      */
     fun moveHoodToAngle(angle: Double = 0.0, voltage: Double = 1.0) {
         val clamped = angle.clamp(0.0.degrees.asDegrees, 55.0.degrees.asDegrees)
-        while (hoodMotor.alternateEncoder.position != clamped) {
+        while (hoodMotor.absoluteEncoder.position != clamped) { // todo absolute encoder?
             hoodMotor.setVoltage(voltage) // todo figure out PID
         }
         hoodMotor.stopMotor()
