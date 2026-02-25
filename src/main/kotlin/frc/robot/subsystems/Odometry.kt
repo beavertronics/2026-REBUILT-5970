@@ -1,5 +1,6 @@
 package frc.robot.subsystems
 
+import beaverlib.utils.Units.Angular.degrees
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.geometry.*
 import edu.wpi.first.util.sendable.SendableBuilder
@@ -8,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import frc.robot.subsystems.Drivetrain.swerveDrive
 
 object `according to all known laws of aviation, our robot should not be able to fly` : SubsystemBase() {
 
@@ -27,6 +29,14 @@ object `according to all known laws of aviation, our robot should not be able to
             },
         )
         setVisionMeasurementStdDevs(5.0, 5.0, 5.0) // todo tune
+
+        swerveDrive.setGyroOffset( // todo
+            Rotation3d(
+                0.0,
+                0.0,
+                0.0
+            )
+        )
     }
 
     // pose of the robot

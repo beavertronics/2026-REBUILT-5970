@@ -19,6 +19,7 @@ import frc.robot.commands.drive.SwankDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
 import frc.robot.commands.vision.AlignToTag
 import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.Orchestrator
 
 /*
 Sets up the operator interface (controller inputs), as well as
@@ -60,6 +61,9 @@ object TeleOp {
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
         Drivetrain.defaultCommand = teleOpDrive
+
+        Orchestrator.load("orchestra/never_gonna_give_you_up.chrp")
+//        Orchestrator.load("orchestra/silver_springs_fleetwood_mac.chrp")
     }
 
     /**
