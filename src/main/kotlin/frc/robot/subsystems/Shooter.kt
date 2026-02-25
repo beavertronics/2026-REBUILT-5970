@@ -34,7 +34,8 @@ object Shooter : SubsystemBase() {
     val hoodPIDConstants = PIDConstants(1.0, 0.0, 0.0)
     val hoodPID = PIDController(hoodPIDConstants.P, hoodPIDConstants.I, hoodPIDConstants.D)
 
-    // the value set by fun zeroHood()
+    // zero for the absolute encoder in rotations, set by zeroHood()
+    // and used by moveHoodToAngle()
     var zeroValue = 0.0
 
     init {
@@ -88,14 +89,18 @@ object Shooter : SubsystemBase() {
      * - Positive to extend the hood, negative to retract the hood. // todo figure out if true
      */
     fun moveHoodToAngle(angle: Double = 0.0, voltage: Double = 1.0) {
-        val clamped = (angle - zeroValue)
-            .clamp(0.0.degrees.asDegrees, 55.0.degrees.asDegrees) // keep within limits
+        // clamp value and convert from degrees to rotations
+        val clamped = (angle.degrees.asDegrees - zeroValue.rotations.asDegrees) // degrees
+            .clamp(0.0.degrees.asDegrees, 55.0.degrees.asDegrees) // degrees
+            .rotations.asRotations // rotations
+
+        // calculate PID value
         val pos = hoodMotor.absoluteEncoder.position.rotations.asRotations
-        val calculated = hoodPID.calculate(pos, clamped.rotations.asRotations)
+        val calculated = hoodPID.calculate(pos, clamped)
        while (!hoodPID.atSetpoint()) {
-           hoodMotor.setVoltage(calculated * voltage) // todo figure out PID, sign
+           runHood(calculated * voltage) // todo figure out PID, sign
        }
-        hoodMotor.stopMotor()
+        runHood(0.0)
         return
     }
 
@@ -106,9 +111,9 @@ object Shooter : SubsystemBase() {
      * - ~55 degrees will have the hood be fully extended. // todo figure out if true
      */
     fun zeroHood(angle: Double = 0.0) {
-        while (!lowerLimitSwitch.get()) { runShooter(-1.0) } // todo figure out sign
-        runShooter(0.0)
-        zeroValue = hoodMotor.alternateEncoder.position // reset encoder
+        while (!lowerLimitSwitch.get()) { runHood(-1.0) } // todo figure out sign, voltage
+        runHood(0.0)
+        zeroValue = hoodMotor.alternateEncoder.position.rotations.asRotations // reset absolute encoder in rotations
         moveHoodToAngle(angle)
     }
 }
