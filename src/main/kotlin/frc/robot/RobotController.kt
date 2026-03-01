@@ -114,7 +114,7 @@ object RobotController : TimedRobot() {
             println("Auto selected: " + selectedPathAuto)
         }
     }
-    override fun autonomousPeriodic() {} //TODO: Unnecesary with command-based programming?
+//    override fun autonomousPeriodic() {} //TODO: Unnecesary with command-based programming?
 
     /**
      * runs when teleop is ready
@@ -129,29 +129,29 @@ object RobotController : TimedRobot() {
     /**
      * runs on every frame of teleop
      */
-    override fun teleopPeriodic() {} //TODO: Unnecessary with command-based programming?
+//    override fun teleopPeriodic() {} //TODO: Unnecessary with command-based programming?
 
     /**
      * runs only in simulation mode,
      * other functions will run regardless of whether the robot is
      * simulated or not
      */
-    override fun simulationInit() {}
+//    override fun simulationInit() {}
 
     /**
      * runs immediately when the robot is disabled, helpful for safe
      * deactivation of robot and whatnot
      */
-    override fun disabledInit() {}
+//    override fun disabledInit() {}
 
     /**
      * runs while robot is disabled, used to hold motors
      * in place.
      * try not to put code here, is often unsafe
      */
-    override fun disabledPeriodic() {}
+//    override fun disabledPeriodic() {}
 
     override fun testInit() { commandScheduler.cancelAll() }
 
-    override fun testPeriodic() {}
+//    override fun testPeriodic() {}
 }

@@ -1,5 +1,7 @@
 package frc.robot.commands.vision
 
+import beaverlib.controls.PIDConstants
+import beaverlib.controls.toPID
 import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Sugar.roundTo
 import edu.wpi.first.math.controller.PIDController
@@ -36,13 +38,12 @@ class AlignToTag(
     val end: Boolean = true
 ) : Command() {
     var firstCalculation = false
-    val rotateKP = 1.5  // 0.45
-    val rotateKD = 0.0 // 0.1
-    val xKP = 2.0
-    val yKP = 2.0
-    val rotatePID = PIDController(rotateKP, 0.0, rotateKD)
-    val xPID = PIDController(xKP, 0.0, 0.0)
-    val yPID = PIDController(yKP, 0.0, 0.0)
+    val kXPID = PIDConstants(2.0, 0.0, 0.0)
+    val kYPID = PIDConstants(2.0, 0.0, 0.0)
+    val kOPID = PIDConstants(2.0, 0.0, 0.0)
+    val xPID = kXPID.toPID()
+    val yPID = kYPID.toPID()
+    val oPID = kOPID.toPID()
     val listenerName = "AlignTag" + aprilTagID + "-" + Random(1)
     var timeSinceTagSeen = 0.0
     val timer = Timer()
@@ -53,7 +54,7 @@ class AlignToTag(
         timer.restart()
         addRequirements(Drivetrain)
         // give it some deadzone
-        rotatePID.setTolerance(0.075) // degrees // NOTE NOT USED FOR DEADZONE ONLY FOR FINISH!
+        oPID.setTolerance(0.075) // degrees // NOTE NOT USED FOR DEADZONE ONLY FOR FINISH!
         xPID.setTolerance(0.175) // meters
         yPID.setTolerance(0.175) // meters
     }
@@ -78,10 +79,10 @@ class AlignToTag(
         )
 
         // reset things
-        rotatePID.reset()
+        oPID.reset()
         xPID.reset()
         yPID.reset()
-        rotatePID.setpoint = offsets.rotation.degrees
+        oPID.setpoint = offsets.rotation.degrees
         xPID.setpoint = offsets.x
         yPID.setpoint = offsets.y
         firstCalculation = false
@@ -105,9 +106,9 @@ class AlignToTag(
         // 180 degrees is facing tag, so gets difference from 180 - current rotation
         // also, rotation2D handles the issue with a half-turn rotation and wraps to 360 (?)
         val rotateError = Rotation2d.fromDegrees(180.0).minus(Rotation2d.fromRadians(yawToTag)).radians
-        val calculatedRotate = (rotatePID.calculate(rotateError) * -1.0)
+        val calculatedRotate = (oPID.calculate(rotateError) * -1.0)
         var driveRotate = (calculatedRotate).clamp(-1.0 * speedLimit, speedLimit)
-        if (rotatePID.atSetpoint()) {
+        if (oPID.atSetpoint()) {
             driveRotate = 0.0
         }
 
@@ -152,7 +153,7 @@ class AlignToTag(
         if (
             xPID.atSetpoint() &&
             yPID.atSetpoint() &&
-            rotatePID.atSetpoint() &&
+            oPID.atSetpoint() &&
             firstCalculation &&
             end
 //            && desiredTag != null
