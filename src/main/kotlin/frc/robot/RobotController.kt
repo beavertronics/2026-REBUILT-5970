@@ -123,6 +123,7 @@ object RobotController : TimedRobot() {
         TeleOp.configureBindings()
         if (!AutoTypeChooser.selected && selectedManualAuto != null) { selectedManualAuto?.cancel() }
         else if (AutoTypeChooser.selected && selectedPathAuto != null) { selectedPathAuto?.cancel() }
+        Orchestrator.stop()
     }
 
     /**

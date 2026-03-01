@@ -28,7 +28,7 @@ object `according to all known laws of aviation, our robot should not be able to
                 addVisionMeasurement(newPose.toPose2d(), result.timestampSeconds, true)
             },
         )
-        setVisionMeasurementStdDevs(5.0, 5.0, 5.0) // todo tune
+        setVisionMeasurementStdDevs(1.0, 1.0, 0.25) // todo tune
 
         swerveDrive.setGyroOffset( // todo
             Rotation3d(
