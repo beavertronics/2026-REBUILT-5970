@@ -1,7 +1,7 @@
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
-    id "org.jetbrains.kotlin.jvm" version "1.8.0"
+    id "org.jetbrains.kotlin.jvm" version "2.2.20"
 }
 
 java {
