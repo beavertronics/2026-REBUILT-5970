@@ -75,10 +75,10 @@ object Drivetrain : SubsystemBase() {
                             AbsoluteEncoderConfig()
                                 .zeroOffset(
                                     when (it.moduleNumber) {
-                                        0 -> 0.39993134 // front left
-                                        1 -> 0.31940567 // front right
-                                        2 -> 0.78962934 // back left
-                                        3 -> 0.57516134 // back right
+                                        0 -> 0.07024613 // front left
+                                        1 -> 0.28472954 // front right
+                                        2 -> 0.32577065 // back left
+                                        3 -> 0.40284413 // back right
                                         else -> 0.0
                                     }
                                 )

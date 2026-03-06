@@ -24,8 +24,8 @@ object Intake : SubsystemBase() {
     private val lowerLimitSwitch = DigitalInput(IntakeConstants.lowerLimitSwitchID)
 
     init {
-        initMotorControllers(30, SparkBaseConfig.IdleMode.kBrake, leftIntakeMotor, rightIntakeMotor)
-        initMotorControllers(30, SparkBaseConfig.IdleMode.kCoast, runIntakeMotor)
+        initMotorControllers(30, SparkBaseConfig.IdleMode.kBrake, leftIntakeMotor, rightIntakeMotor) // 20?
+        initMotorControllers(30, SparkBaseConfig.IdleMode.kCoast, runIntakeMotor) // 20?
     }
 
     /**

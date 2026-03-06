@@ -21,6 +21,7 @@ import frc.robot.commands.vision.AlignToTag
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Orchestrator
+import frc.robot.subsystems.Shooter
 
 /*
 Sets up the operator interface (controller inputs), as well as
@@ -33,8 +34,8 @@ setting up the commands for running the drivetrain and the subsystems
 object TeleOp {
     val teleOpDrive: TeleopDriveCommand =
         TeleopDriveCommand(
-            { OI.driverX },
             { OI.driverY },
+            { OI.driverX },
             { OI.driverOmega },
             { OI.driveMode.asBoolean },
             { OI.slowMode.asBoolean }
@@ -45,30 +46,34 @@ object TeleOp {
 //            { OI.C_LX },
 //            { OI.C_LT.asBoolean }
 //        )
-//    val childDrive: ChildModeDriveCommand =
-//        ChildModeDriveCommand(
-//            { OI.C_LY },
-//            { OI.C_LX },
-//            { OI.C_RX },
-//            { OI.C_LB.asBoolean },
-//            { OI.LJS_Y },
-//            { OI.LJS_X },
-//            { OI.RJS_X },
-//            { OI.C_RT.asBoolean },
-//            { OI.C_LT.asBoolean }
-//        )
+    val childDrive: ChildModeDriveCommand =
+        ChildModeDriveCommand(
+            { OI.parentDrive },
+            { OI.parentStrafe },
+            { OI.parentOmega },
+            { OI.toggleChild.asBoolean },
+            { OI.driverY },
+            { OI.driverX },
+            { OI.driverOmega },
+            { OI.toggleFieldOriented.asBoolean },
+            { OI.toggleSlow.asBoolean }
+        )
 
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
-        Drivetrain.defaultCommand = teleOpDrive
+        Drivetrain.defaultCommand = childDrive
     }
 
     /**
      * configures things to run on specific inputs
      */
     fun configureBindings() {
-        OI.runIntake.whileTrue(InstantCommand( { Intake.runIntake(true, voltage = 1.0)}))
-        OI.runOuttake.whileTrue(InstantCommand( { Intake.runIntake(false, voltage = 1.0)}))
+//        OI.runIntake.onTrue(InstantCommand( { Intake.runIntake(true, voltage = 6.0)}))
+//        OI.runIntake.onFalse(InstantCommand({Intake.runIntake(true, 0.0)}))
+//        OI.runOuttake.onTrue(InstantCommand( { Intake.runIntake(false, voltage = 6.0)}))
+//        OI.runOuttake.onFalse(InstantCommand({ Intake.runIntake(false, 0.0)}))
+//        OI.runIntake.whileTrue(InstantCommand({ Shooter.setRPM(100.0)}))
+//        OI.runIntake.onFalse(InstantCommand({Shooter.setRPM(0.0)}))
     }
 
     /**
@@ -147,10 +152,17 @@ object TeleOp {
         val slowMode get() = leftJoystick.trigger()
         val driveMode get() = rightJoystick.trigger()
         //===== SUBSYSTEMS =====//
-        val runIntake get() = xboxController.y()
-        val runOuttake get() = xboxController.a()
+        val runIntake get() = xboxController.a()
+        val runOuttake get() = xboxController.y()
         val moveIntake get() = xboxController.leftY
         val doScoring get() = xboxController.rightTrigger()
+        //==== CHILDMODE ====//
+        val parentDrive get() = xboxController.leftY.processInput()
+        val parentStrafe get() = xboxController.leftX.processInput()
+        val parentOmega get() = xboxController.rightX.processInput()
+        val toggleChild get() = xboxController.rightTrigger()
+        val toggleSlow get() = xboxController.leftTrigger()
+        val toggleFieldOriented get() = xboxController.leftBumper()
     }
 }
 

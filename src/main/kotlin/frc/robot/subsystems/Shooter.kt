@@ -38,7 +38,7 @@ object Shooter : SubsystemBase() {
     private val lowerLimitSwitch = DigitalInput(ShooterConstants.hoodLimitSwitchID)
 
     val hoodPIDConstants = PIDConstants(1.0, 0.0, 0.0) // todo tune
-    val shooterPIDConstants = PIDConstants(1.0, 0.0, 0.0) // todo tune
+    val shooterPIDConstants = PIDConstants(0.00065, 0.0, 0.000) // todo tune
     val hoodPID = hoodPIDConstants.toPID()
     val shooterPID = shooterPIDConstants.toPID()
 
@@ -53,11 +53,11 @@ object Shooter : SubsystemBase() {
 
     init {
         // configure motors
-        initMotorControllers(30, SparkBaseConfig.IdleMode.kCoast, hoodMotor, feedMotor)
+        initMotorControllers(30, SparkBaseConfig.IdleMode.kCoast, hoodMotor, feedMotor) // 20?
         // configure the shooter flywheel to ramp up its speed instead of going straight to max speed
         shooterMotor.configure(
             SparkMaxConfig()
-                .smartCurrentLimit(30)
+                .smartCurrentLimit(40)
                 .idleMode(SparkBaseConfig.IdleMode.kCoast)
                 .closedLoopRampRate(1.5) // time to go from 0 to max speed, in seconds (for safety reasons)
         , ResetMode.kNoResetSafeParameters,
@@ -69,11 +69,14 @@ object Shooter : SubsystemBase() {
     }
 
     override fun periodic() {
-        // get flywheel to target RPM // todo correct?
-        currentRPM = shooterMotor.encoder.velocity // todo is this RPM?
-        val calculated = shooterPID.calculate(currentRPM, targetRPM)
+        // get flywheel to target RPM
+        currentRPM = shooterMotor.encoder.velocity
+        val calculated = shooterPID.calculate(
+            currentRPM,
+            targetRPM
+        )
         runShooter(
-            (calculated * 12.0).clamp(-ShooterConstants.MAX_VOLTS, ShooterConstants.MAX_VOLTS)
+            (calculated * -12.0).clamp(-ShooterConstants.MAX_VOLTS, ShooterConstants.MAX_VOLTS)
         )
 
         // put data on dashboard
@@ -97,6 +100,7 @@ object Shooter : SubsystemBase() {
     fun setRPM(rpm: Double = 0.0) {
         targetRPM = rpm.clamp( -ShooterConstants.RPM_LIMIT, ShooterConstants.RPM_LIMIT )
     }
+
     /**
      * Runs the feed motor for the shooter.
      * @param voltage the voltage to run the motor at.
