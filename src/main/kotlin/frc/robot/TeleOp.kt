@@ -19,6 +19,7 @@ import frc.robot.commands.drive.SwankDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
 import frc.robot.commands.vision.AlignToTag
 import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Orchestrator
 
 /*
@@ -32,31 +33,30 @@ setting up the commands for running the drivetrain and the subsystems
 object TeleOp {
     val teleOpDrive: TeleopDriveCommand =
         TeleopDriveCommand(
-            { OI.C_LY },
-            { OI.C_LX },
-            { OI.C_RX },
-            { OI.C_RT.asBoolean },
-            { OI.C_LT.asBoolean }
+            { OI.driverX },
+            { OI.driverY },
+            { OI.driverOmega },
+            { OI.driveMode.asBoolean },
+            { OI.slowMode.asBoolean }
         )
-    val swankDrive: SwankDriveCommand =
-        SwankDriveCommand(
-            { OI.C_LY },
-            { OI.C_LX },
-            { OI.C_LT.asBoolean }
-        )
-    val childDrive: ChildModeDriveCommand =
-        ChildModeDriveCommand(
-            { OI.C_LY },
-            { OI.C_LX },
-            { OI.C_RX },
-            { OI.C_LB.asBoolean },
-            { OI.LJS_Y },
-            { OI.LJS_X },
-            { OI.RJS_X },
-            { OI.C_RT.asBoolean },
-            { OI.C_LT.asBoolean }
-
-        )
+//    val swankDrive: SwankDriveCommand =
+//        SwankDriveCommand(
+//            { OI.C_LY },
+//            { OI.C_LX },
+//            { OI.C_LT.asBoolean }
+//        )
+//    val childDrive: ChildModeDriveCommand =
+//        ChildModeDriveCommand(
+//            { OI.C_LY },
+//            { OI.C_LX },
+//            { OI.C_RX },
+//            { OI.C_LB.asBoolean },
+//            { OI.LJS_Y },
+//            { OI.LJS_X },
+//            { OI.RJS_X },
+//            { OI.C_RT.asBoolean },
+//            { OI.C_LT.asBoolean }
+//        )
 
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
@@ -67,16 +67,8 @@ object TeleOp {
      * configures things to run on specific inputs
      */
     fun configureBindings() {
-        OI.C_LB.whileTrue(AlignToTag(
-            aprilTagID = 26,
-            speedLimit = 2.0,
-            offsets = Pose2d(2.0, 0.0, Rotation2d(0.0, 0.0)),
-            end = true
-        ))
-        OI.C_RB.whileTrue(InstantCommand(Drivetrain::lock, Drivetrain))
-//        OI.driveCircle.whileTrue(Circle())
-//        OI.lowerIntake.whileTrue(MoveIntake(DoubleSolenoid.Value.kForward))
-//        OI.raiseIntake.whileTrue(MoveIntake(DoubleSolenoid.Value.kReverse))
+        OI.runIntake.whileTrue(InstantCommand( { Intake.runIntake(true, voltage = 1.0)}))
+        OI.runOuttake.whileTrue(InstantCommand( { Intake.runIntake(false, voltage = 1.0)}))
     }
 
     /**
@@ -149,19 +141,16 @@ object TeleOp {
          * Values for inputs go here
          */
         //===== DRIVETRAIN =====//
-        val C_LX get() = xboxController.leftX.processInput()
-        val C_LY get() = xboxController.leftY.processInput()
-        val C_RX get() = xboxController.rightX.processInput()
-        val C_LB get() = xboxController.leftBumper()
-        val C_RB get() = xboxController.rightBumper()
-        val C_LT get() = xboxController.leftTrigger()
-        val C_RT get() = xboxController.rightTrigger()
-        val LJS_X get() = leftJoystick.x.processInput()
-        val LJS_Y get() = leftJoystick.y.processInput()
-        val RJS_X get() = rightJoystick.x.processInput()
-        val C_A get() = xboxController.a()
-        val RJS_Y get() = rightJoystick.y.processInput()
+        val driverX get() = leftJoystick.x.processInput()
+        val driverY get() = leftJoystick.y.processInput()
+        val driverOmega get() = rightJoystick.x.processInput()
+        val slowMode get() = leftJoystick.trigger()
+        val driveMode get() = rightJoystick.trigger()
         //===== SUBSYSTEMS =====//
+        val runIntake get() = xboxController.y()
+        val runOuttake get() = xboxController.a()
+        val moveIntake get() = xboxController.leftY
+        val doScoring get() = xboxController.rightTrigger()
     }
 }
 

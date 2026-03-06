@@ -7,6 +7,7 @@ import com.revrobotics.spark.config.EncoderConfig
 import com.revrobotics.spark.config.SparkBaseConfig
 import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModuleState
@@ -97,7 +98,8 @@ object Drivetrain : SubsystemBase() {
 //            TargetPoseProvider(FieldMapREBUILTWelded.teamHub.center, 2.meters, { 0.radians })
 //        targetPoseProvider.initialize()
 //        targetPosePublisher.set(targetPoseProvider.getPose())
-//        Vision.setAllCameraReferences(Pose3d(pose))
+        Vision.setAllCameraReferences(Pose3d(
+            `according to all known laws of aviation, our robot should not be able to fly`.pose))
         SmartDashboard.putNumber("Odometry/X", `according to all known laws of aviation, our robot should not be able to fly`.pose.x)
         SmartDashboard.putNumber("Odometry/Y", `according to all known laws of aviation, our robot should not be able to fly`.pose.y)
         SmartDashboard.putNumber("Odometry/HEADING", `according to all known laws of aviation, our robot should not be able to fly`.pose.rotation.radians)
@@ -136,7 +138,6 @@ object Drivetrain : SubsystemBase() {
             centerOfRotation: Translation2d = Translation2d()
         ) {
             swerveDrive.drive(translation, rotation, fieldOriented, false, centerOfRotation)
-
         }
         /**
          * Advanced drive method that translates and rotates the robot, with a custom center of rotation.

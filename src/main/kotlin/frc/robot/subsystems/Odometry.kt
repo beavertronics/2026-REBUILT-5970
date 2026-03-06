@@ -40,7 +40,7 @@ object `according to all known laws of aviation, our robot should not be able to
     }
 
     // pose of the robot
-    val pose get() = Drivetrain.swerveDrive.pose
+    val pose get() = swerveDrive.pose
     var updateVisionOdometry = true
     val field = Field2d()
 
@@ -67,10 +67,10 @@ object `according to all known laws of aviation, our robot should not be able to
         timestamp: Double,
         updateRotation: Boolean = false,
     ) {
-        if (updateRotation) Drivetrain.swerveDrive.addVisionMeasurement(measurement, timestamp)
+        if (updateRotation) swerveDrive.addVisionMeasurement(measurement, timestamp)
         else
-            Drivetrain.swerveDrive.addVisionMeasurement(
-                Pose2d(measurement.x, measurement.y, Drivetrain.swerveDrive.pose.rotation),
+            swerveDrive.addVisionMeasurement(
+                Pose2d(measurement.x, measurement.y, swerveDrive.pose.rotation),
                 timestamp,
             )
     }
@@ -84,7 +84,7 @@ object `according to all known laws of aviation, our robot should not be able to
      *   measurements.
      */
     fun setVisionMeasurementStdDevs(stdDevX: Double, stdDevY: Double, stdDevTheta: Double) {
-        Drivetrain.swerveDrive.swerveDrivePoseEstimator.setVisionMeasurementStdDevs(
+        swerveDrive.swerveDrivePoseEstimator.setVisionMeasurementStdDevs(
             VecBuilder.fill(stdDevX, stdDevY, stdDevTheta)
         )
     }
