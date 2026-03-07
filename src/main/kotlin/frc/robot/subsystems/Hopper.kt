@@ -23,5 +23,5 @@ object Hopper : SubsystemBase() {
      *
      * NOTE: Running hopper has a 6:1 gear ratio.
      */
-    fun runHopper(voltage: Double = 1.0) { hopperMotor.setVoltage(voltage) } // todo figure out sign
+    fun runHopper(voltage: Double = 1.0) { hopperMotor.setVoltage(-voltage) }
 }

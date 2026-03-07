@@ -11,12 +11,19 @@ import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.SwankDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
+import frc.robot.commands.subsystems.FlywheelRPM
+import frc.robot.commands.subsystems.FlywheelVoltage
+import frc.robot.commands.subsystems.MoveIntake
+import frc.robot.commands.subsystems.RunHopper
+import frc.robot.commands.subsystems.RunIntake
+import frc.robot.commands.subsystems.RunShooterFeed
 import frc.robot.commands.vision.AlignToTag
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Intake
@@ -61,19 +68,25 @@ object TeleOp {
 
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
-        Drivetrain.defaultCommand = childDrive
+        Drivetrain.defaultCommand = teleOpDrive
     }
 
     /**
      * configures things to run on specific inputs
      */
     fun configureBindings() {
-//        OI.runIntake.onTrue(InstantCommand( { Intake.runIntake(true, voltage = 6.0)}))
-//        OI.runIntake.onFalse(InstantCommand({Intake.runIntake(true, 0.0)}))
-//        OI.runOuttake.onTrue(InstantCommand( { Intake.runIntake(false, voltage = 6.0)}))
-//        OI.runOuttake.onFalse(InstantCommand({ Intake.runIntake(false, 0.0)}))
-//        OI.runIntake.whileTrue(InstantCommand({ Shooter.setRPM(100.0)}))
-//        OI.runIntake.onFalse(InstantCommand({Shooter.setRPM(0.0)}))
+        OI.runIntake.whileTrue(RunIntake(true, 9.0))
+        OI.runOuttake.whileTrue(RunIntake(false, 9.0))
+        OI.intakeIn.whileTrue(MoveIntake(true, 5.0))
+        OI.intakeOut.whileTrue(MoveIntake(false, 5.0))
+        OI.doScoring.whileTrue(
+            ParallelCommandGroup(
+                RunIntake(true, 9.0),
+                RunHopper(10.0),
+                RunShooterFeed(9.0),
+                FlywheelVoltage(12.0)
+            )
+        )
     }
 
     /**
@@ -154,7 +167,8 @@ object TeleOp {
         //===== SUBSYSTEMS =====//
         val runIntake get() = xboxController.a()
         val runOuttake get() = xboxController.y()
-        val moveIntake get() = xboxController.leftY
+        val intakeOut get() = xboxController.leftTrigger()
+        val intakeIn get() = xboxController.leftBumper()
         val doScoring get() = xboxController.rightTrigger()
         //==== CHILDMODE ====//
         val parentDrive get() = xboxController.leftY.processInput()

@@ -11,6 +11,7 @@ import beaverlib.utils.Units.Angular.rotations
 import beaverlib.utils.Units.Angular.rotationsPerSecond
 import com.revrobotics.PersistMode
 import com.revrobotics.ResetMode
+import com.revrobotics.spark.SparkBase
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
@@ -23,7 +24,6 @@ import frc.engine.utils.initMotorControllers
 object ShooterConstants {
     val hoodID = 11
     val shooterID = 9
-    val feederID = 10
     val hoodLimitSwitchID = 0
     val HOOD_MIN = 0.0
     val HOOD_MAX = 55.0
@@ -32,10 +32,9 @@ object ShooterConstants {
 }
 
 object Shooter : SubsystemBase() {
-    private val hoodMotor = SparkMax(ShooterConstants.hoodID, SparkLowLevel.MotorType.kBrushed) // 775
-    private val shooterMotor = SparkMax(ShooterConstants.shooterID, SparkLowLevel.MotorType.kBrushless) // NEO
-    private val feedMotor = SparkMax(ShooterConstants.feederID, SparkLowLevel.MotorType.kBrushed) // 775
-    private val lowerLimitSwitch = DigitalInput(ShooterConstants.hoodLimitSwitchID)
+     val hoodMotor = SparkMax(ShooterConstants.hoodID, SparkLowLevel.MotorType.kBrushed) // 775
+     val shooterMotor = SparkMax(ShooterConstants.shooterID, SparkLowLevel.MotorType.kBrushless) // NEO
+     val lowerLimitSwitch = DigitalInput(ShooterConstants.hoodLimitSwitchID)
 
     val hoodPIDConstants = PIDConstants(1.0, 0.0, 0.0) // todo tune
     val shooterPIDConstants = PIDConstants(0.00065, 0.0, 0.000) // todo tune
@@ -53,32 +52,24 @@ object Shooter : SubsystemBase() {
 
     init {
         // configure motors
-        initMotorControllers(30, SparkBaseConfig.IdleMode.kCoast, hoodMotor, feedMotor) // 20?
+        initMotorControllers(30, SparkBaseConfig.IdleMode.kBrake, hoodMotor)
         // configure the shooter flywheel to ramp up its speed instead of going straight to max speed
         shooterMotor.configure(
             SparkMaxConfig()
                 .smartCurrentLimit(40)
                 .idleMode(SparkBaseConfig.IdleMode.kCoast)
-                .closedLoopRampRate(1.5) // time to go from 0 to max speed, in seconds (for safety reasons)
-        , ResetMode.kNoResetSafeParameters,
-        PersistMode.kNoPersistParameters
+                .closedLoopRampRate(0.0) // time to go from 0 to max speed, in seconds (for safety reasons)
+            , ResetMode.kNoResetSafeParameters,
+            PersistMode.kNoPersistParameters
         )
 
         // configure PID for the hood
         hoodPID.setTolerance(0.05.degrees.asRotations) // tolerant to 0.05 degrees (encoder uses rotations)
+        shooterPID.setTolerance(5.0.rotationsPerSecond.asRotationsPerSecond)
     }
 
     override fun periodic() {
-        // get flywheel to target RPM
         currentRPM = shooterMotor.encoder.velocity
-        val calculated = shooterPID.calculate(
-            currentRPM,
-            targetRPM
-        )
-        runShooter(
-            (calculated * -12.0).clamp(-ShooterConstants.MAX_VOLTS, ShooterConstants.MAX_VOLTS)
-        )
-
         // put data on dashboard
         SmartDashboard.putNumber("Subsystems/Shooter/Shooter RPM", currentRPM)
         SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", targetRPM)
@@ -88,7 +79,7 @@ object Shooter : SubsystemBase() {
     /**
      * Runs the shooter flywheel with a voltage.
      * @param voltage the voltage to run the motor at.
-     * Positive is to outtake, negative is to shoot. // todo figure out if true
+     * Positive is to outtake, negative is to shoot.
      */
     fun runShooter(voltage: Double = 1.0) { shooterMotor.setVoltage(-voltage); return } // todo figure out sign
 
@@ -102,15 +93,6 @@ object Shooter : SubsystemBase() {
     }
 
     /**
-     * Runs the feed motor for the shooter.
-     * @param voltage the voltage to run the motor at.
-     * Positive is to intake, negative is to outtake. // todo figure out if true
-     *
-     * NOTE: Running feeder has a 10:1 gear ratio.
-     */
-    fun runFeed(voltage: Double = 1.0) { feedMotor.set(voltage); return } // todo figure out sign
-
-    /**
      * Runs the hood motor at a given voltage.
      * @param voltage the voltage to run the motor at.
      * Positive to extend the hood, negative to retract the hood. // todo figure out if true
@@ -118,39 +100,4 @@ object Shooter : SubsystemBase() {
      * NOTE: Running hood has a 87/4 gear ratio (but should not affect encoder).
       */
     fun runHood(voltage: Double = 1.0) { hoodMotor.set(voltage); return } // todo figure out sign
-
-    /**
-     * Moves the hood to the inputted angle.
-     * @param angle the angle, in degrees, of which to move the hood to.
-     * - 0 degrees will have the hood be fully retracted. // todo figure out if true
-     * - ~55 degrees will have the hood be fully extended. // todo figure out if true
-     * @param voltage the voltage at which to run the motor at.
-     * - Positive to extend the hood, negative to retract the hood. // todo figure out if true
-     */
-    fun moveHoodToAngle(angle: Double = 0.0, voltage: Double = 1.0) {
-        // clamp value and convert from degrees to rotations
-        val clamped = (angle.degrees.asDegrees - zeroValue.rotations.asDegrees) // degrees
-            .clamp(ShooterConstants.HOOD_MIN.degrees.asDegrees, ShooterConstants.HOOD_MAX.degrees.asDegrees) // degrees
-            .rotations.asRotations // rotations
-
-        // calculate PID value
-        val pos = hoodMotor.absoluteEncoder.position.rotations.asRotations
-        val calculated = hoodPID.calculate(pos, clamped)
-       while (!hoodPID.atSetpoint()) { runHood(calculated * voltage) } // todo figure out PID, sign}
-        runHood(0.0)
-        return
-    }
-
-    /**
-     * Zeros the hood, then moves to the inputted angle.
-     * @param angle the angle, in degrees, of to move the hood to after zeroing it.
-     * - 0 degrees will have the hood be fully retracted. // todo figure out if true
-     * - ~55 degrees will have the hood be fully extended. // todo figure out if true
-     */
-    fun zeroHood(angle: Double = 0.0) {
-        while (!lowerLimitSwitch.get()) { runHood(-1.0) } // todo figure out sign, voltage
-        runHood(0.0)
-        zeroValue = hoodMotor.alternateEncoder.position.rotations.asRotations // reset absolute encoder in rotations
-        moveHoodToAngle(angle)
-    }
 }
