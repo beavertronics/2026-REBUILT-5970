@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
+import frc.robot.commands.subsystems.AutoAngleHood
 
 object ShooterConstants {
     val hoodID = 11
@@ -67,6 +68,8 @@ object Shooter : SubsystemBase() {
         // configure PID for the hood
         hoodPID.setTolerance(0.05.degrees.asRotations) // tolerant to 0.05 degrees (encoder uses rotations)
         shooterPID.setTolerance(5.0.rotationsPerSecond.asRotationsPerSecond)
+
+//        defaultCommand = AutoAngleHood() // todo when hood is tuned
     }
 
     override fun periodic() {
@@ -82,7 +85,7 @@ object Shooter : SubsystemBase() {
      * @param voltage the voltage to run the motor at.
      * Positive is to outtake, negative is to shoot.
      */
-    fun runShooter(voltage: Double = 1.0) { shooterMotor.setVoltage(-voltage); return } // todo figure out sign
+    fun runShooter(voltage: Double = 1.0) { shooterMotor.setVoltage(-voltage); return }
 
     /**
      * Sets the target RPM.

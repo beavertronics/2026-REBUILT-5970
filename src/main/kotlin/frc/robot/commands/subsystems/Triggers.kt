@@ -1,4 +1,4 @@
-package frc.robot.commands.subsystems.triggers
+package frc.robot.commands.subsystems
 
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.subsystems.Shooter

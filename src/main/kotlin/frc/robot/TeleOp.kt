@@ -16,7 +16,7 @@ import frc.robot.commands.subsystems.MoveIntake
 import frc.robot.commands.subsystems.RunHopper
 import frc.robot.commands.subsystems.RunIntake
 import frc.robot.commands.subsystems.RunShooterFeed
-import frc.robot.commands.subsystems.triggers.Triggers
+import frc.robot.commands.subsystems.Triggers
 import frc.robot.subsystems.Drivetrain
 
 /*
