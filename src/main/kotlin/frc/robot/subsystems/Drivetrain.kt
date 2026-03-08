@@ -1,6 +1,9 @@
 package frc.robot.subsystems
 
 import beaverlib.utils.Units.Electrical.VoltageUnit
+import beaverlib.utils.Units.Linear.inches
+import beaverlib.utils.Units.Linear.meters
+import beaverlib.utils.Units.Linear.metersPerSecond
 import com.revrobotics.spark.SparkBase
 import com.revrobotics.spark.config.AbsoluteEncoderConfig
 import com.revrobotics.spark.config.EncoderConfig
@@ -33,7 +36,9 @@ import java.io.File
 object DriveConstants {
     // for YAGSL to find swerve directory
     val DriveConfig = File(Filesystem.getDeployDirectory(), "swerve")
-    val MaxSpeed = 10.0 // in m/s
+    val MaxSpeed = 10.0.metersPerSecond.asMetersPerSecond // in m/s
+    val robotWidth = 26.0.inches.asMeters
+    val robotLength = 26.0.inches.asMeters
 }
 
 /**

@@ -5,7 +5,6 @@ import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.asDegrees
 import beaverlib.utils.Units.Angular.degrees
 import beaverlib.utils.Units.Angular.radians
-import beaverlib.utils.Units.Linear.asInches
 import beaverlib.utils.Units.Linear.earthGravity
 import beaverlib.utils.Units.Linear.feet
 import beaverlib.utils.Units.Linear.inches
@@ -13,8 +12,9 @@ import beaverlib.utils.Units.Linear.meters
 import beaverlib.utils.Units.Linear.metersPerSecond
 import beaverlib.utils.Units.Linear.metersPerSecondSquared
 import beaverlib.utils.geometry.Vector2
-import edu.wpi.first.math.MathUtil.clamp
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.CommandScheduler
+import frc.robot.commands.general.Move
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.ShooterConstants
 import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
@@ -26,7 +26,7 @@ object AAC {
     val shooterHeight = 6.0.feet.asMeters
     val hubHeight = 72.0.inches.asMeters
     val heightDiff = hubHeight - shooterHeight
-    val yOffset = 1.7.meters
+    val yOffset = 1.7.meters // todo how is this used?
 }
 
 class AutoAngleHood(
@@ -55,8 +55,9 @@ class AutoAngleHood(
 
         // get distance (hypotenuse) from hub
         distance = Vector2(
-            `according to all known laws of aviation, our robot should not be able to fly`.pose
-        ).distance(FieldMapREBUILTWelded.teamHub.center)
+            `according to all known laws of aviation, our robot should not be able to fly`.pose)
+            .distance(FieldMapREBUILTWelded.teamHub.center)
+            .meters.asMeters
 
         // get angle for hood (+ of sqrt)
         rawAnglePlus =
@@ -98,7 +99,7 @@ class AutoAngleHood(
         }
 
         // move hood to angle
-        MoveHoodToAngle(hoodAngle, 3.0) // todo find out voltage
+        CommandScheduler.getInstance().schedule(MoveHoodToAngle(hoodAngle, 3.0)) // todo find out voltage, if this works?
     }
 
     override fun isFinished(): Boolean {

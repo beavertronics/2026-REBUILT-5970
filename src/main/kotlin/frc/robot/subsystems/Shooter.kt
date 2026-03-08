@@ -68,8 +68,6 @@ object Shooter : SubsystemBase() {
         // configure PID for the hood
         hoodPID.setTolerance(0.05.degrees.asRotations) // tolerant to 0.05 degrees (encoder uses rotations)
         shooterPID.setTolerance(5.0.rotationsPerSecond.asRotationsPerSecond)
-
-//        defaultCommand = AutoAngleHood() // todo when hood is tuned
     }
 
     override fun periodic() {

@@ -16,8 +16,13 @@ import frc.robot.commands.subsystems.MoveIntake
 import frc.robot.commands.subsystems.RunHopper
 import frc.robot.commands.subsystems.RunIntake
 import frc.robot.commands.subsystems.RunShooterFeed
-import frc.robot.commands.subsystems.Triggers
+import frc.robot.commands.general.GeneralTriggers
+import frc.robot.commands.subsystems.AutoAngleHood
+import frc.robot.commands.subsystems.ProtectIntake
 import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.Intake
+import frc.robot.subsystems.Shooter
+import frc.robot.subsystems.general.HedgieHelmet
 
 /*
 Sets up the operator interface (controller inputs), as well as
@@ -58,6 +63,8 @@ object TeleOp {
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
         Drivetrain.defaultCommand = teleOpDrive
+//        Shooter.defaultCommand = AutoAngleHood() // todo
+//        Intake.defaultCommand = ProtectIntake() // todo
     }
 
     /**
@@ -70,7 +77,7 @@ object TeleOp {
 
         // move the intake in or out
         OI.intakeIn.whileTrue(MoveIntake(true, 5.0))
-        OI.intakeOut.whileTrue(MoveIntake(false, 5.0))
+        OI.intakeOut.and(HedgieHelmet.trenchDriveTrigger.negate()).whileTrue(MoveIntake(false, 5.0))
 
         // spindexer and shooter kicked independent controls
         OI.indexIn.whileTrue(
@@ -91,7 +98,7 @@ object TeleOp {
 
         // run all subsystems together
         OI.doScoring.whileTrue(ShootVoltage(12.0)) // todo replace with RPM
-        OI.doScoring.and(Triggers.rpmTrigger).whileTrue(
+        OI.doScoring.and(GeneralTriggers.rpmTrigger).whileTrue(
             ParallelCommandGroup(
                 RunHopper(10.0),
                 RunShooterFeed(9.0)
