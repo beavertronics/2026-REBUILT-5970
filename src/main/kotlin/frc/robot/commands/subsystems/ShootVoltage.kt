@@ -3,7 +3,7 @@ package frc.robot.commands.subsystems
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Shooter
 
-class FlywheelVoltage(
+class ShootVoltage(
     val voltage: Double = 1.0
 ) : Command() {
 

@@ -2,33 +2,22 @@ package frc.robot
 
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
-import beaverlib.utils.Units.Angular.degrees
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Transform2d
-import edu.wpi.first.units.measure.Angle
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
-import frc.robot.commands.drive.SwankDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
-import frc.robot.commands.subsystems.FlywheelRPM
-import frc.robot.commands.subsystems.FlywheelVoltage
+import frc.robot.commands.subsystems.ShootVoltage
 import frc.robot.commands.subsystems.MoveIntake
 import frc.robot.commands.subsystems.RunHopper
 import frc.robot.commands.subsystems.RunIntake
 import frc.robot.commands.subsystems.RunShooterFeed
-import frc.robot.commands.vision.AlignToTag
+import frc.robot.commands.subsystems.triggers.Triggers
 import frc.robot.subsystems.Drivetrain
-import frc.robot.subsystems.Intake
-import frc.robot.subsystems.Orchestrator
-import frc.robot.subsystems.Shooter
 
 /*
 Sets up the operator interface (controller inputs), as well as
@@ -75,16 +64,37 @@ object TeleOp {
      * configures things to run on specific inputs
      */
     fun configureBindings() {
+        // run the intake
         OI.runIntake.whileTrue(RunIntake(true, 9.0))
         OI.runOuttake.whileTrue(RunIntake(false, 9.0))
+
+        // move the intake in or out
         OI.intakeIn.whileTrue(MoveIntake(true, 5.0))
         OI.intakeOut.whileTrue(MoveIntake(false, 5.0))
-        OI.doScoring.whileTrue(
+
+        // spindexer and shooter kicked independent controls
+        OI.indexIn.whileTrue(
             ParallelCommandGroup(
-                RunIntake(true, 9.0),
                 RunHopper(10.0),
-                RunShooterFeed(9.0),
-                FlywheelVoltage(12.0)
+                RunShooterFeed(9.0)
+            )
+        )
+        OI.indexOut.whileTrue(
+            ParallelCommandGroup(
+                RunHopper(-10.0),
+                RunShooterFeed(-9.0)
+            )
+        )
+
+        // shooter
+        OI.runShooter.whileTrue(ShootVoltage(12.0)) // todo replace with RPM
+
+        // run all subsystems together
+        OI.doScoring.whileTrue(ShootVoltage(12.0)) // todo replace with RPM
+        OI.doScoring.and(Triggers.rpmTrigger).whileTrue(
+            ParallelCommandGroup(
+                RunHopper(10.0),
+                RunShooterFeed(9.0)
             )
         )
     }
@@ -159,24 +169,31 @@ object TeleOp {
          * Values for inputs go here
          */
         //===== DRIVETRAIN =====//
-        val driverX get() = leftJoystick.x.processInput()
-        val driverY get() = leftJoystick.y.processInput()
-        val driverOmega get() = rightJoystick.x.processInput()
-        val slowMode get() = leftJoystick.trigger()
-        val driveMode get() = rightJoystick.trigger()
+            val driverX get() = leftJoystick.x.processInput()
+            val driverY get() = leftJoystick.y.processInput()
+            val driverOmega get() = rightJoystick.x.processInput()
+            val slowMode get() = leftJoystick.trigger()
+            val driveMode get() = rightJoystick.trigger()
         //===== SUBSYSTEMS =====//
-        val runIntake get() = xboxController.a()
-        val runOuttake get() = xboxController.y()
-        val intakeOut get() = xboxController.leftTrigger()
-        val intakeIn get() = xboxController.leftBumper()
-        val doScoring get() = xboxController.rightTrigger()
+            // intake
+            val runIntake get() = xboxController.a()
+            val runOuttake get() = xboxController.y()
+            val intakeOut get() = xboxController.leftTrigger()
+            val intakeIn get() = xboxController.leftBumper()
+            // spindexer and shooter kicker
+            val indexIn get() = xboxController.button(0) // todo left back paddle
+            val indexOut get() = xboxController.button(0) // todo right back paddle
+            // shooter
+            val runShooter get() = xboxController.rightBumper()
+            // all
+            val doScoring get() = xboxController.rightTrigger()
         //==== CHILDMODE ====//
-        val parentDrive get() = xboxController.leftY.processInput()
-        val parentStrafe get() = xboxController.leftX.processInput()
-        val parentOmega get() = xboxController.rightX.processInput()
-        val toggleChild get() = xboxController.rightTrigger()
-        val toggleSlow get() = xboxController.leftTrigger()
-        val toggleFieldOriented get() = xboxController.leftBumper()
+            val parentDrive get() = xboxController.leftY.processInput()
+            val parentStrafe get() = xboxController.leftX.processInput()
+            val parentOmega get() = xboxController.rightX.processInput()
+            val toggleChild get() = xboxController.rightTrigger()
+            val toggleSlow get() = xboxController.leftTrigger()
+            val toggleFieldOriented get() = xboxController.leftBumper()
     }
 }
 

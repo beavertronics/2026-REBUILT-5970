@@ -29,6 +29,7 @@ object ShooterConstants {
     val HOOD_MAX = 55.0
     val RPM_LIMIT = 5500.0
     val MAX_VOLTS = 12.0
+    val MIN_RPM = 0.0 // todo
 }
 
 object Shooter : SubsystemBase() {

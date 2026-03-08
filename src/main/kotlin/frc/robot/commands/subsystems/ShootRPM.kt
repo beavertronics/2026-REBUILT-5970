@@ -11,7 +11,7 @@ import frc.robot.subsystems.ShooterConstants
  * Runs the shooter flywheel at the inputted RPM.
  * @param targetRPM the RPM to run the motor at.
  */
-class FlywheelRPM(
+class ShootRPM(
     val targetRPM: Double = 0.0
 ) : Command() {
 
