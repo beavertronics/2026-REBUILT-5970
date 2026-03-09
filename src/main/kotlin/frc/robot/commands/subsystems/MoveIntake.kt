@@ -1,5 +1,7 @@
 package frc.robot.commands.subsystems
 
+import beaverlib.utils.Units.Electrical.VoltageUnit
+import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Intake
@@ -12,7 +14,7 @@ import kotlin.math.abs
  */
 class MoveIntake(
     val up: Boolean = true,
-    val voltage: Double = 1.0
+    val voltage: VoltageUnit = 1.0.volts
 ) : Command() {
 
     init { addRequirements(Intake) }
@@ -34,8 +36,8 @@ class MoveIntake(
 
     override fun execute() {
         while (!limitSwitch.get()) {
-            Intake.leftIntakeMotor.setVoltage(abs(voltage) * -direction)
-            Intake.rightIntakeMotor.setVoltage(abs(voltage) * direction)
+            Intake.leftIntakeMotor.setVoltage(abs(voltage.asVolts) * -direction)
+            Intake.rightIntakeMotor.setVoltage(abs(voltage.asVolts) * direction)
         }
     }
 

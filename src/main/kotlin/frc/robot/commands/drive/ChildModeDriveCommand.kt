@@ -4,7 +4,6 @@
 package frc.robot.commands.drive
 
 import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.DriveConstants
 import frc.robot.subsystems.Drivetrain
@@ -87,8 +86,8 @@ class ChildModeDriveCommand(
         // Drive using values
         Drivetrain.drive(
             Translation2d(
-                forwardVelocity * DriveConstants.MaxSpeed,
-                strafeVelocity * DriveConstants.MaxSpeed),
+                forwardVelocity * DriveConstants.MaxSpeed.asMetersPerSecond,
+                strafeVelocity * DriveConstants.MaxSpeed.asMetersPerSecond),
             angVelocity * swerveController.config.maxAngularVelocity,
             driveMode.asBoolean
         )

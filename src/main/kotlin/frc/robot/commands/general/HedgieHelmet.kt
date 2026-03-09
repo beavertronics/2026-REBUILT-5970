@@ -20,7 +20,7 @@ object HedgieHelmet {
     private fun willCollideWithTrench(): Boolean {
         val robotVelocityVector: Vector2 = Drivetrain.swerveDrive.robotVelocity.vector2 * 0.2
         val robotPoseVector: Vector2 = Drivetrain.swerveDrive.pose.vector2
-        val robotWidthVector = Vector2(DriveConstants.robotWidth / 2, 0.0)
+        val robotWidthVector = Vector2(DriveConstants.robotWidth.asMeters / 2, 0.0)
 
         for (area in
         arrayOf(

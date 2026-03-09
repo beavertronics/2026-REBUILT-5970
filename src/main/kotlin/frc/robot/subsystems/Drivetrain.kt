@@ -4,10 +4,7 @@ import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.Units.Linear.meters
 import beaverlib.utils.Units.Linear.metersPerSecond
-import com.revrobotics.spark.SparkBase
 import com.revrobotics.spark.config.AbsoluteEncoderConfig
-import com.revrobotics.spark.config.EncoderConfig
-import com.revrobotics.spark.config.SparkBaseConfig
 import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
@@ -36,9 +33,9 @@ import java.io.File
 object DriveConstants {
     // for YAGSL to find swerve directory
     val DriveConfig = File(Filesystem.getDeployDirectory(), "swerve")
-    val MaxSpeed = 10.0.metersPerSecond.asMetersPerSecond // in m/s
-    val robotWidth = 26.0.inches.asMeters
-    val robotLength = 26.0.inches.asMeters
+    val MaxSpeed = 10.0.metersPerSecond // in m/s
+    val robotWidth = 26.0.inches.asMeters.meters
+    val robotLength = 26.0.inches.asMeters.meters
 }
 
 /**
@@ -66,7 +63,7 @@ object Drivetrain : SubsystemBase() {
         init {
             // set up swerve drive :D
             SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
-            swerveDrive = SwerveParser(DriveConstants.DriveConfig).createSwerveDrive(DriveConstants.MaxSpeed)
+            swerveDrive = SwerveParser(DriveConstants.DriveConfig).createSwerveDrive(DriveConstants.MaxSpeed.asMetersPerSecond)
 
             swerveDrive.setCosineCompensator(false)
             swerveDrive.setHeadingCorrection(false)

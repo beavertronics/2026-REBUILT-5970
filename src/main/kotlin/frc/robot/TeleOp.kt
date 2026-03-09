@@ -2,6 +2,7 @@ package frc.robot
 
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
+import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
@@ -17,11 +18,7 @@ import frc.robot.commands.subsystems.RunHopper
 import frc.robot.commands.subsystems.RunIntake
 import frc.robot.commands.subsystems.RunShooterFeed
 import frc.robot.commands.general.GeneralTriggers
-import frc.robot.commands.subsystems.AutoAngleHood
-import frc.robot.commands.subsystems.ProtectIntake
 import frc.robot.subsystems.Drivetrain
-import frc.robot.subsystems.Intake
-import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.general.HedgieHelmet
 
 /*
@@ -72,36 +69,36 @@ object TeleOp {
      */
     fun configureBindings() {
         // run the intake
-        OI.runIntake.whileTrue(RunIntake(true, 9.0))
-        OI.runOuttake.whileTrue(RunIntake(false, 9.0))
+        OI.runIntake.whileTrue(RunIntake(true, 9.0.volts))
+        OI.runOuttake.whileTrue(RunIntake(false, 9.0.volts))
 
         // move the intake in or out
-        OI.intakeIn.whileTrue(MoveIntake(true, 5.0))
-        OI.intakeOut.and(HedgieHelmet.trenchDriveTrigger.negate()).whileTrue(MoveIntake(false, 5.0))
+        OI.intakeIn.whileTrue(MoveIntake(true, 5.0.volts))
+        OI.intakeOut.and(HedgieHelmet.trenchDriveTrigger.negate()).whileTrue(MoveIntake(false, 5.0.volts))
 
         // spindexer and shooter kicked independent controls
         OI.indexIn.whileTrue(
             ParallelCommandGroup(
-                RunHopper(10.0),
-                RunShooterFeed(9.0)
+                RunHopper(10.0.volts),
+                RunShooterFeed(9.0.volts)
             )
         )
         OI.indexOut.whileTrue(
             ParallelCommandGroup(
-                RunHopper(-10.0),
-                RunShooterFeed(-9.0)
+                RunHopper(-10.0.volts),
+                RunShooterFeed(-9.0.volts)
             )
         )
 
         // shooter
-        OI.runShooter.whileTrue(ShootVoltage(12.0)) // todo replace with RPM
+        OI.runShooter.whileTrue(ShootVoltage(12.0.volts)) // todo replace with RPM
 
         // run all subsystems together
-        OI.doScoring.whileTrue(ShootVoltage(12.0)) // todo replace with RPM
+        OI.doScoring.whileTrue(ShootVoltage(12.0.volts)) // todo replace with RPM
         OI.doScoring.and(GeneralTriggers.rpmTrigger).whileTrue(
             ParallelCommandGroup(
-                RunHopper(10.0),
-                RunShooterFeed(9.0)
+                RunHopper(10.0.volts),
+                RunShooterFeed(9.0.volts)
             )
         )
     }

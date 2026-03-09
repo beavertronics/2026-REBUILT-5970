@@ -1,5 +1,7 @@
 package frc.robot.commands.subsystems
 
+import beaverlib.utils.Units.Electrical.VoltageUnit
+import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Shooter
 
@@ -8,7 +10,7 @@ import frc.robot.subsystems.Shooter
  * @param voltage the voltage to run the motor at.
  */
 class ShootVoltage(
-    val voltage: Double = 1.0
+    val voltage: VoltageUnit = 1.0.volts
 ) : Command() {
 
     init { addRequirements(Shooter) }
@@ -17,5 +19,5 @@ class ShootVoltage(
 
     override fun isFinished(): Boolean { return false }
 
-    override fun end(interrupted: Boolean) { Shooter.runShooter(0.0) }
+    override fun end(interrupted: Boolean) { Shooter.runShooter(0.0.volts) }
 }

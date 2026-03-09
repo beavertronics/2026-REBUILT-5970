@@ -53,8 +53,8 @@ class TeleopDriveCommand(
         // Drive using raw values
         Drivetrain.drive(
             Translation2d(
-                forwardVelocity * DriveConstants.MaxSpeed,
-                strafeVelocity * DriveConstants.MaxSpeed),
+                forwardVelocity * DriveConstants.MaxSpeed.asMetersPerSecond,
+                strafeVelocity * DriveConstants.MaxSpeed.asMetersPerSecond),
             angVelocity * controller.config.maxAngularVelocity,
             driveMode.asBoolean
         )

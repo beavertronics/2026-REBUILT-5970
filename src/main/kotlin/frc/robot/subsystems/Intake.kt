@@ -1,5 +1,8 @@
 package frc.robot.subsystems
 
+import beaverlib.utils.Sugar.clamp
+import beaverlib.utils.Units.Electrical.VoltageUnit
+import beaverlib.utils.Units.Electrical.volts
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
@@ -15,6 +18,7 @@ object IntakeConstants {
     val runIntakeID = 14
     val upperLimitSwitchID = 1
     val lowerLimitSwitchID = 2
+    val MAX_VOLTS = 12.0.volts
 }
 
 object Intake : SubsystemBase() {
@@ -40,11 +44,15 @@ object Intake : SubsystemBase() {
      * @param voltage the voltage to run the motors at.
      * NOTE: Running intake has a 10:1 gear ratio.
      */
-    fun runIntake(intake: Boolean = true, voltage: Double = 1.0) {
+    fun runIntake(intake: Boolean = true, voltage: VoltageUnit = 1.0.volts) {
         val direction = when (intake) {
             true -> -1.0
             false -> 1.0
         }
-        runIntakeMotor.setVoltage( abs(voltage) * direction )
+        runIntakeMotor.setVoltage( abs(voltage.asVolts.clamp(
+            -IntakeConstants.MAX_VOLTS.asVolts,
+            IntakeConstants.MAX_VOLTS.asVolts
+        )) * direction
+        )
     }
 }

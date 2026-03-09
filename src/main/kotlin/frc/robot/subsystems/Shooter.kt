@@ -3,15 +3,20 @@ package frc.robot.subsystems
 import beaverlib.controls.PIDConstants
 import beaverlib.controls.toPID
 import beaverlib.utils.Sugar.clamp
+import beaverlib.utils.Units.Angular.AngleUnit
+import beaverlib.utils.Units.Angular.AngularVelocity
+import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.asDegrees
+import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Angular.asRotations
 import beaverlib.utils.Units.Angular.asRotationsPerSecond
 import beaverlib.utils.Units.Angular.degrees
 import beaverlib.utils.Units.Angular.rotations
 import beaverlib.utils.Units.Angular.rotationsPerSecond
+import beaverlib.utils.Units.Electrical.VoltageUnit
+import beaverlib.utils.Units.Electrical.volts
 import com.revrobotics.PersistMode
 import com.revrobotics.ResetMode
-import com.revrobotics.spark.SparkBase
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
@@ -20,19 +25,22 @@ import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
-import frc.robot.commands.subsystems.AutoAngleHood
 
 object ShooterConstants {
     val hoodID = 11
     val shooterID = 9
     val hoodLimitSwitchID = 0
-    val HOOD_MIN = 0.0
-    val HOOD_MAX = 55.0
-    val RPM_LIMIT = 5500.0
-    val MAX_VOLTS = 12.0
-    val MIN_RPM = 0.0 // todo
+    val HOOD_MIN = 0.0.degrees
+    val HOOD_MAX = 55.0.degrees
+    val RPM_LIMIT = 5500.0.RPM
+    val MAX_VOLTS = 12.0.volts
+    val MIN_RPM = 0.0.RPM // todo
 }
 
+/**
+ * NOTE: The usage of the JVM name stuff here is unknown, but I had to because it got angry.
+ * So therefore, "BiteMe!"
+ */
 object Shooter : SubsystemBase() {
      val hoodMotor = SparkMax(ShooterConstants.hoodID, SparkLowLevel.MotorType.kBrushed) // 775
      val shooterMotor = SparkMax(ShooterConstants.shooterID, SparkLowLevel.MotorType.kBrushless) // NEO
@@ -43,14 +51,33 @@ object Shooter : SubsystemBase() {
     val hoodPID = hoodPIDConstants.toPID()
     val shooterPID = shooterPIDConstants.toPID()
 
-    // zero for the encoder in rotations, set by zeroHood()
-    // and used by moveHoodToAngle()
-    var zeroValue = 0.0
-    // current, target RPM for the shooter flywheel
-    var currentRPM = 0.0
-    var targetRPM = 0.0
-    // whether we can score or not (hood angle, distance, etc)
-    var scorable = false
+
+    /**
+     * This is the zero value for the encoder for the shooter hood, in degrees
+     */
+    var zeroValue: AngleUnit = 0.0.degrees
+
+    /**
+     * this is the current angle for the shooter hood, in degrees
+     */
+    var currentAngle: AngleUnit = 0.0.degrees
+
+    /**
+     * THis is the target angle for the shooter hood, in degrees
+     */
+    @get:JvmName("BiteMe!")
+    var targetAngle: AngleUnit = 0.0.degrees
+
+    /**
+     * This is the current RPM for the shooter flywheel, in RPM
+     */
+    var currentRPM: AngularVelocity = 0.0.rotationsPerSecond.asRPM.RPM
+
+    /**
+     * This is the target RPm for the shooter flywheel, in RPM
+     */
+    @get:JvmName("BiteMe!!")
+    var targetRPM: AngularVelocity = 0.0.rotationsPerSecond.asRPM.RPM
 
     init {
         // configure motors
@@ -71,28 +98,49 @@ object Shooter : SubsystemBase() {
     }
 
     override fun periodic() {
-        currentRPM = shooterMotor.encoder.velocity
+        currentAngle = hoodMotor.encoder.position.rotations.asDegrees.degrees
+        currentRPM = shooterMotor.encoder.velocity.RPM
         // put data on dashboard
-        SmartDashboard.putNumber("Subsystems/Shooter/Shooter RPM", currentRPM)
-        SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", targetRPM)
-        SmartDashboard.putBoolean("Subsystems/Shooter/Able to score?", scorable)
+        SmartDashboard.putNumber("Subsystems/Shooter/Shooter RPM", currentRPM.asRPM)
+        SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", targetRPM.asRPM)
+        SmartDashboard.putNumber("Subsystems/Shooter/Hood Angle", currentAngle.asDegrees)
+        SmartDashboard.putNumber("Subsystems/Shooter/Target Hood Angle", targetAngle.asDegrees)
     }
+
+    /**
+     * Sets the zero for the hood, in degrees.
+     * This will automatically get the current encoder value in degrees, unless specified to
+     * override.
+     * @param override whether to use a custom value instead.
+     * @param angle the custom angle to use.
+     */
+    fun setZero(override: Boolean = false, angle: AngleUnit = 0.0.degrees) {
+        if (override) { zeroValue = angle }
+        else { zeroValue = hoodMotor.encoder.position.rotations.asDegrees.degrees }
+    }
+
+    /**
+     * Sets the target angle for the hood, in degrees.
+     */
+    @JvmName("BiteMe!!!")
+    fun setTargetAngle(target: AngleUnit) { targetAngle = target }
+
+    /**
+     * Sets the target RPM for the shooter flywheel, in RPM.
+     */
+    @JvmName("BiteMe!!!!")
+    fun setTargetRPM(target: AngularVelocity) { targetRPM = target }
 
     /**
      * Runs the shooter flywheel with a voltage.
      * @param voltage the voltage to run the motor at.
-     * Positive is to outtake, negative is to shoot.
+     * Positive is to shoot, negative is to reverse.
      */
-    fun runShooter(voltage: Double = 1.0) { shooterMotor.setVoltage(-voltage); return }
-
-    /**
-     * Sets the target RPM.
-     * @param rpm the RPM to set the flywheel to. There is a limit of 5500 RPM.
-     * The flywheel is then adjusted for the RPM through the periodic function.
-     */
-    fun setRPM(rpm: Double = 0.0) {
-        targetRPM = rpm.clamp( -ShooterConstants.RPM_LIMIT, ShooterConstants.RPM_LIMIT )
-    }
+    fun runShooter(voltage: VoltageUnit = 1.0.volts) { shooterMotor.setVoltage(
+        -voltage.asVolts.clamp(
+            -ShooterConstants.MAX_VOLTS.asVolts,
+            ShooterConstants.MAX_VOLTS.asVolts
+        )) }
 
     /**
      * Runs the hood motor at a given voltage.
@@ -101,5 +149,10 @@ object Shooter : SubsystemBase() {
      *
      * NOTE: Running hood has a 87/4 gear ratio (but should not affect encoder).
       */
-    fun runHood(voltage: Double = 1.0) { hoodMotor.set(voltage); return } // todo figure out sign
+    fun runHood(voltage: VoltageUnit = 1.0.volts) { hoodMotor.set(
+        voltage.asVolts.clamp(
+            -ShooterConstants.MAX_VOLTS.asVolts,
+            ShooterConstants.MAX_VOLTS.asVolts
+        )
+    )} // todo figure out sign
 }

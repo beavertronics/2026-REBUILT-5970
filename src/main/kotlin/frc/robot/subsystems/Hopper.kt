@@ -1,5 +1,8 @@
 package frc.robot.subsystems
 
+import beaverlib.utils.Sugar.clamp
+import beaverlib.utils.Units.Electrical.VoltageUnit
+import beaverlib.utils.Units.Electrical.volts
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
@@ -8,6 +11,7 @@ import frc.engine.utils.initMotorControllers
 
 object HopperConstants {
     val hopperID = 15
+    val MAX_VOLTS = 12.0.volts
 }
 
 object Hopper : SubsystemBase() {
@@ -20,8 +24,14 @@ object Hopper : SubsystemBase() {
     /**
      * Runs the hopper as the inputted voltage.
      * @param voltage the voltage to run the motor at.
+     * Positive is to intake, negative is to outtake.
      *
      * NOTE: Running hopper has a 6:1 gear ratio.
      */
-    fun runHopper(voltage: Double = 1.0) { hopperMotor.setVoltage(-voltage) }
+    fun runHopper(voltage: VoltageUnit = 1.0.volts) { hopperMotor.setVoltage(
+        -voltage.asVolts.clamp(
+            -HopperConstants.MAX_VOLTS.asVolts,
+            HopperConstants.MAX_VOLTS.asVolts
+        )
+    ) }
 }
