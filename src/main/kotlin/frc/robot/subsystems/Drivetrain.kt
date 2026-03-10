@@ -36,6 +36,7 @@ object DriveConstants {
     val MaxSpeed = 10.0.metersPerSecond // in m/s
     val robotWidth = 26.0.inches.asMeters.meters
     val robotLength = 26.0.inches.asMeters.meters
+    val bumperThickness = 3.875.inches.asMeters.meters
 }
 
 /**

@@ -13,11 +13,12 @@ class ZeroHood() : Command() {
 
     var done = false
 
+    override fun initialize() { done = false }
+
     override fun execute() {
-        while (!Shooter.lowerLimitSwitch.get()) { Shooter.runHood(1.0.volts) } // todo tune voltage
+        while (!Shooter.lowerLimitSwitch.get()) { Shooter.runHood(-0.5.volts) }
         Shooter.runHood(0.0.volts)
-        Shooter.setZero()
-        done = true
+        done = Shooter.setZero()
     }
 
     override fun isFinished(): Boolean { return done }

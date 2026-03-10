@@ -4,6 +4,7 @@ import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj2.command.Command
+import frc.robot.TeleOp
 import frc.robot.subsystems.Intake
 import kotlin.math.abs
 
@@ -41,7 +42,11 @@ class MoveIntake(
         }
     }
 
-    override fun isFinished(): Boolean { return limitSwitch.get() }
+    override fun isFinished(): Boolean {
+        return limitSwitch.get()
+                || TeleOp.OI.intakeOut.negate().asBoolean
+                || TeleOp.OI.intakeIn.negate().asBoolean
+    }
 
     override fun end(interrupted: Boolean) {
         Intake.leftIntakeMotor.stopMotor()

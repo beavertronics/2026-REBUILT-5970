@@ -19,7 +19,7 @@ class RunIntake(
 
     override fun execute() { Intake.runIntake(intake, voltage) }
 
-    override fun isFinished(): Boolean { return Intake.upperLimitSwitch.get() }
+    override fun isFinished(): Boolean { return false } // Intake.upperLimitSwitch.get() }
 
     override fun end(interrupted: Boolean) { Intake.runIntake(intake, 0.0.volts) }
 }

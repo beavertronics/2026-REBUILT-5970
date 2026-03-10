@@ -6,5 +6,5 @@ import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.ShooterConstants
 
 object GeneralTriggers {
-    val rpmTrigger = Trigger { Shooter.currentRPM.asRPM > ShooterConstants.MIN_RPM.asRPM }
+    val rpmTrigger = Trigger { Shooter.currentRPM.asRPM >= ShooterConstants.MIN_RPM.asRPM }
 }

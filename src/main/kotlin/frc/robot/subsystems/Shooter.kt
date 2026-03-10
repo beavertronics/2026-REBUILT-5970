@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
+import kotlin.math.round
 
 object ShooterConstants {
     val hoodID = 11
@@ -71,13 +72,13 @@ object Shooter : SubsystemBase() {
     /**
      * This is the current RPM for the shooter flywheel, in RPM
      */
-    var currentRPM: AngularVelocity = 0.0.rotationsPerSecond.asRPM.RPM
+    var currentRPM: AngularVelocity = 0.0.RPM
 
     /**
      * This is the target RPm for the shooter flywheel, in RPM
      */
     @get:JvmName("BiteMe!!")
-    var targetRPM: AngularVelocity = 0.0.rotationsPerSecond.asRPM.RPM
+    var targetRPM: AngularVelocity = 0.0.RPM
 
     init {
         // configure motors
@@ -98,13 +99,14 @@ object Shooter : SubsystemBase() {
     }
 
     override fun periodic() {
-        currentAngle = hoodMotor.encoder.position.rotations.asDegrees.degrees
+        currentAngle = getCurrentAngle()
         currentRPM = shooterMotor.encoder.velocity.RPM
         // put data on dashboard
         SmartDashboard.putNumber("Subsystems/Shooter/Shooter RPM", currentRPM.asRPM)
         SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", targetRPM.asRPM)
-        SmartDashboard.putNumber("Subsystems/Shooter/Hood Angle", currentAngle.asDegrees)
+        SmartDashboard.putNumber("Subsystems/Shooter/Hood Angle", currentAngle.asDegrees) // adjusted by 90 degrees - zero
         SmartDashboard.putNumber("Subsystems/Shooter/Target Hood Angle", targetAngle.asDegrees)
+        SmartDashboard.putBoolean("Subsystems/Shooter/Hood limit switch", lowerLimitSwitch.get())
     }
 
     /**
@@ -114,9 +116,10 @@ object Shooter : SubsystemBase() {
      * @param override whether to use a custom value instead.
      * @param angle the custom angle to use.
      */
-    fun setZero(override: Boolean = false, angle: AngleUnit = 0.0.degrees) {
+    fun setZero(override: Boolean = false, angle: AngleUnit = 0.0.degrees): Boolean {
         if (override) { zeroValue = angle }
-        else { zeroValue = hoodMotor.encoder.position.rotations.asDegrees.degrees }
+        else { zeroValue = getCurrentAngle(true) }
+        return true
     }
 
     /**
@@ -132,6 +135,18 @@ object Shooter : SubsystemBase() {
     fun setTargetRPM(target: AngularVelocity) { targetRPM = target }
 
     /**
+     * returns the current angle of the shooter hood with the ratio (4/87).
+     * @param raw whether to return the value without the zero.
+     */
+    @JvmName("BiteMe!!!!!")
+    fun getCurrentAngle(raw: Boolean = false) : AngleUnit {
+        val pos = (90.0.degrees.asDegrees -
+                (hoodMotor.encoder.position * 360.0 * (4.0/87.0)) * -1.0).degrees // ratio for hood
+        if (raw) return pos
+        else return pos - zeroValue
+    }
+
+    /**
      * Runs the shooter flywheel with a voltage.
      * @param voltage the voltage to run the motor at.
      * Positive is to shoot, negative is to reverse.
@@ -145,14 +160,14 @@ object Shooter : SubsystemBase() {
     /**
      * Runs the hood motor at a given voltage.
      * @param voltage the voltage to run the motor at.
-     * Positive to extend the hood, negative to retract the hood. // todo figure out if true
+     * Positive to extend the hood, negative to retract the hood.
      *
      * NOTE: Running hood has a 87/4 gear ratio (but should not affect encoder).
       */
     fun runHood(voltage: VoltageUnit = 1.0.volts) { hoodMotor.set(
-        voltage.asVolts.clamp(
+        -voltage.asVolts.clamp(
             -ShooterConstants.MAX_VOLTS.asVolts,
             ShooterConstants.MAX_VOLTS.asVolts
         )
-    )} // todo figure out sign
+    )}
 }

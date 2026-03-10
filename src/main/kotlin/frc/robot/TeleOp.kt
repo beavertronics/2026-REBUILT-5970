@@ -6,6 +6,7 @@ import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick
@@ -18,7 +19,10 @@ import frc.robot.commands.subsystems.RunHopper
 import frc.robot.commands.subsystems.RunIntake
 import frc.robot.commands.subsystems.RunShooterFeed
 import frc.robot.commands.general.GeneralTriggers
+import frc.robot.commands.subsystems.MoveHoodVolt
+import frc.robot.commands.subsystems.ZeroHood
 import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.general.HedgieHelmet
 
 /*
@@ -79,13 +83,13 @@ object TeleOp {
         // spindexer and shooter kicked independent controls
         OI.indexIn.whileTrue(
             ParallelCommandGroup(
-                RunHopper(10.0.volts),
+                RunHopper(12.0.volts),
                 RunShooterFeed(9.0.volts)
             )
         )
         OI.indexOut.whileTrue(
             ParallelCommandGroup(
-                RunHopper(-10.0.volts),
+                RunHopper(-12.0.volts),
                 RunShooterFeed(-9.0.volts)
             )
         )
@@ -93,11 +97,17 @@ object TeleOp {
         // shooter
         OI.runShooter.whileTrue(ShootVoltage(12.0.volts)) // todo replace with RPM
 
+        // shooter hood
+        OI.zeroHood.whileTrue(ZeroHood())
+        OI.hoodUp.whileTrue(MoveHoodVolt(0.25.volts))
+        OI.hoodDown.whileTrue(MoveHoodVolt((-0.25).volts))
+
+
         // run all subsystems together
         OI.doScoring.whileTrue(ShootVoltage(12.0.volts)) // todo replace with RPM
         OI.doScoring.and(GeneralTriggers.rpmTrigger).whileTrue(
             ParallelCommandGroup(
-                RunHopper(10.0.volts),
+                RunHopper(12.0.volts),
                 RunShooterFeed(9.0.volts)
             )
         )
@@ -182,15 +192,19 @@ object TeleOp {
             // intake
             val runIntake get() = xboxController.a()
             val runOuttake get() = xboxController.y()
-            val intakeOut get() = xboxController.leftTrigger()
-            val intakeIn get() = xboxController.leftBumper()
+            val intakeOut get() = xboxController.rightTrigger()
+            val intakeIn get() = xboxController.rightBumper()
             // spindexer and shooter kicker
-            val indexIn get() = xboxController.button(0) // todo left back paddle
-            val indexOut get() = xboxController.button(0) // todo right back paddle
+            val indexIn get() = xboxController.b()
+            val indexOut get() = xboxController.x()
             // shooter
-            val runShooter get() = xboxController.rightBumper()
+            val runShooter get() = xboxController.leftBumper()
+            // shooter hood
+            val zeroHood get() = xboxController.povLeft()
+            val hoodUp get() = xboxController.povUp()
+            val hoodDown get() = xboxController.povDown()
             // all
-            val doScoring get() = xboxController.rightTrigger()
+            val doScoring get() = xboxController.leftTrigger()
         //==== CHILDMODE ====//
             val parentDrive get() = xboxController.leftY.processInput()
             val parentStrafe get() = xboxController.leftX.processInput()
