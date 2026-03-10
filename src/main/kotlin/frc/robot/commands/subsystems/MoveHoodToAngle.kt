@@ -24,7 +24,7 @@ class MoveHoodToAngle(
 
     override fun execute() {
         // keep inputted angle within safe tolerances
-        val clamped = (angle - Shooter.zeroValue).asDegrees.clamp(
+        val clamped = angle.asDegrees.clamp(
             ShooterConstants.HOOD_MIN.asDegrees,
             ShooterConstants.HOOD_MAX.asDegrees
         ) // degrees

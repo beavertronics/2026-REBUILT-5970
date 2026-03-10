@@ -6,6 +6,7 @@ import beaverlib.utils.Units.Electrical.volts
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
 
@@ -19,6 +20,17 @@ object Hopper : SubsystemBase() {
 
     init {
         initMotorControllers(30, SparkBaseConfig.IdleMode.kCoast, hopperMotor)
+    }
+
+    /**
+     * A command to run the spindexer at the inputted voltage.
+     * @param voltage the voltage to run the spindexer motor at.
+     */
+    fun RunHopperCommand(voltage: VoltageUnit = 1.0.volts) : Command {
+        return run { runHopper(voltage) }
+            .finallyDo({ interrupted ->
+                runHopper(0.0.volts)
+            })
     }
 
     /**
