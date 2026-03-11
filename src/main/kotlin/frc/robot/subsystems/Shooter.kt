@@ -1,33 +1,26 @@
 package frc.robot.subsystems
 
 import beaverlib.controls.PIDConstants
-import beaverlib.controls.toPID
+import beaverlib.controls.PidFF
+import beaverlib.controls.SimpleMotorFeedForwardConstants
 import beaverlib.utils.Sugar.clamp
-import beaverlib.utils.Units.Angular.AngleUnit
 import beaverlib.utils.Units.Angular.AngularVelocity
 import beaverlib.utils.Units.Angular.RPM
-import beaverlib.utils.Units.Angular.asDegrees
 import beaverlib.utils.Units.Angular.asRPM
-import beaverlib.utils.Units.Angular.asRotations
-import beaverlib.utils.Units.Angular.asRotationsPerSecond
-import beaverlib.utils.Units.Angular.degrees
-import beaverlib.utils.Units.Angular.rotationsPerSecond
 import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Electrical.volts
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
-import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
-import frc.robot.TeleOp
 
 object ShooterConstants {
     val shooterID = 9
-    val MIN_RPM = 0.0.RPM // todo
-    val RPM_LIMIT = 5500.0.RPM
+    val MIN_RPM = 3000.0.RPM // todo
+    val RPM_LIMIT = 5000.0.RPM
     val MAX_VOLTS = 12.0.volts
 }
 
@@ -38,8 +31,9 @@ object ShooterConstants {
 object Shooter : SubsystemBase() {
     val shooterMotor = SparkMax(ShooterConstants.shooterID, SparkLowLevel.MotorType.kBrushless) // NEO
 
-    val shooterPIDConstants = PIDConstants(0.00016, 0.0, 0.000) // todo tune
-    val shooterPID = shooterPIDConstants.toPID()
+    val PIDConstants = PIDConstants(0.0, 0.0, 0.0) // todo tune
+    val feedForwardConstants = SimpleMotorFeedForwardConstants(0.0, 0.0, 0.0) // todo tune
+    val pidff = PidFF(PIDConstants, feedForwardConstants)
 
     /**
      * This is the current RPM for the shooter flywheel, in RPM
@@ -47,7 +41,7 @@ object Shooter : SubsystemBase() {
     var currentRPM: AngularVelocity = 0.0.RPM
 
     /**
-     * This is the target RPm for the shooter flywheel, in RPM
+     * This is the target RPM for the shooter flywheel, in RPM
      */
     @get:JvmName("BiteMe!!")
     var targetRPM: AngularVelocity = 0.0.RPM
@@ -55,9 +49,6 @@ object Shooter : SubsystemBase() {
     init {
         // configure motors
         initMotorControllers(40, SparkBaseConfig.IdleMode.kCoast, shooterMotor)
-
-        // configure PID for the shooter
-        shooterPID.setTolerance(10.0) // RPM
     }
 
     /**
@@ -71,7 +62,30 @@ object Shooter : SubsystemBase() {
             })
     }
 
+    /**
+     * A command to run the shooter at target RPM.
+     * @see targetRPM
+     */
+    fun ShootRPMCommand() : Command {
+        return run {
+            runShooter((pidff.calculate(currentRPM.asRPM) * ShooterConstants.MAX_VOLTS.asVolts).volts)
+        }
+            .finallyDo({ interrupted ->
+                runShooter(0.0.volts)
+            })
+    }
+
+    /**
+     * A command to set the target RPM of the shooter.
+     * @param rpm the target RPM to run the shooter motor at.
+     */
+    fun SetTargetRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command {
+        return run { setTargetRPM(
+            rpm.asRPM.clamp(-ShooterConstants.RPM_LIMIT.asRPM, ShooterConstants.RPM_LIMIT.asRPM).RPM) }
+    }
+
     override fun periodic() {
+        pidff.setpoint = targetRPM.asRPM
         currentRPM = (shooterMotor.encoder.velocity * -1.0).RPM
         // put data on dashboard
         SmartDashboard.putNumber("Subsystems/Shooter/Shooter RPM", currentRPM.asRPM)

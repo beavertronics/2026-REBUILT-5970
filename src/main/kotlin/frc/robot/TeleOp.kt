@@ -17,7 +17,6 @@ import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
 import frc.robot.commands.general.GeneralTriggers
 import frc.robot.commands.subsystems.MoveHoodToAngle
-import frc.robot.commands.subsystems.ShootRPM
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Intake
@@ -65,8 +64,7 @@ object TeleOp {
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
         Drivetrain.defaultCommand = teleOpDrive
-//        Shooter.defaultCommand = AutoAngleHood() // todo
-//        Intake.defaultCommand = ProtectIntake() // todo
+//        Shooter.defaultCommand = Shooter.ShootRPMCommand() // todo
     }
 
     /**
@@ -96,9 +94,7 @@ object TeleOp {
         )
 
         // shooter
-//        OI.runShooter.whileTrue(ShootRPM(1000.0.RPM)) // todo replace with RPM
-        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(12.0.volts)) // todo replace with RPM
-
+        OI.runShooter.whileTrue(Shooter.SetTargetRPMCommand(5000.0.RPM)) // todo test
 
         // shooter hood
 //        GeneralTriggers.hoodDownTrigger.whileTrue(Hood.ZeroHoodCommand())
@@ -109,7 +105,7 @@ object TeleOp {
 
 
         // run all subsystems together
-        OI.doScoring.whileTrue(Shooter.ShootVoltageCommand(12.0.volts)) // todo replace with RPM
+        OI.doScoring.whileTrue(Shooter.SetTargetRPMCommand(5000.0.RPM)) // todo test
         OI.doScoring.and(GeneralTriggers.rpmTrigger).whileTrue(
             ParallelCommandGroup(
                 Hopper.RunHopperCommand(12.0.volts),
