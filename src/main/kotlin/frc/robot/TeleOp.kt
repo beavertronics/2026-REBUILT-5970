@@ -64,7 +64,7 @@ object TeleOp {
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
         Drivetrain.defaultCommand = teleOpDrive
-//        Shooter.defaultCommand = Shooter.ShootRPMCommand() // todo
+        Shooter.defaultCommand = Shooter.ShootRPMCommand() // todo
     }
 
     /**
@@ -94,7 +94,7 @@ object TeleOp {
         )
 
         // shooter
-        OI.runShooter.whileTrue(Shooter.SetTargetRPMCommand(5000.0.RPM)) // todo test
+        OI.runShooter.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
 
         // shooter hood
 //        GeneralTriggers.hoodDownTrigger.whileTrue(Hood.ZeroHoodCommand())
@@ -105,7 +105,7 @@ object TeleOp {
 
 
         // run all subsystems together
-        OI.doScoring.whileTrue(Shooter.SetTargetRPMCommand(5000.0.RPM)) // todo test
+        OI.doScoring.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
         OI.doScoring.and(GeneralTriggers.rpmTrigger).whileTrue(
             ParallelCommandGroup(
                 Hopper.RunHopperCommand(12.0.volts),

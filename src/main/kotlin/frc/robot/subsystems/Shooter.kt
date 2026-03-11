@@ -7,6 +7,7 @@ import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.AngularVelocity
 import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.asRPM
+import beaverlib.utils.Units.Angular.rotationsPerSecond
 import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Electrical.volts
 import com.revrobotics.spark.SparkLowLevel
@@ -19,7 +20,7 @@ import frc.engine.utils.initMotorControllers
 
 object ShooterConstants {
     val shooterID = 9
-    val MIN_RPM = 3000.0.RPM // todo
+    val MAX_RPM_DIFF = 5.0.RPM
     val RPM_LIMIT = 5000.0.RPM
     val MAX_VOLTS = 12.0.volts
 }
@@ -63,29 +64,27 @@ object Shooter : SubsystemBase() {
     }
 
     /**
-     * A command to run the shooter at target RPM.
+     * A command to run the shooter at target RPM. Whether the shooter flywheel is up to speed
+     * can be checked by its trigger.
      * @see targetRPM
+     * @see frc.robot.commands.general.GeneralTriggers.rpmTrigger
      */
-    fun ShootRPMCommand() : Command {
+    fun ShootRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command { // todo test
         return run {
             runShooter((pidff.calculate(currentRPM.asRPM) * ShooterConstants.MAX_VOLTS.asVolts).volts)
         }
+            .beforeStarting(
+                run {
+                    setTargetRPM(rpm)
+                    pidff.setpoint = targetRPM.asRPM
+                }
+            )
             .finallyDo({ interrupted ->
                 runShooter(0.0.volts)
             })
     }
 
-    /**
-     * A command to set the target RPM of the shooter.
-     * @param rpm the target RPM to run the shooter motor at.
-     */
-    fun SetTargetRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command {
-        return run { setTargetRPM(
-            rpm.asRPM.clamp(-ShooterConstants.RPM_LIMIT.asRPM, ShooterConstants.RPM_LIMIT.asRPM).RPM) }
-    }
-
     override fun periodic() {
-        pidff.setpoint = targetRPM.asRPM
         currentRPM = (shooterMotor.encoder.velocity * -1.0).RPM
         // put data on dashboard
         SmartDashboard.putNumber("Subsystems/Shooter/Shooter RPM", currentRPM.asRPM)
