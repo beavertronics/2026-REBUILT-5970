@@ -18,13 +18,16 @@ class ShootRPM(
 
     init { addRequirements(Shooter) }
 
-    override fun initialize() { Shooter.setTargetRPM(targetRPM) }
+    override fun initialize() {
+        Shooter.setTargetRPM(targetRPM)
+        Shooter.shooterPID.setpoint = Shooter.targetRPM.asRPM
+    }
 
     override fun execute() {
         val calculated = Shooter.shooterPID.calculate(
-            Shooter.currentRPM.asRPM, Shooter.targetRPM.asRPM
+            Shooter.currentRPM.asRPM
         )
-        Shooter.runShooter((calculated * -ShooterConstants.MAX_VOLTS.asVolts).volts)
+        Shooter.runShooter((calculated * ShooterConstants.MAX_VOLTS.asVolts).volts)
     }
 
     override fun isFinished(): Boolean { return false }

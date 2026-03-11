@@ -16,6 +16,7 @@ import beaverlib.utils.Units.Linear.metersPerSecondSquared
 import beaverlib.utils.geometry.Vector2
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
+import frc.robot.subsystems.HoodConstants
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.ShooterConstants
 import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
@@ -86,12 +87,12 @@ class AutoAngleHood(
         posAngle =
             (90.0.degrees.asDegrees - calculatedPos.radians.asDegrees)
                 .clamp(
-                    0.0.degrees.asDegrees, ShooterConstants.HOOD_MAX.asDegrees
+                    0.0.degrees.asDegrees, HoodConstants.HOOD_MAX.asDegrees
                 ).degrees
         negAngle =
             (90.0.degrees.asDegrees - calculatedPos.radians.asDegrees)
                 .clamp(
-                    0.0.degrees.asDegrees, ShooterConstants.HOOD_MAX.asDegrees
+                    0.0.degrees.asDegrees, HoodConstants.HOOD_MAX.asDegrees
                 ).degrees
 
         // get final (bigger) angle

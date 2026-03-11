@@ -7,8 +7,11 @@ import beaverlib.utils.Units.Angular.degrees
 import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj2.command.Command
+import frc.robot.subsystems.Hood
+import frc.robot.subsystems.HoodConstants
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.ShooterConstants
+import kotlin.math.abs
 
 /**
  * Moves the hood to an inputted angle within 0 to 55 degrees.
@@ -22,22 +25,33 @@ class MoveHoodToAngle(
 
     init { addRequirements(Shooter) }
 
-    override fun execute() {
-        // keep inputted angle within safe tolerances
-        val clamped = angle.asDegrees.clamp(
-            ShooterConstants.HOOD_MIN.asDegrees,
-            ShooterConstants.HOOD_MAX.asDegrees
-        ) // degrees
+    var clamped: AngleUnit = 0.0.degrees
 
-        // position of encoder for shooter hood
-        val pos = Shooter.currentAngle
-        val calculated = Shooter.hoodPID.calculate(pos.asDegrees, clamped)
-        while (!Shooter.hoodPID.atSetpoint()) { Shooter.runHood((calculated * voltage.asVolts).volts) }
-        Shooter.runHood(0.0.volts)
-        return
+    override fun initialize() {
+        // keep inputted angle within safe tolerances
+        clamped = angle.asDegrees.clamp(
+            HoodConstants.HOOD_MIN.asDegrees,
+            HoodConstants.HOOD_MAX.asDegrees
+        ).degrees // degrees
+        Hood.hoodPID.setpoint = clamped.asDegrees
     }
 
-    override fun isFinished(): Boolean { return Shooter.hoodPID.atSetpoint() }
+    override fun execute() {
+        // position of encoder for shooter hood
+        val pos = Hood.currentAngle
+        val calculated = Hood.hoodPID.calculate(pos.asDegrees)
+        println(
+            "Current: "
+                    + pos.asDegrees
+                    + ", target: " + clamped.asDegrees
+                    + ", calculated: " + calculated
+        )
+        Hood.runHood((calculated * abs(voltage.asVolts)).volts)
+    }
 
-    override fun end(interrupted: Boolean) {}
+    override fun isFinished(): Boolean { return Hood.hoodPID.atSetpoint() }
+
+    override fun end(interrupted: Boolean) {
+        Hood.runHood(0.0.volts)
+    }
 }

@@ -2,6 +2,9 @@ package frc.robot
 
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
+import beaverlib.utils.Units.Angular.RPM
+import beaverlib.utils.Units.Angular.degrees
+import beaverlib.utils.Units.Angular.rotationsPerSecond
 import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
@@ -13,10 +16,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
 import frc.robot.commands.general.GeneralTriggers
+import frc.robot.commands.subsystems.MoveHoodToAngle
+import frc.robot.commands.subsystems.ShootRPM
 import frc.robot.subsystems.Drivetrain
+import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Hopper
+import frc.robot.subsystems.ShooterFeed
 import frc.robot.subsystems.general.HedgieHelmet
 
 /*
@@ -78,23 +85,27 @@ object TeleOp {
         OI.indexIn.whileTrue(
             ParallelCommandGroup(
                 Hopper.RunHopperCommand(12.0.volts),
-                Shooter.RunShooterFeedCommand(9.0.volts)
+                ShooterFeed.RunShooterFeedCommand(9.0.volts)
             )
         )
         OI.indexOut.whileTrue(
             ParallelCommandGroup(
                 Hopper.RunHopperCommand((-12.0).volts),
-                Shooter.RunShooterFeedCommand((-9.0).volts)
+                ShooterFeed.RunShooterFeedCommand((-9.0).volts)
             )
         )
 
         // shooter
+//        OI.runShooter.whileTrue(ShootRPM(1000.0.RPM)) // todo replace with RPM
         OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(12.0.volts)) // todo replace with RPM
 
+
         // shooter hood
-        OI.zeroHood.whileTrue(Shooter.ZeroHoodCommand())
-        OI.hoodUp.whileTrue(Shooter.MoveHoodVoltageCommand(0.25.volts))
-        OI.hoodDown.whileTrue(Shooter.MoveHoodVoltageCommand((-0.25).volts))
+//        GeneralTriggers.hoodDownTrigger.whileTrue(Hood.ZeroHoodCommand())
+        OI.zeroHood.onTrue(Hood.ZeroHoodCommand())
+        OI.hoodUp.whileTrue(Hood.MoveHoodVoltageCommand(0.25.volts))
+        OI.hoodDown.whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
+        OI.hoodTest.whileTrue(MoveHoodToAngle(45.0.degrees, 0.25.volts))
 
 
         // run all subsystems together
@@ -102,7 +113,7 @@ object TeleOp {
         OI.doScoring.and(GeneralTriggers.rpmTrigger).whileTrue(
             ParallelCommandGroup(
                 Hopper.RunHopperCommand(12.0.volts),
-                Shooter.RunShooterFeedCommand(9.0.volts)
+                ShooterFeed.RunShooterFeedCommand(9.0.volts)
             )
         )
     }
@@ -195,6 +206,7 @@ object TeleOp {
             val runShooter get() = xboxController.leftBumper()
             // shooter hood
             val zeroHood get() = xboxController.povLeft()
+            val hoodTest get() = xboxController.povRight()
             val hoodUp get() = xboxController.povUp()
             val hoodDown get() = xboxController.povDown()
             // all

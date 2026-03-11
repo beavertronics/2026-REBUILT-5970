@@ -51,10 +51,8 @@ object Intake : SubsystemBase() {
     fun MoveIntakeCommand(voltage: VoltageUnit = 1.0.volts) : Command { // todo figure out how to stop when no button pressed
         return run { runIntakeMotors(voltage) }
             .until {
-                upperLimitSwitch.get()
-                        || lowerLimitSwitch.get()
-//                        || TeleOp.OI.intakeIn.negate() .asBoolean
-//                        || TeleOp.OI.intakeOut.negate().asBoolean
+                if (voltage.asVolts > 0.0) { upperLimitSwitch.get() }
+                else { lowerLimitSwitch.get() }
             }
             .finallyDo({ interrupted ->
                 runIntakeMotors(0.0.volts)
