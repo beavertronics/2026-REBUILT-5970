@@ -40,7 +40,7 @@ class TargetPoseProvider(
 
 val Vision = BeaverPhotonVision( // TODO two cameras?
     BeaverVisionCamera(
-        name = "Arducam_OV9281_USB_Camera - Camronny",
+        name = "Arducam_OV9281_USB_Camera - Jimmy",
         // 12.5 inches backwards, 7.0 inches right, 22.5 inches up on the robot
         robotToCamera = Transform3d(
             -12.5.inches.asMeters, -7.0.inches.asMeters, 22.5.inches.asMeters,

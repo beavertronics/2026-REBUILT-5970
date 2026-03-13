@@ -2,12 +2,22 @@ package frc.robot.subsystems
 
 import beaverlib.controls.PIDConstants
 import beaverlib.controls.toPID
+import beaverlib.fieldmap.FieldMapREBUILTWelded
 import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.AngleUnit
 import beaverlib.utils.Units.Angular.asDegrees
+import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Angular.degrees
+import beaverlib.utils.Units.Angular.radians
 import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Electrical.volts
+import beaverlib.utils.Units.Linear.earthGravity
+import beaverlib.utils.Units.Linear.feet
+import beaverlib.utils.Units.Linear.inches
+import beaverlib.utils.Units.Linear.meters
+import beaverlib.utils.Units.Linear.metersPerSecond
+import beaverlib.utils.Units.Linear.metersPerSecondSquared
+import beaverlib.utils.geometry.Vector2
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
@@ -17,6 +27,9 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
 import frc.robot.TeleOp
+import kotlin.math.PI
+import kotlin.math.atan
+import kotlin.math.sqrt
 
 object HoodConstants {
     val hoodID = 11
@@ -24,6 +37,13 @@ object HoodConstants {
     val HOOD_MAX = 55.0.degrees
     val hoodLimitSwitchID = 0
     val MAX_VOLTS = 12.0.volts
+}
+
+object AAC {
+    val shooterHeight = 6.0.feet.asMeters.meters
+    val hubHeight = 72.0.inches.asMeters.meters
+    val heightDiff = hubHeight - shooterHeight
+    val yOffset = 1.7.meters // todo how is this used?
 }
 
 object Hood : SubsystemBase() {
@@ -131,4 +151,66 @@ object Hood : SubsystemBase() {
             ShooterConstants.MAX_VOLTS.asVolts
         )
     )}
+
+    fun autoCalculateHood(dynamic: Boolean = false): AngleUnit {
+        var velocity = 0.0
+        // get flywheel velocity (inches / min)
+        if (dynamic) { velocity = Shooter.currentRPM.asRPM * (PI * 4) } // live RPM
+        else { velocity = Shooter.targetRPM.asRPM * (PI * 4) } // fixed RPM
+
+        // inches per min to meters per sec^2
+        val vsq = (velocity / 2362.0)  // todo is this right?
+            .metersPerSecond
+            .asMetersPerSecond
+            .metersPerSecondSquared
+
+        // get distance (hypotenuse) from hub
+        val distance = Vector2(
+            `according to all known laws of aviation, our robot should not be able to fly`.pose)
+            .distance(FieldMapREBUILTWelded.teamHub.center)
+            .meters
+
+        // calculated the sqrt
+        val calculatedSqrt = sqrt(
+            vsq.asMetersPerSecondSquared * vsq.asMetersPerSecondSquared
+                    - earthGravity.asMetersPerSecondSquared
+                    * (
+                    earthGravity.asMetersPerSecondSquared
+                            * distance.asMeters
+                            * distance.asMeters
+                            + 2
+                            * AAC.heightDiff.asMeters
+                            * vsq.asMetersPerSecondSquared
+                    )
+        )
+
+        // get the positive and negative parts of sqrt
+        val calculatedPos = atan((vsq.asMetersPerSecondSquared + calculatedSqrt) /
+                (earthGravity.asMetersPerSecondSquared * distance.asMeters))
+        val calculatedNeg = atan((vsq.asMetersPerSecondSquared - calculatedSqrt) /
+                (earthGravity.asMetersPerSecondSquared * distance.asMeters))
+
+        // clamp to constrained degrees
+        val posAngle =
+            (90.0.degrees.asDegrees - calculatedPos.radians.asDegrees)
+                .clamp(
+                    0.0.degrees.asDegrees, HoodConstants.HOOD_MAX.asDegrees
+                ).degrees
+
+        val negAngle =
+            (90.0.degrees.asDegrees - calculatedPos.radians.asDegrees)
+                .clamp(
+                    0.0.degrees.asDegrees, HoodConstants.HOOD_MAX.asDegrees
+                ).degrees
+
+        // get final (bigger) angle
+        val hoodAngle = when {
+            (posAngle.asDegrees > negAngle.asDegrees) -> posAngle
+            (negAngle.asDegrees > posAngle.asDegrees) -> negAngle
+            (negAngle.asDegrees == posAngle.asDegrees) -> posAngle
+            else -> 0.0.degrees
+        }
+
+        return hoodAngle
+    }
 }

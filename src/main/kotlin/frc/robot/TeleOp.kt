@@ -64,7 +64,11 @@ object TeleOp {
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
         Drivetrain.defaultCommand = teleOpDrive
-        Shooter.defaultCommand = Shooter.ShootRPMCommand() // todo
+//        Hood.defaultCommand = MoveHoodToAngle(
+//            Hood.autoCalculateHood(false),
+//            0.25.volts
+//        )
+        Shooter.defaultCommand = Shooter.ShootRPMCommand()
     }
 
     /**
@@ -97,21 +101,18 @@ object TeleOp {
         OI.runShooter.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
 
         // shooter hood
-//        GeneralTriggers.hoodDownTrigger.whileTrue(Hood.ZeroHoodCommand())
-        OI.zeroHood.onTrue(Hood.ZeroHoodCommand())
-        OI.hoodUp.whileTrue(Hood.MoveHoodVoltageCommand(0.25.volts))
-        OI.hoodDown.whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
-        OI.hoodTest.whileTrue(MoveHoodToAngle(45.0.degrees, 0.25.volts))
-
-
-        // run all subsystems together
-        OI.doScoring.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
-        OI.doScoring.and(GeneralTriggers.rpmTrigger).whileTrue(
-            ParallelCommandGroup(
-                Hopper.RunHopperCommand(12.0.volts),
-                ShooterFeed.RunShooterFeedCommand(9.0.volts)
-            )
-        )
+        OI.zeroHood
+            .and(OI.safetyOverride)
+            .onTrue(Hood.ZeroHoodCommand())
+        OI.hoodUp
+            .and(OI.safetyOverride)
+            .whileTrue(Hood.MoveHoodVoltageCommand(0.25.volts))
+        OI.hoodDown
+            .and(OI.safetyOverride)
+            .whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
+        OI.hoodTest
+            .and(OI.safetyOverride)
+            .whileTrue(MoveHoodToAngle(45.0.degrees, 0.25.volts))
     }
 
     /**
@@ -199,14 +200,14 @@ object TeleOp {
             val indexIn get() = xboxController.b()
             val indexOut get() = xboxController.x()
             // shooter
-            val runShooter get() = xboxController.leftBumper()
+            val runShooter get() = xboxController.leftTrigger()
             // shooter hood
             val zeroHood get() = xboxController.povLeft()
             val hoodTest get() = xboxController.povRight()
             val hoodUp get() = xboxController.povUp()
             val hoodDown get() = xboxController.povDown()
             // all
-            val doScoring get() = xboxController.leftTrigger()
+            val safetyOverride get() = xboxController.leftBumper()
         //==== CHILDMODE ====//
             val parentDrive get() = xboxController.leftY.processInput()
             val parentStrafe get() = xboxController.leftX.processInput()

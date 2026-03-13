@@ -81,6 +81,12 @@ object RobotController : TimedRobot() {
         ManualAutoChooser.addOption("Angle Sys ID",
             Drivetrain.sysIdAngleMotorCommand()
         )
+        ManualAutoChooser.addOption("Shooter quasistatic",
+            Shooter.shooterSysID()[1]
+            )
+        ManualAutoChooser.addOption("Shooter dynamic",
+            Shooter.shooterSysID()[0]
+            )
         ManualAutoChooser.addOption("Orchestra - Never Gonna Give You Up by Rick Astley",
             InstantCommand( { Orchestrator.loadnplay("orchestra/never_gonna_give_you_up.chrp")}, Orchestrator)
         )
