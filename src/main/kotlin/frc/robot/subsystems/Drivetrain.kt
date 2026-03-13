@@ -76,15 +76,15 @@ object Drivetrain : SubsystemBase() {
                         .smartCurrentLimit(30)
                         .apply(
                             AbsoluteEncoderConfig()
-                                .zeroOffset(
-                                    when (it.moduleNumber) {
-                                        0 -> 0.07024613 // front left
-                                        1 -> 0.28472954 // front right
-                                        2 -> 0.32577065 // back left
-                                        3 -> 0.40284413 // back right
-                                        else -> 0.0
-                                    }
-                                )
+//                                .zeroOffset(
+//                                    when (it.moduleNumber) {
+//                                        0 -> 0.07024613 // front left
+//                                        1 -> 0.28472954 // front right
+//                                        2 -> 0.32577065 // back left
+//                                        3 -> 0.40284413 // back right
+//                                        else -> 0.0
+//                                    }
+//                                )
                                 .inverted(false)
                                 .positionConversionFactor(360.0)
                                 .velocityConversionFactor(6.0)

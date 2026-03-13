@@ -1,5 +1,7 @@
 package frc.robot
 
+import com.ctre.phoenix6.SignalLogger
+import com.revrobotics.util.StatusLogger
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.wpilibj.TimedRobot
@@ -56,7 +58,9 @@ object RobotController : TimedRobot() {
         Shooter
         ShooterFeed
 
-
+        // logging things
+        if (isSimulation()) { SignalLogger.enableAutoLogging(true) }
+        else { SignalLogger.enableAutoLogging(false); StatusLogger.disableAutoLogging() }
 
         // start drive cam // todo replaced by vision feed
         // CameraServer.startAutomaticCapture(0)
@@ -81,12 +85,19 @@ object RobotController : TimedRobot() {
         ManualAutoChooser.addOption("Angle Sys ID",
             Drivetrain.sysIdAngleMotorCommand()
         )
-        ManualAutoChooser.addOption("Shooter quasistatic",
-            Shooter.shooterSysID()[1]
+        ManualAutoChooser.addOption("Shooter quasistatic reverse (forwards)",
+            Shooter.shooterSysID()[2]
             )
-        ManualAutoChooser.addOption("Shooter dynamic",
+        ManualAutoChooser.addOption("Shooter quasistatic forwards (reverse)",
+            Shooter.shooterSysID()[3]
+            )
+        ManualAutoChooser.addOption("Shooter dynamic reverse (forwards)",
             Shooter.shooterSysID()[0]
             )
+        ManualAutoChooser.addOption("Shooter dynamic forwards (reverse)",
+            Shooter.shooterSysID()[1]
+            )
+
         ManualAutoChooser.addOption("Orchestra - Never Gonna Give You Up by Rick Astley",
             InstantCommand( { Orchestrator.loadnplay("orchestra/never_gonna_give_you_up.chrp")}, Orchestrator)
         )

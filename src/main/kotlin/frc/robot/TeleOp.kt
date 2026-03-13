@@ -68,7 +68,7 @@ object TeleOp {
 //            Hood.autoCalculateHood(false),
 //            0.25.volts
 //        )
-        Shooter.defaultCommand = Shooter.ShootRPMCommand()
+//        Shooter.defaultCommand = Shooter.ShootRPMCommand()
     }
 
     /**
@@ -87,20 +87,24 @@ object TeleOp {
         OI.indexIn.whileTrue(
             ParallelCommandGroup(
                 Hopper.RunHopperCommand(12.0.volts),
-                ShooterFeed.RunShooterFeedCommand(9.0.volts)
+                ShooterFeed.RunShooterFeedCommand(12.0.volts)
             )
         )
         OI.indexOut.whileTrue(
             ParallelCommandGroup(
                 Hopper.RunHopperCommand((-12.0).volts),
-                ShooterFeed.RunShooterFeedCommand((-9.0).volts)
+                ShooterFeed.RunShooterFeedCommand((-12.0).volts)
             )
         )
 
         // shooter
         OI.runShooter.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
 
-        // shooter hood
+        // safety override features
+        OI.runShooter
+            .and(OI.safetyOverride)
+//            .whileTrue(Shooter.ShootVoltageCommand(0.3.volts))
+            .whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
         OI.zeroHood
             .and(OI.safetyOverride)
             .onTrue(Hood.ZeroHoodCommand())

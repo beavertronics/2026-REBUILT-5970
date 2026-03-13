@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.engine.utils.initMotorControllers
 import frc.robot.beaverlib.utils.sysID.BeaverSysIDMotor
 import frc.robot.beaverlib.utils.sysID.BeaverSysIDRoutine
+import frc.robot.commands.tests.Wait
 
 object ShooterConstants {
     val shooterID = 9
@@ -35,8 +36,8 @@ object ShooterConstants {
 object Shooter : SubsystemBase() {
     val shooterMotor = SparkMax(ShooterConstants.shooterID, SparkLowLevel.MotorType.kBrushless) // NEO
 
-    val PIDConstants = PIDConstants(0.0, 0.0, 0.0) // todo tune
-    val feedForwardConstants = SimpleMotorFeedForwardConstants(0.0, 0.0, 0.0) // todo tune
+    val PIDConstants = PIDConstants(0.27699, 0.0, 0.0) // todo tune
+    val feedForwardConstants = SimpleMotorFeedForwardConstants(0.3, 1.0, 1.0) // todo tune
     val pidff = PidFF(PIDConstants, feedForwardConstants)
 
     /**
@@ -74,12 +75,18 @@ object Shooter : SubsystemBase() {
      */
     fun ShootRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command { // todo test
         return run {
-            runShooter((pidff.calculate(currentRPM.asRPM) * ShooterConstants.MAX_VOLTS.asVolts).volts)
+            val calculatedAll = pidff.calculate(currentRPM.asRPM)
+            val calculatedPID = pidff.pid.calculate(currentRPM.asRPM)
+            println("Running shooter at " + calculatedAll)
+            runShooter((calculatedAll * ShooterConstants.MAX_VOLTS.asVolts).volts)
         }
+            .repeatedly()
             .beforeStarting(
-                run {
-                    setTargetRPM(rpm)
-                    pidff.setpoint = targetRPM.asRPM
+                {
+                    run {
+                        setTargetRPM(rpm)
+                        pidff.setpoint = targetRPM.asRPM
+                    }
                 }
             )
             .finallyDo({ interrupted ->
@@ -114,7 +121,11 @@ object Shooter : SubsystemBase() {
     fun shooterSysID(): Array<Command> {
         val motor = BeaverSysIDMotor("Shooter", shooterMotor)
         val routine = BeaverSysIDRoutine(Shooter, motor)
-        return arrayOf(routine.sysIdDynamic(SysIdRoutine.Direction.kReverse), routine.sysIdQuasistatic(SysIdRoutine.Direction.kReverse))
-
+        return arrayOf(
+            routine.sysIdDynamic(SysIdRoutine.Direction.kReverse),
+            routine.sysIdDynamic(SysIdRoutine.Direction.kForward),
+            routine.sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
+            routine.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+        )
     }
 }
