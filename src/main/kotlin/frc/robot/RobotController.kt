@@ -16,13 +16,13 @@ import frc.robot.commands.general.Move
 import frc.robot.commands.vision.AlignToTag
 import frc.robot.commands.tests.Wait
 import frc.robot.subsystems.Drivetrain
-import frc.robot.subsystems.Hood
-import frc.robot.subsystems.Hopper
-import frc.robot.subsystems.Intake
+//import frc.robot.subsystems.Hood
+//import frc.robot.subsystems.Hopper
+//import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Orchestrator
 import frc.robot.subsystems.Phatplanner
-import frc.robot.subsystems.Shooter
-import frc.robot.subsystems.ShooterFeed
+//import frc.robot.subsystems.Shooter
+//import frc.robot.subsystems.ShooterFeed
 import frc.robot.subsystems.Vision
 import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
 
@@ -52,11 +52,11 @@ object RobotController : TimedRobot() {
         TeleOp
         Drivetrain
         `according to all known laws of aviation, our robot should not be able to fly`
-        Hood
-        Hopper
-        Intake
-        Shooter
-        ShooterFeed
+//        Hood
+//        Hopper
+//        Intake
+//        Shooter
+//        ShooterFeed
 
         // logging things
         if (isSimulation()) { SignalLogger.enableAutoLogging(true) }
@@ -85,18 +85,18 @@ object RobotController : TimedRobot() {
         ManualAutoChooser.addOption("Angle Sys ID",
             Drivetrain.sysIdAngleMotorCommand()
         )
-        ManualAutoChooser.addOption("Shooter quasistatic reverse (forwards)",
-            Shooter.shooterSysID()[2]
-            )
-        ManualAutoChooser.addOption("Shooter quasistatic forwards (reverse)",
-            Shooter.shooterSysID()[3]
-            )
-        ManualAutoChooser.addOption("Shooter dynamic reverse (forwards)",
-            Shooter.shooterSysID()[0]
-            )
-        ManualAutoChooser.addOption("Shooter dynamic forwards (reverse)",
-            Shooter.shooterSysID()[1]
-            )
+//        ManualAutoChooser.addOption("Shooter quasistatic reverse (forwards)",
+//            Shooter.shooterSysID()[2]
+//            )
+//        ManualAutoChooser.addOption("Shooter quasistatic forwards (reverse)",
+//            Shooter.shooterSysID()[3]
+//            )
+//        ManualAutoChooser.addOption("Shooter dynamic reverse (forwards)",
+//            Shooter.shooterSysID()[0]
+//            )
+//        ManualAutoChooser.addOption("Shooter dynamic forwards (reverse)",
+//            Shooter.shooterSysID()[1]
+//            )
 
         ManualAutoChooser.addOption("Orchestra - Never Gonna Give You Up by Rick Astley",
             InstantCommand( { Orchestrator.loadnplay("orchestra/never_gonna_give_you_up.chrp")}, Orchestrator)

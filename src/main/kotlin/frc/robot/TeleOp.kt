@@ -16,13 +16,14 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
 import frc.robot.commands.general.GeneralTriggers
-import frc.robot.commands.subsystems.MoveHoodToAngle
+//import frc.robot.commands.subsystems.MoveHoodToAngle
 import frc.robot.subsystems.Drivetrain
-import frc.robot.subsystems.Hood
-import frc.robot.subsystems.Intake
-import frc.robot.subsystems.Shooter
-import frc.robot.subsystems.Hopper
-import frc.robot.subsystems.ShooterFeed
+//import frc.robot.subsystems.Hood
+//import frc.robot.subsystems.Intake
+//import frc.robot.subsystems.Shooter
+//import frc.robot.subsystems.Hopper
+//import frc.robot.subsystems.IntakeMover
+//import frc.robot.subsystems.ShooterFeed
 import frc.robot.subsystems.general.HedgieHelmet
 
 /*
@@ -57,7 +58,7 @@ object TeleOp {
             { OI.driverY },
             { OI.driverX },
             { OI.driverOmega },
-            { OI.toggleFieldOriented.asBoolean },
+            { !OI.toggleFieldOriented.asBoolean },
             { OI.toggleSlow.asBoolean }
         )
 
@@ -76,47 +77,51 @@ object TeleOp {
      */
     fun configureBindings() {
         // run the intake
-        OI.runIntake.whileTrue(Intake.RunIntakeCommand(true, 9.0.volts))
-        OI.runOuttake.whileTrue(Intake.RunIntakeCommand(false, 9.0.volts))
-
-        // move the intake in or out
-        OI.intakeIn.whileTrue(Intake.MoveIntakeCommand(5.0.volts))
-        OI.intakeOut.and(HedgieHelmet.trenchDriveTrigger.negate()).whileTrue(Intake.MoveIntakeCommand(-5.0.volts))
+//        OI.runIntake.whileTrue(Intake.RunIntakeCommand(true, 9.0.volts))
+//        OI.runOuttake.whileTrue(Intake.RunIntakeCommand(false, 9.0.volts))
+//
+//         move the intake in or out
+//        OI.intakeIn.whileTrue(IntakeMover.MoveIntakeCommand(5.0.volts))
+//        OI.intakeOut.and(HedgieHelmet.trenchDriveTrigger.negate()).whileTrue(IntakeMover.MoveIntakeCommand(-5.0.volts))
 
         // spindexer and shooter kicked independent controls
-        OI.indexIn.whileTrue(
-            ParallelCommandGroup(
-                Hopper.RunHopperCommand(12.0.volts),
-                ShooterFeed.RunShooterFeedCommand(12.0.volts)
-            )
-        )
-        OI.indexOut.whileTrue(
-            ParallelCommandGroup(
-                Hopper.RunHopperCommand((-12.0).volts),
-                ShooterFeed.RunShooterFeedCommand((-12.0).volts)
-            )
-        )
+//        OI.indexIn.whileTrue(
+//            ParallelCommandGroup(
+//                Hopper.RunHopperCommand(12.0.volts),
+//                ShooterFeed.RunShooterFeedCommand(12.0.volts)
+//            )
+//        )
+//        OI.indexOut.whileTrue(
+//            ParallelCommandGroup(
+//                Hopper.RunHopperCommand((-12.0).volts),
+//                ShooterFeed.RunShooterFeedCommand((-12.0).volts)
+//            )
+//        )
 
         // shooter
-        OI.runShooter.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
+//        OI.runShooter.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
+//        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
 
         // safety override features
-        OI.runShooter
-            .and(OI.safetyOverride)
+//        OI.runShooter
+//            .and(OI.safetyOverride)
 //            .whileTrue(Shooter.ShootVoltageCommand(0.3.volts))
-            .whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
-        OI.zeroHood
-            .and(OI.safetyOverride)
-            .onTrue(Hood.ZeroHoodCommand())
-        OI.hoodUp
-            .and(OI.safetyOverride)
-            .whileTrue(Hood.MoveHoodVoltageCommand(0.25.volts))
-        OI.hoodDown
-            .and(OI.safetyOverride)
-            .whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
-        OI.hoodTest
-            .and(OI.safetyOverride)
-            .whileTrue(MoveHoodToAngle(45.0.degrees, 0.25.volts))
+//            .whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
+//        OI.zeroHood
+//            .and(OI.safetyOverride)
+//            .onTrue(Hood.ZeroHoodCommand())
+//        OI.hoodUp
+//            .and(OI.safetyOverride)
+//            .whileTrue(Hood.MoveHoodVoltageCommand(0.25.volts))
+//        OI.hoodDown
+//            .and(OI.safetyOverride)
+//            .whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
+//        OI.hoodTest
+//            .and(OI.safetyOverride)
+//            .whileTrue(MoveHoodToAngle(45.0.degrees, 0.25.volts))
+//        OI.hoodTest
+//            .and(OI.safetyOverride)
+//            .whileTrue(Shooter.ShootVoltageCommand(-12.0.volts))
     }
 
     /**
@@ -197,21 +202,21 @@ object TeleOp {
         //===== SUBSYSTEMS =====//
             // intake
             val runIntake get() = xboxController.a()
-            val runOuttake get() = xboxController.y()
-            val intakeOut get() = xboxController.rightTrigger()
-            val intakeIn get() = xboxController.rightBumper()
+            val runOuttake get() = xboxController.b()
+            val intakeOut get() = xboxController.leftTrigger()
+            val intakeIn get() = xboxController.leftBumper()
             // spindexer and shooter kicker
-            val indexIn get() = xboxController.b()
-            val indexOut get() = xboxController.x()
+            val indexIn get() = xboxController.x()
+            val indexOut get() = xboxController.y()
             // shooter
-            val runShooter get() = xboxController.leftTrigger()
+            val runShooter get() = xboxController.rightTrigger()
             // shooter hood
             val zeroHood get() = xboxController.povLeft()
             val hoodTest get() = xboxController.povRight()
             val hoodUp get() = xboxController.povUp()
             val hoodDown get() = xboxController.povDown()
             // all
-            val safetyOverride get() = xboxController.leftBumper()
+            val safetyOverride get() = xboxController.rightBumper()
         //==== CHILDMODE ====//
             val parentDrive get() = xboxController.leftY.processInput()
             val parentStrafe get() = xboxController.leftX.processInput()
