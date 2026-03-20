@@ -10,6 +10,7 @@ import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Angular.rotationsPerSecond
 import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Electrical.volts
+import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
@@ -24,8 +25,9 @@ import frc.robot.commands.tests.Wait
 
 object ShooterConstants {
     val shooterID = 9
+    val altShooterID = 0 // todo
     val MAX_RPM_DIFF = 5.0.RPM
-    val RPM_LIMIT = 5000.0.RPM
+    val RPM_LIMIT = 5000.0.RPM // todo
     val MAX_VOLTS = 12.0.volts
 }
 
@@ -36,8 +38,8 @@ object ShooterConstants {
 object Shooter : SubsystemBase() {
     val shooterMotor = SparkMax(ShooterConstants.shooterID, SparkLowLevel.MotorType.kBrushless) // NEO
 
-    val PIDConstants = PIDConstants(0.27699, 0.0, 0.0) // todo tune
-    val feedForwardConstants = SimpleMotorFeedForwardConstants(0.3, 1.0, 1.0) // todo tune
+    val PIDConstants = PIDConstants(0.0, 0.0, 0.0) // todo tune
+    val feedForwardConstants = SimpleMotorFeedForwardConstants(0.0, 0.0, 0.0) // todo tune
     val pidff = PidFF(PIDConstants, feedForwardConstants)
 
     /**
@@ -116,7 +118,8 @@ object Shooter : SubsystemBase() {
         -voltage.asVolts.clamp(
             -ShooterConstants.MAX_VOLTS.asVolts,
             ShooterConstants.MAX_VOLTS.asVolts
-        )) }
+        ))
+    }
 
     fun shooterSysID(): Array<Command> {
         val motor = BeaverSysIDMotor("Shooter", shooterMotor)

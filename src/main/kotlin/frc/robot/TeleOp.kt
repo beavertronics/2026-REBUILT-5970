@@ -3,8 +3,6 @@ package frc.robot
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
 import beaverlib.utils.Units.Angular.RPM
-import beaverlib.utils.Units.Angular.degrees
-import beaverlib.utils.Units.Angular.rotationsPerSecond
 import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
@@ -15,13 +13,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
-import frc.robot.commands.general.GeneralTriggers
-import frc.robot.commands.subsystems.MoveHoodToAngle
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Hopper
+import frc.robot.subsystems.IntakeMover
 import frc.robot.subsystems.ShooterFeed
 import frc.robot.subsystems.general.HedgieHelmet
 
@@ -64,11 +61,23 @@ object TeleOp {
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
         Drivetrain.defaultCommand = teleOpDrive
-//        Hood.defaultCommand = MoveHoodToAngle(
+
+        // SUBSYSTEMS!
+        // intake
+//        Intake.defaultCommand = Intake.RunIntakeCommand(true, 0.0.volts) // todo test
+        // intake mover
+//        IntakeMover.defaultCommand = IntakeMover.ProtectIntakeCommand() // todo test
+        // hopper
+//        Hopper.defaultCommand = Hopper.AgitateHopperCommand() // todo test
+        // shooter feed
+//        ShooterFeed.defaultCommand = ShooterFeed.RunShooterFeedCommand((-12.0).volts) // todo test
+        // hood
+//        Hood.defaultCommand = MoveHoodToAngle( // todo test
 //            Hood.autoCalculateHood(false),
 //            0.25.volts
 //        )
-//        Shooter.defaultCommand = Shooter.ShootRPMCommand()
+        // shooter
+//        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM) // todo test
     }
 
     /**
@@ -76,12 +85,12 @@ object TeleOp {
      */
     fun configureBindings() {
         // run the intake
-        OI.runIntake.whileTrue(Intake.RunIntakeCommand(true, 9.0.volts))
-        OI.runOuttake.whileTrue(Intake.RunIntakeCommand(false, 9.0.volts))
+        OI.runIntake.whileTrue(Intake.RunIntakeCommand(true, 12.0.volts))
+        OI.runOuttake.whileTrue(Intake.RunIntakeCommand(false, 12.0.volts))
 
         // move the intake in or out
-        OI.intakeIn.whileTrue(Intake.MoveIntakeCommand(5.0.volts))
-        OI.intakeOut.and(HedgieHelmet.trenchDriveTrigger.negate()).whileTrue(Intake.MoveIntakeCommand(-5.0.volts))
+        OI.intakeIn.whileTrue(IntakeMover.MoveIntakeCommand(5.0.volts))
+        OI.intakeOut.and(HedgieHelmet.trenchDriveTrigger.negate()).whileTrue(IntakeMover.MoveIntakeCommand((-5.0).volts))
 
         // spindexer and shooter kicked independent controls
         OI.indexIn.whileTrue(
@@ -114,9 +123,6 @@ object TeleOp {
         OI.hoodDown
             .and(OI.safetyOverride)
             .whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
-        OI.hoodTest
-            .and(OI.safetyOverride)
-            .whileTrue(MoveHoodToAngle(45.0.degrees, 0.25.volts))
     }
 
     /**
