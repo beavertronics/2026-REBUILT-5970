@@ -84,6 +84,18 @@ object TeleOp {
      * configures things to run on specific inputs
      */
     fun configureBindings() {
+        //===== DRIVETRAIN =====//
+        OI.pointHub.whileTrue( // todo test
+            TeleopDriveCommand(
+                { OI.driverY },
+                { OI.driverX },
+                { Drivetrain.calculateRotationPID() },
+                { OI.driveMode.asBoolean },
+                { OI.slowMode.asBoolean }
+            )
+        )
+
+        //===== SUBSYSTEMS =====//
         // run the intake
         OI.runIntake.whileTrue(Intake.RunIntakeCommand(true, 12.0.volts))
         OI.runOuttake.whileTrue(Intake.RunIntakeCommand(false, 12.0.volts))
@@ -200,6 +212,7 @@ object TeleOp {
             val driverOmega get() = rightJoystick.x.processInput()
             val slowMode get() = leftJoystick.trigger()
             val driveMode get() = rightJoystick.trigger()
+            val pointHub get() = leftJoystick.button(0) // todo figure out a button
         //===== SUBSYSTEMS =====//
             // intake
             val runIntake get() = xboxController.a()

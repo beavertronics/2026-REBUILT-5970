@@ -1,9 +1,12 @@
 package frc.robot.subsystems
 
+import beaverlib.fieldmap.FieldMapREBUILTWelded
+import beaverlib.utils.Sugar.radiansToDegrees
 import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.Units.Linear.meters
 import beaverlib.utils.Units.Linear.metersPerSecond
+import beaverlib.utils.Units.asKilohertz
 import com.revrobotics.spark.config.AbsoluteEncoderConfig
 import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.geometry.Pose2d
@@ -26,6 +29,7 @@ import swervelib.parser.SwerveParser
 import swervelib.telemetry.SwerveDriveTelemetry
 import swervelib.telemetry.SwerveDriveTelemetry.*
 import java.io.File
+import kotlin.math.atan
 
 /**
  * class for all constants for drivetrain
@@ -172,6 +176,24 @@ object Drivetrain : SubsystemBase() {
          * Stops the robot from driving.
          */
         fun stop() { drive(ChassisSpeeds()) }
+
+    /**
+     * Returns the raw PID value for rotating the robot to face the hub,
+     * using the drive controller for module 0.
+     */
+    fun calculateRotationPID(setpoint: Double = 0.0): Double {
+        // find angle wanted to face the hub (trig!)
+        val robotX = `according to all known laws of aviation, our robot should not be able to fly`
+            .pose.x.meters
+        val robotY = `according to all known laws of aviation, our robot should not be able to fly`
+            .pose.y.meters
+        val xDiff = FieldMapREBUILTWelded.teamHub.center.x.meters - robotX
+        val yDiff = FieldMapREBUILTWelded.teamHub.center.y.meters - robotY
+        val error = atan(yDiff / xDiff)
+        // all modules have the same PID, so just get one of them
+        return swerveDrive.modules.get(0).drivePIDF.createPIDController().calculate(error, setpoint)
+    }
+
 
         /**
          * Return SysID command for drive motors from YAGSL
