@@ -38,12 +38,6 @@ class MoveHoodToAngle(
         // position of encoder for shooter hood
         val pos = Hood.currentAngle
         val calculated = Hood.hoodPID.calculate(pos.asDegrees)
-//        println(
-//            "Current: "
-//                    + pos.asDegrees
-//                    + ", target: " + clamped.asDegrees
-//                    + ", calculated: " + calculated
-//        )
         Hood.runHood((calculated * abs(voltage.asVolts)).volts)
     }
 

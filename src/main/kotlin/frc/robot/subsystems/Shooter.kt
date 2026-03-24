@@ -9,8 +9,14 @@ import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Angular.rotationsPerSecond
 import beaverlib.utils.Units.Electrical.VoltageUnit
+import beaverlib.utils.Units.Electrical.amps
 import beaverlib.utils.Units.Electrical.volts
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs
+import com.ctre.phoenix6.configs.MotorOutputConfigs
+import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.hardware.TalonFX
+import com.ctre.phoenix6.signals.InvertedValue
+import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
@@ -20,7 +26,8 @@ object ShooterConstants {
 //    val shooterID = 9
     val krakenID = 0 // todo kraken ID
     val MAX_RPM_DIFF = 5.0.RPM
-    val RPM_LIMIT = 7000.0.RPM // todo figure out
+    val RPM_LIMIT = 6250.0.RPM // for a KrakenX60
+    val SUPPLY_CURRENT_LIMIT = 35.0.amps
 }
 
 /**
@@ -46,9 +53,20 @@ object Shooter : SubsystemBase() {
     @get:JvmName("BiteMe!!")
     var targetRPM: AngularVelocity = 0.0.RPM
 
-    init { // todo configure kraken here
+    init {
 //        initMotorControllers(40, SparkBaseConfig.IdleMode.kCoast, shooterMotor)
-        ""
+        val config = TalonFXConfiguration()
+            .withCurrentLimits(
+                CurrentLimitsConfigs()
+                    .withSupplyCurrentLimit(ShooterConstants.SUPPLY_CURRENT_LIMIT.asAmps) // todo is this the right current limit?
+                    .withSupplyCurrentLimitEnable(true)
+            )
+            .withMotorOutput(
+                MotorOutputConfigs()
+                    .withInverted(InvertedValue.Clockwise_Positive) // todo which one?
+                    .withNeutralMode(NeutralModeValue.Coast)
+            )
+        krakenShooter.configurator.apply(config)
     }
 
     /**
@@ -71,15 +89,18 @@ object Shooter : SubsystemBase() {
     fun ShootRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command { // todo test
         return run {
             val calculatedAll = pidff.calculate(currentRPM.asRPM)
-//            val calculatedP023ID = pidff.pid.calculate(currentRPM.asRPM)
-//            println("Running shooter at " + calculatedAll)
             runShooter((calculatedAll * Constants.MAX_VOLTS.asVolts).volts)
         }
             .repeatedly()
             .beforeStarting(
                 {
                     run {
-                        setTargetRPM(rpm)
+                        setTargetRPM(
+                            rpm.asRPM.clamp(
+                                -ShooterConstants.RPM_LIMIT.asRPM,
+                                ShooterConstants.RPM_LIMIT.asRPM
+                            ).RPM
+                        )
                         pidff.setpoint = targetRPM.asRPM
                     }
                 }
@@ -111,7 +132,7 @@ object Shooter : SubsystemBase() {
     fun runShooter(voltage: VoltageUnit = 1.0.volts) {
 //        shooterMotor.setVoltage(
         krakenShooter.setVoltage(
-        -voltage.asVolts.clamp(
+        voltage.asVolts.clamp( // REMEMBER TO INVERT VOLTAGE FOR THE NEO BUT NOT FOR KRAKEN!
             -Constants.MAX_VOLTS.asVolts,
             Constants.MAX_VOLTS.asVolts
         ))

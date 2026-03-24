@@ -1,10 +1,12 @@
 package frc.robot
 
+import beaverlib.fieldmap.FieldMapREBUILTWelded
+import beaverlib.utils.Units.Linear.meters
 import com.ctre.phoenix6.SignalLogger
 import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.util.StatusLogger
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.wpilibj.TimedRobot
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -13,9 +15,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
-import edu.wpi.first.wpilibj2.command.WaitCommand
-import frc.robot.commands.general.Move
-import frc.robot.commands.vision.AlignToTag
+import frc.robot.commands.general.MoveTo
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Hopper
@@ -79,18 +79,17 @@ object RobotController : TimedRobot() {
 
         // load manual autos
         ManualAutoChooser.setDefaultOption("no auto", Commands.none())
-        ManualAutoChooser.addOption("Align to multiple tags",
+        ManualAutoChooser.addOption("Align to hub",
             SequentialCommandGroup(
-                    AlignToTag(2),
-                    WaitCommand(2.0),
-                    AlignToTag(3),
-                    WaitCommand(2.0),
-                    AlignToTag(4)
+                MoveTo(
+                    Pose2d(
+                        FieldMapREBUILTWelded.teamHub.center.x - 2.0.meters.asMeters,
+                        FieldMapREBUILTWelded.teamHub.center.y,
+                        Rotation2d()
+                    )
                 )
+            )
         )
-        ManualAutoChooser.addOption("1 meter square",
-            SequentialCommandGroup(
-                Move(Transform2d(1.0, 0.0, Rotation2d(0.0, 0.0)))))
         ManualAutoChooser.addOption("Drive Sys ID",
             Drivetrain.sysIdDriveMotor()
         )
@@ -124,8 +123,8 @@ object RobotController : TimedRobot() {
 
         // make thing to choose between pathplanner and manual autos
         AutoTypeChooser.setDefaultOption("Default - Manual", false)
-        AutoTypeChooser.addOption("Pathplanner", true)
         AutoTypeChooser.addOption("Manual", false)
+        AutoTypeChooser.addOption("Pathplanner", true)
         SmartDashboard.putData("Autos/Auto chooser", AutoTypeChooser)
 
     }

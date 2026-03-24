@@ -5,6 +5,7 @@ import beaverlib.controls.toPID
 import beaverlib.fieldmap.FieldMapREBUILTWelded
 import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.AngleUnit
+import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.asDegrees
 import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Angular.degrees
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
 import frc.robot.Constants
 import frc.robot.TeleOp
+import frc.robot.triggers.Stall
 import kotlin.math.PI
 import kotlin.math.atan
 import kotlin.math.sqrt
@@ -49,7 +51,7 @@ object AAC {
 object Hood : SubsystemBase() {
     val hoodMotor = SparkMax(HoodConstants.hoodID, SparkLowLevel.MotorType.kBrushed) // 775
     val lowerLimitSwitch = DigitalInput(HoodConstants.hoodLimitSwitchID)
-    val hoodPIDConstants = PIDConstants(0.050, 0.0, 0.0) // todo tune
+    val hoodPIDConstants = PIDConstants(0.05, 0.0, 0.0)
     val hoodPID = hoodPIDConstants.toPID()
 
     /**
@@ -78,7 +80,11 @@ object Hood : SubsystemBase() {
      */
     fun ZeroHoodCommand() : Command {
         return run { runHood(-(0.225).volts) }
-            .until { lowerLimitSwitch.get() }
+            .until {
+                lowerLimitSwitch.get()
+                        ||
+                Stall.hoodStall.asBoolean
+            }
             .andThen(
                 run { runHood(0.05.volts) }
                     .until { !lowerLimitSwitch.get() }
@@ -95,7 +101,11 @@ object Hood : SubsystemBase() {
      */
     fun MoveHoodVoltageCommand(voltage: VoltageUnit = 1.0.volts) : Command {
         return run { runHood(voltage) }
-            .until { lowerLimitSwitch.get() && TeleOp.OI.hoodUp.asBoolean == false }
+            .until {
+                lowerLimitSwitch.get() && TeleOp.OI.hoodUp.asBoolean == false
+                        ||
+                Stall.hoodStall.asBoolean
+            }
             .finallyDo({ interrupted ->
                 runHood(0.0.volts)
             })
@@ -103,6 +113,7 @@ object Hood : SubsystemBase() {
 
     override fun periodic() {
         currentAngle = getCurrentAngle()
+        targetAngle = SmartDashboard.getNumber("Subsystems/Shooter/Target Hood Angle", 0.0).degrees // todo test
         SmartDashboard.putNumber("Subsystems/Shooter/Hood Angle", currentAngle.asDegrees) // adjusted by 90 degrees - zero
         SmartDashboard.putNumber("Subsystems/Shooter/Target Hood Angle", targetAngle.asDegrees)
         SmartDashboard.putBoolean("Subsystems/Shooter/Hood limit switch", lowerLimitSwitch.get())

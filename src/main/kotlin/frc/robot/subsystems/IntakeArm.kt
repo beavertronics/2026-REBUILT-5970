@@ -13,27 +13,37 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
 import frc.robot.Constants
 import frc.robot.subsystems.general.HedgieHelmet
+import frc.robot.triggers.Stall
 import kotlin.math.sign
 
-object IntakeMoverConstants {
+object IntakeArmConstants {
     val leftMoveIntakeID = 12
     val rightMoveIntakeID = 13
     val upperLimitSwitchID = 1
     val lowerLimitSwitchID = 2
 }
 
-object IntakeMover : SubsystemBase() {
-    val leftIntakeMotor = SparkMax(IntakeMoverConstants.leftMoveIntakeID, SparkLowLevel.MotorType.kBrushed) // 775
-    val rightIntakeMotor = SparkMax(IntakeMoverConstants.rightMoveIntakeID, SparkLowLevel.MotorType.kBrushed) // 775
-    val upperLimitSwitch = DigitalInput(IntakeMoverConstants.upperLimitSwitchID)
-    val lowerLimitSwitch = DigitalInput(IntakeMoverConstants.lowerLimitSwitchID)
+object IntakeArm : SubsystemBase() {
+    val leftIntakeMotor = SparkMax(IntakeArmConstants.leftMoveIntakeID, SparkLowLevel.MotorType.kBrushed) // 775
+    val rightIntakeMotor = SparkMax(IntakeArmConstants.rightMoveIntakeID, SparkLowLevel.MotorType.kBrushed) // 775
+    val upperLimitSwitch = DigitalInput(IntakeArmConstants.upperLimitSwitchID)
+    val lowerLimitSwitch = DigitalInput(IntakeArmConstants.lowerLimitSwitchID)
 
     init {
         initMotorControllers(30, SparkBaseConfig.IdleMode.kBrake, leftIntakeMotor, rightIntakeMotor) // 20?
     }
 
-    fun MoveIntakeCommand(voltage: VoltageUnit = 1.0.volts) : Command { // todo figure out how to stop when no button pressed
-        return run { runIntakeMotors(voltage) }
+    /**
+     * A command to move the intake arm up or down.
+     * @param stall whether to invert the direction when a stall is detected.
+     * @param voltage the voltage to move the arm at.
+     */
+    fun MoveIntakeCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
+        return run {
+            if (Stall.intakeArmStall.asBoolean && stall) { runIntakeMotors(-voltage) }
+            else { runIntakeMotors(voltage) }
+            }
+            .onlyIf(Stall.intakeArmStall.negate()) // only move the intake if it is not stalled
             .until {
                 if (voltage.asVolts.sign > 0.0) { upperLimitSwitch.get() }
                 else { lowerLimitSwitch.get() }

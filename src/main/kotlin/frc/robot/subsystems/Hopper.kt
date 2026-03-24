@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import frc.engine.utils.initMotorControllers
 import frc.robot.Constants
+import frc.robot.triggers.Stall
 
 object HopperConstants {
     val hopperID = 15
@@ -26,10 +27,14 @@ object Hopper : SubsystemBase() {
 
     /**
      * A command to run the spindexer at the inputted voltage.
+     * @param stall whether to invert the direction when a stall is detected.
      * @param voltage the voltage to run the spindexer motor at.
      */
-    fun RunHopperCommand(voltage: VoltageUnit = 1.0.volts) : Command {
-        return run { runHopper(voltage) }
+    fun RunHopperCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
+        return run {
+            if (Stall.hopperStall.asBoolean && stall) { runHopper(-voltage) }
+            else { runHopper(voltage) }
+        }
             .finallyDo({ interrupted ->
                 runHopper(0.0.volts)
             })

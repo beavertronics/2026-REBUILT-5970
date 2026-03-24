@@ -18,7 +18,7 @@ import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Hopper
-import frc.robot.subsystems.IntakeMover
+import frc.robot.subsystems.IntakeArm
 import frc.robot.subsystems.Kicker
 import frc.robot.triggers.General
 
@@ -68,9 +68,9 @@ object TeleOp {
         // intake mover
 //        IntakeMover.defaultCommand = IntakeMover.ProtectIntakeCommand() // todo test
         // hopper
-//        Hopper.defaultCommand = Hopper.AgitateHopperCommand() // todo test
-        // shooter feed
-//        ShooterFeed.defaultCommand = ShooterFeed.RunShooterFeedCommand((-12.0).volts) // todo test
+        Hopper.defaultCommand = Hopper.AgitateHopperCommand() // todo test
+//         shooter feed
+        Kicker.defaultCommand = Kicker.RunKickerCommand((-12.0).volts) // todo test
         // hood
 //        Hood.defaultCommand = MoveHoodToAngle( // todo test
 //            Hood.autoCalculateHood(false),
@@ -97,16 +97,16 @@ object TeleOp {
 
         //===== SUBSYSTEMS =====//
         // run the intake
-        OI.runIntake.whileTrue(Intake.RunIntakeCommand(true, 12.0.volts))
-        OI.runOuttake.whileTrue(Intake.RunIntakeCommand(false, 12.0.volts))
+        OI.runIntake.whileTrue(Intake.RunIntakeCommand(12.0.volts))
+        OI.runOuttake.whileTrue(Intake.RunIntakeCommand((-12.0).volts))
 
         // move the intake in or out
-        OI.intakeIn.whileTrue(IntakeMover.MoveIntakeCommand(5.0.volts))
+        OI.intakeIn.whileTrue(IntakeArm.MoveIntakeCommand(5.0.volts))
         OI.intakeOut
 //            .and(HedgieHelmet.trenchDriveTrigger.negate()) // todo test
-            .whileTrue(IntakeMover.MoveIntakeCommand((-5.0).volts))
+            .whileTrue(IntakeArm.MoveIntakeCommand((-5.0).volts))
 
-        // spindexer and shooter kicked independent controls
+        // spindexer and shooter kicker independent controls
         OI.indexIn
             .and(General.rpmTrigger)  // todo test
             .whileTrue(
