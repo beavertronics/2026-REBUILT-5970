@@ -1,6 +1,5 @@
 package frc.robot.subsystems
 
-import beaverlib.utils.Units.Angular.degrees
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.geometry.*
 import edu.wpi.first.util.sendable.SendableBuilder
@@ -22,21 +21,20 @@ object `according to all known laws of aviation, our robot should not be able to
                 if (result.targets.isEmpty()) return
                 if (
                     !result.multitagResult.isPresent && (result.targets.first().poseAmbiguity > 0.3)
-                )
-                    return
+                ) return
                 val newPose = camera.getMultiTagPoseWithFallback(result) ?: return
                 addVisionMeasurement(newPose.toPose2d(), result.timestampSeconds, true)
             },
         )
         setVisionMeasurementStdDevs(1.0, 1.0, 0.25) // todo tune
 
-        swerveDrive.setGyroOffset( // todo
-            Rotation3d(
-                0.0,
-                0.0,
-                0.0
-            )
-        )
+//        swerveDrive.setGyroOffset( // todo
+//            Rotation3d(
+//                0.0,
+//                0.0,
+//                0.0
+//            )
+//        )
     }
 
     // pose of the robot

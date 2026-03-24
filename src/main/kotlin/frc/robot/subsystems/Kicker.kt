@@ -9,14 +9,14 @@ import com.revrobotics.spark.config.SparkBaseConfig
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
+import frc.robot.Constants
 
-object ShooterFeedConstants {
+object KickerConstants {
     val feederID = 10
-    val MAX_VOLTS = 12.0.volts
 }
 
-object ShooterFeed: SubsystemBase() {
-    val feedMotor = SparkMax(ShooterFeedConstants.feederID, SparkLowLevel.MotorType.kBrushed) // 775
+object Kicker: SubsystemBase() {
+    val feedMotor = SparkMax(KickerConstants.feederID, SparkLowLevel.MotorType.kBrushed) // 775
 
     init {
         initMotorControllers(30, SparkBaseConfig.IdleMode.kCoast, feedMotor)
@@ -26,10 +26,10 @@ object ShooterFeed: SubsystemBase() {
      * A command to run the shooter feed at the inputted voltage.
      * @param voltage the voltage to run the feeder motor at.
      */
-    fun RunShooterFeedCommand(voltage: VoltageUnit = 1.0.volts) : Command {
-        return run { runFeed(voltage) }
+    fun RunKickerCommand(voltage: VoltageUnit = 1.0.volts) : Command {
+        return run { runKicker(voltage) }
             .finallyDo({ interrupted ->
-                runFeed(0.0.volts)
+                runKicker(0.0.volts)
             })
     }
 
@@ -40,10 +40,10 @@ object ShooterFeed: SubsystemBase() {
      *
      * NOTE: Running feeder has a 10:1 gear ratio.
      */
-    fun runFeed(voltage: VoltageUnit = 1.0.volts) { feedMotor.set(
+    fun runKicker(voltage: VoltageUnit = 1.0.volts) { feedMotor.set(
         -voltage.asVolts.clamp(
-            -ShooterConstants.MAX_VOLTS.asVolts,
-            ShooterConstants.MAX_VOLTS.asVolts
+            -Constants.MAX_VOLTS.asVolts,
+            Constants.MAX_VOLTS.asVolts
         )
     )}
 }

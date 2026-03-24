@@ -1,4 +1,4 @@
-package frc.robot.commands.general
+package frc.robot.triggers
 
 import beaverlib.utils.Units.Angular.asRPM
 import edu.wpi.first.wpilibj2.command.button.Trigger
@@ -8,10 +8,12 @@ import frc.robot.subsystems.ShooterConstants
 import frc.robot.subsystems.Vision
 import kotlin.math.abs
 
-object GeneralTriggers {
+object General {
     /**
      * A trigger for when the shooter is at its target RPM.
-     * Specifically, when the difference between the current and target RPM is less than 5.0 RPM.
+     * Specifically, when the difference between the current and target RPM is less than the set minimum.
+     * @see Shooter.currentRPM
+     * @see Shooter.targetRPM
      * @see ShooterConstants.MAX_RPM_DIFF
      */
     val rpmTrigger = Trigger {
@@ -19,7 +21,7 @@ object GeneralTriggers {
     }
 
     /**
-     * A trigger for when the hood has pressed the limit switch.
+     * A trigger for when the hood has pressed the lower limit switch.
      */
     val hoodDownTrigger = Trigger { Hood.lowerLimitSwitch.get() }
 

@@ -9,8 +9,6 @@ import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.HoodConstants
-import frc.robot.subsystems.Shooter
-import frc.robot.subsystems.ShooterConstants
 import kotlin.math.abs
 
 /**

@@ -1,6 +1,7 @@
 package frc.robot
 
 import com.ctre.phoenix6.SignalLogger
+import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.util.StatusLogger
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
@@ -12,18 +13,17 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
+import edu.wpi.first.wpilibj2.command.WaitCommand
 import frc.robot.commands.general.Move
 import frc.robot.commands.vision.AlignToTag
-import frc.robot.commands.tests.Wait
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Hopper
 import frc.robot.subsystems.Intake
+import frc.robot.subsystems.Kicker
 import frc.robot.subsystems.Orchestrator
 import frc.robot.subsystems.Phatplanner
 import frc.robot.subsystems.Shooter
-import frc.robot.subsystems.ShooterFeed
-import frc.robot.subsystems.Vision
 import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
 
 /*
@@ -38,7 +38,6 @@ import frc.robot.subsystems.`according to all known laws of aviation, our robot 
  */
 object RobotController : TimedRobot() {
     val commandScheduler = CommandScheduler.getInstance()
-//    val manualAutoCommands: Map<String,Command> = mapOf()
     var selectedManualAuto: Command? = null
     val ManualAutoChooser = SendableChooser<Command>()
     val AutoTypeChooser = SendableChooser<Boolean>()
@@ -48,6 +47,10 @@ object RobotController : TimedRobot() {
      * runs when robot turns on, should be used for any initialization of robot or subsystems
      */
     override fun robotInit() {
+        // logging things
+        if (isSimulation()) { SignalLogger.enableAutoLogging(true) }
+        else { SignalLogger.enableAutoLogging(false); StatusLogger.disableAutoLogging() }
+
         // all subsystems
         TeleOp
         Drivetrain
@@ -56,11 +59,20 @@ object RobotController : TimedRobot() {
         Hopper
         Intake
         Shooter
-        ShooterFeed
+        Kicker
 
-        // logging things
-        if (isSimulation()) { SignalLogger.enableAutoLogging(true) }
-        else { SignalLogger.enableAutoLogging(false); StatusLogger.disableAutoLogging() }
+        // add all TalonFX motors to orchestrator
+        println("ORCHESTRA: Shooter motor added (" +
+                Shooter.krakenShooter.deviceID +
+                "): " + Orchestrator.register(Shooter.krakenShooter)
+        )
+        Drivetrain.swerveDrive.modules.forEach {
+            val driveMotor = it.driveMotor.motor as TalonFX
+            println("ORCHESTRA: Drive motor added (" +
+                    driveMotor.deviceID +
+                    "): " + Orchestrator.register(driveMotor)
+            )
+        }
 
         // start drive cam // todo replaced by vision feed
         // CameraServer.startAutomaticCapture(0)
@@ -70,9 +82,9 @@ object RobotController : TimedRobot() {
         ManualAutoChooser.addOption("Align to multiple tags",
             SequentialCommandGroup(
                     AlignToTag(2),
-                    Wait(2.0),
+                    WaitCommand(2.0),
                     AlignToTag(3),
-                    Wait(2.0),
+                    WaitCommand(2.0),
                     AlignToTag(4)
                 )
         )
@@ -85,18 +97,18 @@ object RobotController : TimedRobot() {
         ManualAutoChooser.addOption("Angle Sys ID",
             Drivetrain.sysIdAngleMotorCommand()
         )
-        ManualAutoChooser.addOption("Shooter quasistatic reverse (forwards)",
-            Shooter.shooterSysID()[2]
-            )
-        ManualAutoChooser.addOption("Shooter quasistatic forwards (reverse)",
-            Shooter.shooterSysID()[3]
-            )
-        ManualAutoChooser.addOption("Shooter dynamic reverse (forwards)",
-            Shooter.shooterSysID()[0]
-            )
-        ManualAutoChooser.addOption("Shooter dynamic forwards (reverse)",
-            Shooter.shooterSysID()[1]
-            )
+//        ManualAutoChooser.addOption("Shooter quasistatic reverse (forwards)",
+//            Shooter.shooterSysID()[2]
+//            )
+//        ManualAutoChooser.addOption("Shooter quasistatic forwards (reverse)",
+//            Shooter.shooterSysID()[3]
+//            )
+//        ManualAutoChooser.addOption("Shooter dynamic reverse (forwards)",
+//            Shooter.shooterSysID()[0]
+//            )
+//        ManualAutoChooser.addOption("Shooter dynamic forwards (reverse)",
+//            Shooter.shooterSysID()[1]
+//            )
 
         ManualAutoChooser.addOption("Orchestra - Never Gonna Give You Up by Rick Astley",
             InstantCommand( { Orchestrator.loadnplay("orchestra/never_gonna_give_you_up.chrp")}, Orchestrator)
@@ -111,7 +123,7 @@ object RobotController : TimedRobot() {
         SmartDashboard.putData("Autos/Pathplanner auto choices", Phatplanner.autoChooser)
 
         // make thing to choose between pathplanner and manual autos
-        AutoTypeChooser.setDefaultOption("Default - Manual", true)
+        AutoTypeChooser.setDefaultOption("Default - Manual", false)
         AutoTypeChooser.addOption("Pathplanner", true)
         AutoTypeChooser.addOption("Manual", false)
         SmartDashboard.putData("Autos/Auto chooser", AutoTypeChooser)
@@ -138,7 +150,6 @@ object RobotController : TimedRobot() {
             println("Auto selected: " + selectedPathAuto)
         }
     }
-//    override fun autonomousPeriodic() {} //TODO: Unnecesary with command-based programming?
 
     /**
      * runs when teleop is ready
@@ -150,32 +161,5 @@ object RobotController : TimedRobot() {
         Orchestrator.stop()
     }
 
-    /**
-     * runs on every frame of teleop
-     */
-//    override fun teleopPeriodic() {} //TODO: Unnecessary with command-based programming?
-
-    /**
-     * runs only in simulation mode,
-     * other functions will run regardless of whether the robot is
-     * simulated or not
-     */
-//    override fun simulationInit() {}
-
-    /**
-     * runs immediately when the robot is disabled, helpful for safe
-     * deactivation of robot and whatnot
-     */
-//    override fun disabledInit() {}
-
-    /**
-     * runs while robot is disabled, used to hold motors
-     * in place.
-     * try not to put code here, is often unsafe
-     */
-//    override fun disabledPeriodic() {}
-
     override fun testInit() { commandScheduler.cancelAll() }
-
-//    override fun testPeriodic() {}
 }

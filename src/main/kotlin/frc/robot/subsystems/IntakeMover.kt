@@ -11,14 +11,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
+import frc.robot.Constants
 import frc.robot.subsystems.general.HedgieHelmet
+import kotlin.math.sign
 
 object IntakeMoverConstants {
     val leftMoveIntakeID = 12
     val rightMoveIntakeID = 13
     val upperLimitSwitchID = 1
     val lowerLimitSwitchID = 2
-    val MAX_VOLTS = 12.0.volts
 }
 
 object IntakeMover : SubsystemBase() {
@@ -34,7 +35,7 @@ object IntakeMover : SubsystemBase() {
     fun MoveIntakeCommand(voltage: VoltageUnit = 1.0.volts) : Command { // todo figure out how to stop when no button pressed
         return run { runIntakeMotors(voltage) }
             .until {
-                if (voltage.asVolts > 0.0) { upperLimitSwitch.get() }
+                if (voltage.asVolts.sign > 0.0) { upperLimitSwitch.get() }
                 else { lowerLimitSwitch.get() }
             }
             .finallyDo({ interrupted ->
@@ -62,12 +63,12 @@ object IntakeMover : SubsystemBase() {
      */
     fun runIntakeMotors(voltage: VoltageUnit = 1.0.volts) {
         leftIntakeMotor.setVoltage(-voltage.asVolts.clamp(
-            -IntakeConstants.MAX_VOLTS.asVolts,
-            IntakeConstants.MAX_VOLTS.asVolts
+            -Constants.MAX_VOLTS.asVolts,
+            Constants.MAX_VOLTS.asVolts
         ))
         rightIntakeMotor.setVoltage(voltage.asVolts.clamp(
-            -IntakeConstants.MAX_VOLTS.asVolts,
-            IntakeConstants.MAX_VOLTS.asVolts
+            -Constants.MAX_VOLTS.asVolts,
+            Constants.MAX_VOLTS.asVolts
         ))
     }
 }

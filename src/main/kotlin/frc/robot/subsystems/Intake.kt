@@ -6,18 +6,14 @@ import beaverlib.utils.Units.Electrical.volts
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
-import edu.wpi.first.wpilibj.DigitalInput
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
-import frc.robot.TeleOp
-import frc.robot.subsystems.general.HedgieHelmet
+import frc.robot.Constants
 import kotlin.math.abs
 
 object IntakeConstants {
     val runIntakeID = 14
-    val MAX_VOLTS = 12.0.volts
 }
 
 object Intake : SubsystemBase() {
@@ -51,8 +47,8 @@ object Intake : SubsystemBase() {
             false -> 1.0
         }
         runIntakeMotor.setVoltage( abs(voltage.asVolts.clamp(
-            -IntakeConstants.MAX_VOLTS.asVolts,
-            IntakeConstants.MAX_VOLTS.asVolts
+            -Constants.MAX_VOLTS.asVolts,
+            Constants.MAX_VOLTS.asVolts
         )) * direction
         )
     }

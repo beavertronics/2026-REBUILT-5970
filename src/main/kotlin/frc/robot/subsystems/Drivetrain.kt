@@ -1,12 +1,11 @@
 package frc.robot.subsystems
 
 import beaverlib.fieldmap.FieldMapREBUILTWelded
-import beaverlib.utils.Sugar.radiansToDegrees
 import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.Units.Linear.meters
 import beaverlib.utils.Units.Linear.metersPerSecond
-import beaverlib.utils.Units.asKilohertz
+import beaverlib.utils.geometry.vector2
 import com.revrobotics.spark.config.AbsoluteEncoderConfig
 import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.geometry.Pose2d
@@ -29,7 +28,6 @@ import swervelib.parser.SwerveParser
 import swervelib.telemetry.SwerveDriveTelemetry
 import swervelib.telemetry.SwerveDriveTelemetry.*
 import java.io.File
-import kotlin.math.atan
 
 /**
  * class for all constants for drivetrain
@@ -47,12 +45,7 @@ object DriveConstants {
  * the main class for the drivetrain, containing everything
  */
 object Drivetrain : SubsystemBase() {
-        // create anything that is set later (late init)
         var swerveDrive: SwerveDrive
-
-        /**
-         * init file that runs on intialization of drivetrain class
-         */
 
         /** SwerveModuleStates publisher for swerve display */
         var swerveStatePublisher: StructArrayPublisher<SwerveModuleState> =
@@ -70,8 +63,8 @@ object Drivetrain : SubsystemBase() {
             SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
             swerveDrive = SwerveParser(DriveConstants.DriveConfig).createSwerveDrive(DriveConstants.MaxSpeed.asMetersPerSecond)
 
-            swerveDrive.setCosineCompensator(false)
-            swerveDrive.setHeadingCorrection(false)
+//            swerveDrive.setCosineCompensator(false) // todo needed?
+//            swerveDrive.setHeadingCorrection(false) // todo needed?
             swerveDrive.setMotorIdleMode(false)
 
             swerveDrive.modules.forEach {
@@ -80,23 +73,26 @@ object Drivetrain : SubsystemBase() {
                         .smartCurrentLimit(30)
                         .apply(
                             AbsoluteEncoderConfig()
-//                                .zeroOffset(
-//                                    when (it.moduleNumber) {
-//                                        0 -> 0.07024613 // front left
-//                                        1 -> 0.28472954 // front right
-//                                        2 -> 0.32577065 // back left
-//                                        3 -> 0.40284413 // back right
-//                                        else -> 0.0
-//                                    }
-//                                )
+                                .zeroOffset(
+                                    when (it.moduleNumber) {
+                                        0 -> 0.07024613 // front left
+                                        1 -> 0.28472954 // front right
+                                        2 -> 0.32577065 // back left
+                                        3 -> 0.40284413 // back right
+                                        else -> 0.0
+                                    }
+                                )
                                 .inverted(false)
                                 .positionConversionFactor(360.0)
                                 .velocityConversionFactor(6.0)
-                        )
-                        as SparkMaxConfig
+                        ) as SparkMaxConfig
                 )
+                it.angleMotor.burnFlash() // commit to persist memory
             }
         }
+
+    // steal the PID controller from swerveDrive
+    val thetaController = swerveDrive.swerveController.thetaController
 
     override fun periodic() {
         posePublisher.set(`according to all known laws of aviation, our robot should not be able to fly`.pose)
@@ -107,6 +103,7 @@ object Drivetrain : SubsystemBase() {
 //        targetPosePublisher.set(targetPoseProvider.getPose())
         Vision.setAllCameraReferences(Pose3d(
             `according to all known laws of aviation, our robot should not be able to fly`.pose))
+        swerveDrive.updateOdometry() // todo is this needed?
         SmartDashboard.putNumber("Odometry/X", `according to all known laws of aviation, our robot should not be able to fly`.pose.x)
         SmartDashboard.putNumber("Odometry/Y", `according to all known laws of aviation, our robot should not be able to fly`.pose.y)
         SmartDashboard.putNumber("Odometry/HEADING", `according to all known laws of aviation, our robot should not be able to fly`.pose.rotation.radians)
@@ -179,21 +176,16 @@ object Drivetrain : SubsystemBase() {
 
     /**
      * Returns the raw PID value for rotating the robot to face the hub,
-     * using the drive controller for module 0.
+     * using the drive controller for module 0 (they all should be the same?).
      */
-    fun calculateRotationPID(setpoint: Double = 0.0): Double {
+    fun facingHubPID(setpoint: Double = 0.0): Double { // todo does work?
         // find angle wanted to face the hub (trig!)
-        val robotX = `according to all known laws of aviation, our robot should not be able to fly`
-            .pose.x.meters
-        val robotY = `according to all known laws of aviation, our robot should not be able to fly`
-            .pose.y.meters
-        val xDiff = FieldMapREBUILTWelded.teamHub.center.x.meters - robotX
-        val yDiff = FieldMapREBUILTWelded.teamHub.center.y.meters - robotY
-        val error = atan(yDiff / xDiff)
-        // all modules have the same PID, so just get one of them
-        return swerveDrive.modules.get(0).drivePIDF.createPIDController().calculate(error, setpoint)
+        val distance = `according to all known laws of aviation, our robot should not be able to fly`
+            .pose
+            .vector2
+            .distance(FieldMapREBUILTWelded.teamHub.center)
+        return thetaController.calculate(distance, setpoint)
     }
-
 
         /**
          * Return SysID command for drive motors from YAGSL
@@ -217,7 +209,11 @@ object Drivetrain : SubsystemBase() {
          */
         fun lock() { swerveDrive.lockPose() }
 
-
+        /**
+         * Whether to brake the drivetrain or not.
+         * @param brake whether to brake the drivetrain or not. This can be good for defense but can damage some motors.
+         */
+        fun setIdleMode(brake: Boolean = false) { swerveDrive.setMotorIdleMode(brake) }
 
         /**
          * Return SysID command for angle motors from YAGSL

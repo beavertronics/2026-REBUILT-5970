@@ -15,18 +15,13 @@ object Orchestrator : SubsystemBase() {
 
     val orchestra = Orchestra()
 
-    init {
-        // add all krakens as instruments
-        orchestra.clearInstruments()
-        Drivetrain.swerveDrive.modules.forEach {
-            val driveMotor = it.driveMotor.motor as TalonFX
-            println("ORCHESTRA: Motor added (" +
-                    driveMotor.deviceID +
-                    "): " +
-                    orchestra.addInstrument(it.driveMotor.motor as TalonFX)
-            )
-        }
-    }
+    init { orchestra.clearInstruments() }
+
+    /**
+     * Registers a TalonFX motor into the orchestra.
+     * @param motor the TalonFX motor to add to the orchestra.
+     */
+    fun register(motor: TalonFX) { orchestra.addInstrument(motor) }
 
     /**
      * Loads the music file to play (.chrp file).

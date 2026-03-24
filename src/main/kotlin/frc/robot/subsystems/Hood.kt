@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
+import frc.robot.Constants
 import frc.robot.TeleOp
 import kotlin.math.PI
 import kotlin.math.atan
@@ -36,7 +37,6 @@ object HoodConstants {
     val HOOD_MIN = 0.0.degrees
     val HOOD_MAX = 55.0.degrees
     val hoodLimitSwitchID = 0
-    val MAX_VOLTS = 12.0.volts
 }
 
 object AAC {
@@ -147,11 +147,12 @@ object Hood : SubsystemBase() {
      */
     fun runHood(voltage: VoltageUnit = 1.0.volts) { hoodMotor.set(
         -voltage.asVolts.clamp(
-            -ShooterConstants.MAX_VOLTS.asVolts,
-            ShooterConstants.MAX_VOLTS.asVolts
+            -Constants.MAX_VOLTS.asVolts,
+            Constants.MAX_VOLTS.asVolts
         )
     )}
 
+    // todo test
     fun autoCalculateHood(dynamic: Boolean = false): AngleUnit {
         var velocity = 0.0
         // get flywheel velocity (inches / min)

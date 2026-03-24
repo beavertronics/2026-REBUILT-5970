@@ -11,14 +11,14 @@ import edu.wpi.first.wpilibj2.command.ParallelRaceGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import frc.engine.utils.initMotorControllers
+import frc.robot.Constants
 
 object HopperConstants {
     val hopperID = 15
-    val MAX_VOLTS = 12.0.volts
 }
 
 object Hopper : SubsystemBase() {
-    private val hopperMotor = SparkMax(HopperConstants.hopperID, SparkLowLevel.MotorType.kBrushless) // NEO
+    val hopperMotor = SparkMax(HopperConstants.hopperID, SparkLowLevel.MotorType.kBrushless) // NEO
 
     init {
         initMotorControllers(30, SparkBaseConfig.IdleMode.kCoast, hopperMotor)
@@ -35,14 +35,18 @@ object Hopper : SubsystemBase() {
             })
     }
 
-    fun AgitateHopperCommand() : Command {
+    /**
+     * Agitates the hopper by running it backwwards for 5 seconds, and then forwards for 1 second.
+     * @oaram voltage the voltage to agitate at.
+     */
+    fun AgitateHopperCommand(volts: VoltageUnit = 5.0.volts) : Command {
         return ParallelRaceGroup(
-            RunHopperCommand(5.0.volts),
+            RunHopperCommand(volts),
             WaitCommand(5.0)
         )
             .andThen(
                 ParallelRaceGroup(
-                    RunHopperCommand((-5.0).volts),
+                    RunHopperCommand(-volts),
                     WaitCommand(1.0)
                 )
             )
@@ -58,8 +62,8 @@ object Hopper : SubsystemBase() {
      */
     fun runHopper(voltage: VoltageUnit = 1.0.volts) { hopperMotor.setVoltage(
         -voltage.asVolts.clamp(
-            -HopperConstants.MAX_VOLTS.asVolts,
-            HopperConstants.MAX_VOLTS.asVolts
+            -Constants.MAX_VOLTS.asVolts,
+            Constants.MAX_VOLTS.asVolts
         )
     ) }
 }

@@ -14,6 +14,10 @@ fun Vector2.crossesX(origin: Vector2, x: Double): Boolean {
     return true
 }
 
+/**
+ * A trigger that tells you when you will collide with the trench.
+ * Stolen from 2898.
+ */
 object HedgieHelmet {
     val trenchDriveTrigger = Trigger { willCollideWithTrench() && !Vision.cameras.isEmpty() }
 
