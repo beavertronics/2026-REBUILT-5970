@@ -40,12 +40,12 @@ object IntakeArm : SubsystemBase() {
      */
     fun MoveIntakeCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
         return run {
-            if (Stall.intakeArmStall.asBoolean && stall) { runIntakeMotors(-voltage) }
+            if (Stall.intakeArmStall.asBoolean && stall) { runIntakeMotors(0.0.volts) }
             else { runIntakeMotors(voltage) }
             }
-            .onlyIf(Stall.intakeArmStall.negate()) // only move the intake if it is not stalled
             .until {
-                if (voltage.asVolts.sign > 0.0) { upperLimitSwitch.get() }
+                if (Stall.intakeArmStall.asBoolean) { Stall.intakeArmStall.asBoolean }
+                else if (voltage.asVolts.sign > 0.0) { upperLimitSwitch.get() }
                 else { lowerLimitSwitch.get() }
             }
             .finallyDo({ interrupted ->

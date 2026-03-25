@@ -5,7 +5,6 @@ import beaverlib.controls.toPID
 import beaverlib.fieldmap.FieldMapREBUILTWelded
 import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.AngleUnit
-import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.asDegrees
 import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Angular.degrees
@@ -87,7 +86,11 @@ object Hood : SubsystemBase() {
             }
             .andThen(
                 run { runHood(0.05.volts) }
-                    .until { !lowerLimitSwitch.get() }
+                    .until {
+                        !lowerLimitSwitch.get()
+                                ||
+                        Stall.hoodStall.asBoolean
+                    }
                     .finallyDo({ interrupted ->
                         runHood(0.0.volts)
                         zeroValue = getCurrentAngle(raw = true)
