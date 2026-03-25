@@ -1,15 +1,18 @@
 package frc.robot.subsystems
 
 import beaverlib.fieldmap.FieldMapREBUILTWelded
+import beaverlib.fieldmap.Trench
 import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.Units.Linear.meters
 import beaverlib.utils.Units.Linear.metersPerSecond
 import beaverlib.utils.geometry.vector2
+import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants
 import com.revrobotics.spark.config.AbsoluteEncoderConfig
 import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Pose3d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModuleState
@@ -19,8 +22,10 @@ import edu.wpi.first.networktables.StructPublisher
 import edu.wpi.first.wpilibj.Filesystem
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
+import frc.robot.commands.general.MoveTo
 import swervelib.SwerveDrive
 import swervelib.SwerveDriveTest
 import swervelib.motors.SparkMaxSwerve
@@ -174,18 +179,48 @@ object Drivetrain : SubsystemBase() {
          */
         fun stop() { drive(ChassisSpeeds()) }
 
-    /**
-     * Returns the raw PID value for rotating the robot to face the hub,
-     * using the drive controller for module 0 (they all should be the same?).
-     */
-    fun facingHubPID(setpoint: Double = 0.0): Double { // todo does work?
-        // find angle wanted to face the hub (trig!)
-        val distance = `according to all known laws of aviation, our robot should not be able to fly`
-            .pose
-            .vector2
-            .distance(FieldMapREBUILTWelded.teamHub.center)
-        return thetaController.calculate(distance, setpoint)
-    }
+        /**
+         * Returns the raw PID value for rotating the robot to face the hub,
+         * using the drive controller for module 0 (they all should be the same?).
+         */
+        fun facingHubPID(setpoint: Double = 0.0): Double { // todo does work?
+            // find angle wanted to face the hub (trig!)
+            val distance = `according to all known laws of aviation, our robot should not be able to fly`
+                .pose
+                .vector2
+                .distance(FieldMapREBUILTWelded.teamHub.center)
+            return thetaController.calculate(distance, setpoint)
+        }
+
+        /**
+         * A command to align to the alliance hub.
+         */
+        fun HubAlignCommand() = MoveTo(
+                Pose2d(
+                    FieldMapREBUILTWelded.teamHub.center.x.meters.asMeters - 2.0.meters.asMeters, // todo tune value
+                    FieldMapREBUILTWelded.teamHub.center.y.meters.asMeters,
+                    Rotation2d()
+                )
+            )
+
+//        fun TrenchAlignCommand(right: Boolean = true) {
+//            val trenches = FieldMapREBUILTWelded.teamTrenches()
+//            val fieldArea = FieldMapREBUILTWelded.getPoseAllianceArea(
+//                `according to all known laws of aviation, our robot should not be able to fly`.pose
+//            )
+//            var trench: Trench?
+//            var xOffset: Double // to position ourselves on the correct side of trench
+//
+//            if (right) { trench = trenches.get(FieldMapREBUILTWelded.TrenchPos.Bottom) }
+//            else { trench = trenches.get(FieldMapREBUILTWelded.TrenchPos.Top) }
+//
+//            if (
+//
+//                ) {
+//                xOffset = DriveConstants.robotWidth.asMeters + 2.0.meters.asMeters
+//            }
+//            else { xOffset = DriveConstants.robotWidth.asMeters - 2.0.meters.asMeters }
+//        }
 
         /**
          * Return SysID command for drive motors from YAGSL

@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
@@ -64,7 +63,7 @@ object TeleOp {
 
         // SUBSYSTEMS!
         // intake
-//        Intake.defaultCommand = Intake.RunIntakeCommand(true, 0.0.volts) // todo test
+        Intake.defaultCommand = Intake.RunIntakeCommand(0.0.volts) // todo test
         // intake mover
 //        IntakeMover.defaultCommand = IntakeMover.ProtectIntakeCommand() // todo test
         // hopper
@@ -77,7 +76,7 @@ object TeleOp {
 //            0.25.volts
 //        )
         // shooter
-//        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM) // todo test
+        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM) // todo test
     }
 
     /**
@@ -94,6 +93,9 @@ object TeleOp {
                 { OI.slowMode.asBoolean }
             )
         )
+        OI.hubAlign.whileTrue(Drivetrain.HubAlignCommand())
+//        OI.leftTrenchAlign.whileTrue(Drivetrain.TrenchAlignCommand(false))
+//        OI.rightTrenchAlign.whileTrue(Drivetrain.TrenchAlignCommand(true))
 
         //===== SUBSYSTEMS =====//
         // run the intake
@@ -124,6 +126,12 @@ object TeleOp {
 
         // shooter
         OI.runShooter.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
+        OI.runShooter.whileTrue((OI.Rumble(
+                    OI.operatorController,
+                    1.0,
+                    1.0,
+                    GenericHID.RumbleType.kBothRumble
+        )))
 
         // alternate features
         OI.alternate
@@ -138,7 +146,6 @@ object TeleOp {
         OI.alternate
             .and(OI.hoodDown)
             .whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
-        OI.alternate
     }
 
     /**
@@ -190,8 +197,6 @@ object TeleOp {
 
             override fun execute() {
                 controller.setRumble(rumbleSide, rumblePower)
-                // update the pose
-
             }
 
             override fun end(interrupted: Boolean) {
@@ -206,45 +211,55 @@ object TeleOp {
         /**
          * Input devices go here
          */
-        val xboxController = CommandXboxController(0)
-        val leftJoystick = CommandJoystick(1)
-        val rightJoystick = CommandJoystick(2)
+        val operatorController = CommandXboxController(0)
+        val driverController = CommandXboxController(1)
+//        val leftJoystick = CommandJoystick(1)
+//        val rightJoystick = CommandJoystick(2)
 
         /**
          * Values for inputs go here
          */
         //===== DRIVETRAIN =====//
-            val driverX get() = leftJoystick.x.processInput()
-            val driverY get() = leftJoystick.y.processInput()
-            val driverOmega get() = rightJoystick.x.processInput()
-            val slowMode get() = leftJoystick.trigger()
-            val driveMode get() = rightJoystick.trigger()
-            val pointHub get() = leftJoystick.button(0) // todo figure out a button
+            val driverX get() = driverController.leftX.processInput()
+            val driverY get() = driverController.leftY.processInput()
+            val driverOmega get() = driverController.rightX.processInput()
+            val slowMode get() = driverController.leftTrigger()
+            val driveMode get() = driverController.rightTrigger()
+            val pointHub get() = driverController.rightBumper()
+            val hubAlign get() = driverController.povUp()
+            val leftTrenchAlign get() = driverController.povLeft()
+            val rightTrenchAlign get() = driverController.povRight()
+//            val driverX get() = leftJoystick.x.processInput()
+//            val driverY get() = leftJoystick.y.processInput()
+//            val driverOmega get() = rightJoystick.x.processInput()
+//            val slowMode get() = leftJoystick.trigger()
+//            val driveMode get() = rightJoystick.trigger()
+//            val pointHub get() = leftJoystick.button(0) // todo figure out a button
         //===== SUBSYSTEMS =====//
             // intake
-            val runIntake get() = xboxController.a()
-            val runOuttake get() = xboxController.y()
-            val intakeOut get() = xboxController.rightTrigger()
-            val intakeIn get() = xboxController.rightBumper()
+            val runIntake get() = operatorController.a()
+            val runOuttake get() = operatorController.y()
+            val intakeOut get() = operatorController.rightTrigger()
+            val intakeIn get() = operatorController.rightBumper()
             // spindexer and shooter kicker
-            val indexIn get() = xboxController.b()
-            val indexOut get() = xboxController.x()
+            val indexIn get() = operatorController.b()
+            val indexOut get() = operatorController.x()
             // shooter
-            val runShooter get() = xboxController.leftTrigger()
+            val runShooter get() = operatorController.leftTrigger()
             // shooter hood
-            val zeroHood get() = xboxController.povLeft()
-            val hoodTest get() = xboxController.povRight()
-            val hoodUp get() = xboxController.povUp()
-            val hoodDown get() = xboxController.povDown()
+            val zeroHood get() = operatorController.povLeft()
+            val hoodTest get() = operatorController.povRight()
+            val hoodUp get() = operatorController.povUp()
+            val hoodDown get() = operatorController.povDown()
             // all
-            val alternate get() = xboxController.leftBumper()
+            val alternate get() = operatorController.leftBumper()
         //==== CHILDMODE ====//
-            val parentDrive get() = xboxController.leftY.processInput()
-            val parentStrafe get() = xboxController.leftX.processInput()
-            val parentOmega get() = xboxController.rightX.processInput()
-            val toggleChild get() = xboxController.rightTrigger()
-            val toggleSlow get() = xboxController.leftTrigger()
-            val toggleFieldOriented get() = xboxController.leftBumper()
+            val parentDrive get() = operatorController.leftY.processInput()
+            val parentStrafe get() = operatorController.leftX.processInput()
+            val parentOmega get() = operatorController.rightX.processInput()
+            val toggleChild get() = operatorController.rightTrigger()
+            val toggleSlow get() = operatorController.leftTrigger()
+            val toggleFieldOriented get() = operatorController.leftBumper()
     }
 }
 

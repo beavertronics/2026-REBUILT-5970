@@ -1,4 +1,4 @@
-package frc.robot.commands.subsystems
+package frc.robot.commands.vision
 
 import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.AngleUnit
