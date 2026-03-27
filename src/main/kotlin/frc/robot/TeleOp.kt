@@ -4,9 +4,12 @@ import kotlin.math.*
 import beaverlib.utils.Sugar.within
 import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Electrical.volts
+//import edu.wpi.first.math.geometry.Pose2d
+//import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
+//import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
@@ -19,7 +22,8 @@ import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Hopper
 import frc.robot.subsystems.IntakeArm
 import frc.robot.subsystems.Kicker
-import frc.robot.triggers.General
+//import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
+//import frc.robot.triggers.General
 
 /*
 Sets up the operator interface (controller inputs), as well as
@@ -63,20 +67,20 @@ object TeleOp {
 
         // SUBSYSTEMS!
         // intake
-        Intake.defaultCommand = Intake.RunIntakeCommand(0.0.volts) // todo test
+//        Intake.defaultCommand = Intake.RunIntakeCommand(0.0.volts)
         // intake mover
 //        IntakeMover.defaultCommand = IntakeMover.ProtectIntakeCommand() // todo test
         // hopper
-        Hopper.defaultCommand = Hopper.AgitateHopperCommand() // todo test
+//        Hopper.defaultCommand = Hopper.AgitateHopperCommand() // todo test
 //         shooter feed
-        Kicker.defaultCommand = Kicker.RunKickerCommand((-12.0).volts) // todo test
+//        Kicker.defaultCommand = Kicker.RunKickerCommand((-12.0).volts) // todo test
         // hood
 //        Hood.defaultCommand = MoveHoodToAngle( // todo test
 //            Hood.autoCalculateHood(false),
 //            0.25.volts
 //        )
         // shooter
-        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM) // todo test
+//        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM) // todo test
     }
 
     /**
@@ -84,16 +88,16 @@ object TeleOp {
      */
     fun configureBindings() {
         //===== DRIVETRAIN =====//
-        OI.pointHub.whileTrue( // todo test
-            TeleopDriveCommand(
-                { OI.driverY },
-                { OI.driverX },
-                { Drivetrain.facingHubPID() },
-                { OI.driveMode.asBoolean },
-                { OI.slowMode.asBoolean }
-            )
-        )
-        OI.hubAlign.whileTrue(Drivetrain.HubAlignCommand())
+//        OI.pointHub.whileTrue( // todo test
+//            TeleopDriveCommand(
+//                { OI.driverY },
+//                { OI.driverX },
+//                { Drivetrain.facingHubPID() },
+//                { OI.driveMode.asBoolean },
+//                { OI.slowMode.asBoolean }
+//            )
+//        )
+//        OI.hubAlign.whileTrue(Drivetrain.HubAlignCommand())
 //        OI.leftTrenchAlign.whileTrue(Drivetrain.TrenchAlignCommand(false))
 //        OI.rightTrenchAlign.whileTrue(Drivetrain.TrenchAlignCommand(true))
 
@@ -110,7 +114,7 @@ object TeleOp {
 
         // spindexer and shooter kicker independent controls
         OI.indexIn
-            .and(General.rpmTrigger)  // todo test
+//            .and(General.rpmTrigger)  // todo test
             .whileTrue(
             ParallelCommandGroup(
                 Hopper.RunHopperCommand(12.0.volts),
@@ -126,12 +130,14 @@ object TeleOp {
 
         // shooter
         OI.runShooter.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
-        OI.runShooter.whileTrue((OI.Rumble(
-                    OI.operatorController,
-                    1.0,
-                    1.0,
-                    GenericHID.RumbleType.kBothRumble
-        )))
+//        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
+//        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(0.3.volts))
+//        OI.runShooter.whileTrue((OI.Rumble(
+//                    OI.operatorController,
+//                    1.0,
+//                    1.0,
+//                    GenericHID.RumbleType.kBothRumble
+//        )))
 
         // alternate features
         OI.alternate
@@ -225,10 +231,11 @@ object TeleOp {
             val driverOmega get() = driverController.rightX.processInput()
             val slowMode get() = driverController.leftTrigger()
             val driveMode get() = driverController.rightTrigger()
-            val pointHub get() = driverController.rightBumper()
-            val hubAlign get() = driverController.povUp()
-            val leftTrenchAlign get() = driverController.povLeft()
-            val rightTrenchAlign get() = driverController.povRight()
+//            val pointHub get() = driverController.rightBumper()
+//            val hubAlign get() = driverController.povUp()
+//            val resetOdometry get() = driverController.back()
+//            val leftTrenchAlign get() = driverController.povLeft()
+//            val rightTrenchAlign get() = driverController.povRight()
 //            val driverX get() = leftJoystick.x.processInput()
 //            val driverY get() = leftJoystick.y.processInput()
 //            val driverOmega get() = rightJoystick.x.processInput()

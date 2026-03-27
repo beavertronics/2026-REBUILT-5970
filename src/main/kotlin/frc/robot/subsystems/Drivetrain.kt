@@ -2,6 +2,9 @@ package frc.robot.subsystems
 
 import beaverlib.fieldmap.FieldMapREBUILTWelded
 import beaverlib.fieldmap.Trench
+import beaverlib.utils.Units.Angular.asDegrees
+import beaverlib.utils.Units.Angular.degrees
+import beaverlib.utils.Units.Angular.radians
 import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.Units.Linear.meters
@@ -68,8 +71,8 @@ object Drivetrain : SubsystemBase() {
             SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
             swerveDrive = SwerveParser(DriveConstants.DriveConfig).createSwerveDrive(DriveConstants.MaxSpeed.asMetersPerSecond)
 
-//            swerveDrive.setCosineCompensator(false) // todo needed?
-//            swerveDrive.setHeadingCorrection(false) // todo needed?
+            swerveDrive.setCosineCompensator(false) // todo needed?
+            swerveDrive.setHeadingCorrection(false) // todo needed?
             swerveDrive.setMotorIdleMode(false)
 
             swerveDrive.modules.forEach {
@@ -97,7 +100,7 @@ object Drivetrain : SubsystemBase() {
         }
 
     // steal the PID controller from swerveDrive
-    val thetaController = swerveDrive.swerveController.thetaController
+//    val thetaController = swerveDrive.swerveController.thetaController
 
     override fun periodic() {
         posePublisher.set(`according to all known laws of aviation, our robot should not be able to fly`.pose)
@@ -108,7 +111,7 @@ object Drivetrain : SubsystemBase() {
 //        targetPosePublisher.set(targetPoseProvider.getPose())
         Vision.setAllCameraReferences(Pose3d(
             `according to all known laws of aviation, our robot should not be able to fly`.pose))
-        swerveDrive.updateOdometry() // todo is this needed?
+//        swerveDrive.updateOdometry() // todo is this needed?
         SmartDashboard.putNumber("Odometry/X", `according to all known laws of aviation, our robot should not be able to fly`.pose.x)
         SmartDashboard.putNumber("Odometry/Y", `according to all known laws of aviation, our robot should not be able to fly`.pose.y)
         SmartDashboard.putNumber("Odometry/HEADING", `according to all known laws of aviation, our robot should not be able to fly`.pose.rotation.radians)
@@ -183,25 +186,33 @@ object Drivetrain : SubsystemBase() {
          * Returns the raw PID value for rotating the robot to face the hub,
          * using the drive controller for module 0 (they all should be the same?).
          */
-        fun facingHubPID(setpoint: Double = 0.0): Double { // todo does work?
-            // find angle wanted to face the hub (trig!)
-            val distance = `according to all known laws of aviation, our robot should not be able to fly`
-                .pose
-                .vector2
-                .distance(FieldMapREBUILTWelded.teamHub.center)
-            return thetaController.calculate(distance, setpoint)
-        }
+//        fun facingHubPID(setpoint: Double = 0.0): Double { // todo does work?
+//             find angle wanted to face the hub (trig!)
+//            val distance = `according to all known laws of aviation, our robot should not be able to fly`
+//                .pose
+//                .vector2
+//                .distance(FieldMapREBUILTWelded.teamHub.center)
+//            return thetaController.calculate(distance, setpoint)
+//        }
 
         /**
          * A command to align to the alliance hub.
          */
-        fun HubAlignCommand() = MoveTo(
-                Pose2d(
-                    FieldMapREBUILTWelded.teamHub.center.x.meters.asMeters - 2.0.meters.asMeters, // todo tune value
-                    FieldMapREBUILTWelded.teamHub.center.y.meters.asMeters,
-                    Rotation2d()
-                )
-            )
+//        fun HubAlignCommand(): MoveTo {
+//            var offset = (-2.0).meters // for blue side
+//            var rotation = (0.0).degrees // for blue side
+//            if (FieldMapREBUILTWelded.teamHub == FieldMapREBUILTWelded.RedHub) {
+//                offset *= -1.0 // invert for red side
+//                rotation = 180.degrees
+//            }
+//            return MoveTo(
+//                Pose2d(
+//                    FieldMapREBUILTWelded.teamHub.center.x.meters.asMeters + offset.asMeters,
+//                    FieldMapREBUILTWelded.teamHub.center.y.meters.asMeters,
+//                    Rotation2d(rotation.asDegrees.radians.asRadians)
+//                )
+//            )
+//        }
 
 //        fun TrenchAlignCommand(right: Boolean = true) {
 //            val trenches = FieldMapREBUILTWelded.teamTrenches()

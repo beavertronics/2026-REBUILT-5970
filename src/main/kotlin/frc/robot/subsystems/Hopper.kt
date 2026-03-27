@@ -32,8 +32,9 @@ object Hopper : SubsystemBase() {
      */
     fun RunHopperCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
         return run {
-            if (Stall.hopperStall.asBoolean && stall) { runHopper(-voltage) }
-            else { runHopper(voltage) }
+//            if (Stall.hopperStall.asBoolean && stall) { runHopper(-voltage) }
+//            else { runHopper(voltage) }
+            runHopper(voltage)
         }
             .finallyDo({ interrupted ->
                 runHopper(0.0.volts)
@@ -44,7 +45,7 @@ object Hopper : SubsystemBase() {
      * Agitates the hopper by running it backwwards for 5 seconds, and then forwards for 1 second.
      * @oaram voltage the voltage to agitate at.
      */
-    fun AgitateHopperCommand(volts: VoltageUnit = 5.0.volts) : Command {
+    fun AgitateHopperCommand(volts: VoltageUnit = 3.0.volts) : Command {
         return ParallelRaceGroup(
             RunHopperCommand(volts),
             WaitCommand(5.0)
@@ -52,10 +53,9 @@ object Hopper : SubsystemBase() {
             .andThen(
                 ParallelRaceGroup(
                     RunHopperCommand(-volts),
-                    WaitCommand(1.0)
+                    WaitCommand(2.0)
                 )
             )
-            .repeatedly()
     }
 
     /**

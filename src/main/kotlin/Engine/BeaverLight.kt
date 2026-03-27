@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer
 import edu.wpi.first.wpilibj.AddressableLEDBufferView
 import edu.wpi.first.wpilibj.LEDPattern
 import edu.wpi.first.wpilibj.util.Color
+import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import kotlin.math.roundToInt
 
@@ -30,12 +31,14 @@ class BeaverLight(
     init {
         led.setLength(buffer.length)
         led.start()
-        defaultCommand = run { LEDPattern.solid(Color.kBlack) }
+        defaultCommand = setDefaultCommand(
+            LEDPattern.solid(Color.kOrange)
+        )
     }
 
     /**
      * A function that registers a new buffer. A "buffer" is a section of the lights. This is designed so that you can
-     * address different sections of lights individually (for example, on different subsytems) so that you can do different things.
+     * address different sections of lights individually (for example, on different subsystems) so that you can do different things.
      * @param name The name of the buffer.
      * @param lower the starting LED in the buffer.
      * @param upper the ending LED in the buffer.
@@ -56,5 +59,18 @@ class BeaverLight(
         pattern.applyTo(segments[buffer])
     }
 
-    override fun periodic() { led.setData(buffer) }
+    /**
+     * A function that returns a command to make set as the default command.
+     * @param pattern the new pattern to be the default.
+     */
+    fun setDefaultCommand(pattern: LEDPattern) : Command {
+        return run {
+            pattern.applyTo(buffer)
+        }
+            .ignoringDisable(true)
+    }
+
+    override fun periodic() {
+        led.setData(buffer)
+    }
 }

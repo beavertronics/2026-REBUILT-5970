@@ -24,7 +24,7 @@ import frc.robot.Constants
 
 object ShooterConstants {
 //    val shooterID = 9
-    val krakenID = 0 // todo kraken ID
+    val krakenID = 53 // todo kraken ID
     val MAX_RPM_DIFF = 5.0.RPM
     val RPM_LIMIT = 6250.0.RPM // for a KrakenX60
     val SUPPLY_CURRENT_LIMIT = 35.0.amps
@@ -39,7 +39,7 @@ object Shooter : SubsystemBase() {
     val krakenShooter = TalonFX(ShooterConstants.krakenID) // Kraken X60
 
     val PIDConstants = PIDConstants(0.0, 0.0, 0.0) // todo tune
-    val feedForwardConstants = SimpleMotorFeedForwardConstants(0.0, 0.0, 0.0) // todo tune
+    val feedForwardConstants = SimpleMotorFeedForwardConstants(0.3, 1.0, 0.0) // todo tune
     val pidff = PidFF(PIDConstants, feedForwardConstants)
 
     /**
@@ -88,7 +88,11 @@ object Shooter : SubsystemBase() {
      */
     fun ShootRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command { // todo test
         return run {
-            val calculatedAll = pidff.calculate(currentRPM.asRPM)
+            pidff.setpoint = targetRPM.asRPM
+            val calculatedAll = pidff.calculate(
+                currentRPM.asRPM
+            )
+            println("Calc " + calculatedAll)
             runShooter((calculatedAll * Constants.MAX_VOLTS.asVolts).volts)
         }
             .repeatedly()
@@ -111,8 +115,11 @@ object Shooter : SubsystemBase() {
     }
 
     override fun periodic() {
+        // get current RPM
 //        currentRPM = (shooterMotor.encoder.velocity * -1.0).RPM
         currentRPM = (krakenShooter.velocity.valueAsDouble.rotationsPerSecond.asRPM.RPM) // todo need to invert?
+        // get current RPM from dashboard
+        targetRPM = SmartDashboard.getNumber("Subsystems/Shooter/Shooter/Target RPM", 0.0).RPM
         // put data on dashboard
         SmartDashboard.putNumber("Subsystems/Shooter/Shooter RPM", currentRPM.asRPM)
         SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", targetRPM.asRPM)
@@ -122,7 +129,10 @@ object Shooter : SubsystemBase() {
      * Sets the target RPM for the shooter flywheel, in RPM.
      */
     @JvmName("BiteMe!!!!")
-    fun setTargetRPM(target: AngularVelocity) { targetRPM = target }
+    fun setTargetRPM(target: AngularVelocity) {
+        targetRPM = target
+        SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", target.asRPM)
+    }
 
     /**
      * Runs the shooter flywheel with a voltage.

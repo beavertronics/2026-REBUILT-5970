@@ -15,7 +15,7 @@ import frc.robot.Constants
 import frc.robot.triggers.Stall
 
 object IntakeConstants {
-    val runIntakeID = 14
+    val runIntakeID = 61
 }
 
 object Intake : SubsystemBase() {
@@ -38,8 +38,9 @@ object Intake : SubsystemBase() {
      */
     fun RunIntakeCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
         return run {
-            if (Stall.intakeStall.asBoolean && stall) { runIntake(-voltage) }
-            else { runIntake(voltage) }
+//            if (Stall.intakeStall.asBoolean && stall) { runIntake(-voltage) }
+//            else { runIntake(voltage) }
+            runIntake(voltage)
         }
             .finallyDo({ interrupted ->
                 runIntake(0.0.volts)

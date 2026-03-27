@@ -81,15 +81,15 @@ object Hood : SubsystemBase() {
         return run { runHood(-(0.225).volts) }
             .until {
                 lowerLimitSwitch.get()
-                        ||
-                Stall.hoodStall.asBoolean
+//                        ||
+//                Stall.hoodStall.asBoolean
             }
             .andThen(
                 run { runHood(0.05.volts) }
                     .until {
                         !lowerLimitSwitch.get()
-                                ||
-                        Stall.hoodStall.asBoolean
+//                                ||
+//                        Stall.hoodStall.asBoolean
                     }
                     .finallyDo({ interrupted ->
                         runHood(0.0.volts)
@@ -106,8 +106,8 @@ object Hood : SubsystemBase() {
         return run { runHood(voltage) }
             .until {
                 lowerLimitSwitch.get() && TeleOp.OI.hoodUp.asBoolean == false
-                        ||
-                Stall.hoodStall.asBoolean
+//                        ||
+//                Stall.hoodStall.asBoolean
             }
             .finallyDo({ interrupted ->
                 runHood(0.0.volts)

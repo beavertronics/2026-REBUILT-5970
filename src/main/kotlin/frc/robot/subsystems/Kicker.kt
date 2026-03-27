@@ -31,8 +31,9 @@ object Kicker: SubsystemBase() {
      */
     fun RunKickerCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
         return run {
-            if (Stall.kickerStall.asBoolean && stall) { runKicker(-voltage) }
-            else { runKicker(voltage) }
+//            if (Stall.kickerStall.asBoolean && stall) { runKicker(-voltage) }
+//            else { runKicker(voltage) }
+            runKicker(voltage)
         }
             .finallyDo({ interrupted ->
                 runKicker(0.0.volts)
