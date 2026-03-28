@@ -83,7 +83,7 @@ object Drivetrain : SubsystemBase() {
                             AbsoluteEncoderConfig()
                                 .zeroOffset(
                                     when (it.moduleNumber) {
-                                        0 -> 0.07024613 // front left
+                                        0 -> 0.42946 // front left
                                         1 -> 0.28472954 // front right
                                         2 -> 0.32577065 // back left
                                         3 -> 0.40284413 // back right
@@ -183,9 +183,22 @@ object Drivetrain : SubsystemBase() {
         fun stop() { drive(ChassisSpeeds()) }
 
         /**
-         * Returns the raw PID value for rotating the robot to face the hub,
-         * using the drive controller for module 0 (they all should be the same?).
+         * Locks the robot in place, stopping it from moving. Is disabled by driver inputs.
          */
+        fun lock() { swerveDrive.lockPose() }
+
+        /**
+         * A command for whether to brake the drivetrain or not.
+         * @param brake whether to brake the drivetrain or not. This can be good for defense but can damage some motors.
+         */
+        fun setIdleMode(brake: Boolean = false) : Command {
+            return run { swerveDrive.setMotorIdleMode(brake) }
+        }
+
+        /**
+        * Returns the raw PID value for rotating the robot to face the hub,
+             * using the drive controller for module 0 (they all should be the same?).
+             */
 //        fun facingHubPID(setpoint: Double = 0.0): Double { // todo does work?
 //             find angle wanted to face the hub (trig!)
 //            val distance = `according to all known laws of aviation, our robot should not be able to fly`
@@ -249,17 +262,6 @@ object Drivetrain : SubsystemBase() {
                 3.0, 5.0, 3.0
             )
         }
-
-        /**
-         * Locks the robot in place, stopping it from moving. Is disabled by driver inputs.
-         */
-        fun lock() { swerveDrive.lockPose() }
-
-        /**
-         * Whether to brake the drivetrain or not.
-         * @param brake whether to brake the drivetrain or not. This can be good for defense but can damage some motors.
-         */
-        fun setIdleMode(brake: Boolean = false) { swerveDrive.setMotorIdleMode(brake) }
 
         /**
          * Return SysID command for angle motors from YAGSL

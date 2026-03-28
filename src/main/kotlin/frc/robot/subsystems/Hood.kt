@@ -24,7 +24,9 @@ import com.revrobotics.spark.config.SparkBaseConfig
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.WaitCommand
 import frc.engine.utils.initMotorControllers
 import frc.robot.Constants
 import frc.robot.TeleOp
@@ -85,7 +87,7 @@ object Hood : SubsystemBase() {
 //                Stall.hoodStall.asBoolean
             }
             .andThen(
-                run { runHood(0.05.volts) }
+                run { runHood(0.0625.volts) }
                     .until {
                         !lowerLimitSwitch.get()
 //                                ||

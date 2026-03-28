@@ -44,11 +44,11 @@ object IntakeArm : SubsystemBase() {
 //            else { runIntakeMotors(voltage) }
             runIntakeMotors(voltage)
             }
-            .until {
-                if (Stall.intakeArmStall.asBoolean) { Stall.intakeArmStall.asBoolean }
-                else if (voltage.asVolts.sign > 0.0) { upperLimitSwitch.get() }
-                else { lowerLimitSwitch.get() }
-            }
+//            .until {
+//                if (Stall.intakeArmStall.asBoolean) { Stall.intakeArmStall.asBoolean }
+//                if (voltage.asVolts.sign > 0.0) { upperLimitSwitch.get() }
+//                else { lowerLimitSwitch.get() }
+//            }
             .finallyDo({ interrupted ->
                 runIntakeMotors(0.0.volts)
             })

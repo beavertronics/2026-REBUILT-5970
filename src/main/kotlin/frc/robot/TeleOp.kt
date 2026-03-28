@@ -22,6 +22,8 @@ import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Hopper
 import frc.robot.subsystems.IntakeArm
 import frc.robot.subsystems.Kicker
+import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
+
 //import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
 //import frc.robot.triggers.General
 
@@ -97,40 +99,48 @@ object TeleOp {
 //                { OI.slowMode.asBoolean }
 //            )
 //        )
+//        OI.resetOdometry.onTrue(
+//            `according to all known laws of aviation, our robot should not be able to fly`
+//                .doResetOdometry(false, true)
+//        )
 //        OI.hubAlign.whileTrue(Drivetrain.HubAlignCommand())
 //        OI.leftTrenchAlign.whileTrue(Drivetrain.TrenchAlignCommand(false))
 //        OI.rightTrenchAlign.whileTrue(Drivetrain.TrenchAlignCommand(true))
 
         //===== SUBSYSTEMS =====//
         // run the intake
-        OI.runIntake.whileTrue(Intake.RunIntakeCommand(12.0.volts))
-        OI.runOuttake.whileTrue(Intake.RunIntakeCommand((-12.0).volts))
+        OI.runIntake
+            .and { !IntakeArm.upperLimitSwitch.get() }
+            .whileTrue(Intake.RunIntakeCommand(12.0.volts))
+        OI.runOuttake
+            .and { !IntakeArm.upperLimitSwitch.get() }
+            .whileTrue(Intake.RunIntakeCommand((-12.0).volts))
 
         // move the intake in or out
-        OI.intakeIn.whileTrue(IntakeArm.MoveIntakeCommand(5.0.volts))
+        OI.intakeIn.whileTrue(IntakeArm.MoveIntakeCommand(7.0.volts))
         OI.intakeOut
-//            .and(HedgieHelmet.trenchDriveTrigger.negate()) // todo test
-            .whileTrue(IntakeArm.MoveIntakeCommand((-5.0).volts))
+            .whileTrue(IntakeArm.MoveIntakeCommand((-7.0).volts))
 
         // spindexer and shooter kicker independent controls
         OI.indexIn
 //            .and(General.rpmTrigger)  // todo test
             .whileTrue(
             ParallelCommandGroup(
-                Hopper.RunHopperCommand(12.0.volts),
-                Kicker.RunKickerCommand(12.0.volts)
+                Hopper.RunHopperCommand(10.0.volts),
+                Kicker.RunKickerCommand(9.0.volts)
             )
         )
         OI.indexOut.whileTrue(
             ParallelCommandGroup(
-                Hopper.RunHopperCommand((-12.0).volts),
-                Kicker.RunKickerCommand((-12.0).volts)
+                Hopper.RunHopperCommand((-10.0).volts),
+                Kicker.RunKickerCommand((-9.0).volts)
             )
         )
 
         // shooter
-        OI.runShooter.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
+//        OI.runShooter.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
 //        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
+        OI.runShooter.onTrue(Autos.scorePreload)
 //        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(0.3.volts))
 //        OI.runShooter.whileTrue((OI.Rumble(
 //                    OI.operatorController,
@@ -152,6 +162,9 @@ object TeleOp {
         OI.alternate
             .and(OI.hoodDown)
             .whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
+        OI.alternate
+            .and(OI.runShooter)
+            .whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
     }
 
     /**
@@ -226,14 +239,14 @@ object TeleOp {
          * Values for inputs go here
          */
         //===== DRIVETRAIN =====//
-            val driverX get() = driverController.leftX.processInput()
-            val driverY get() = driverController.leftY.processInput()
-            val driverOmega get() = driverController.rightX.processInput()
+            val driverX get() = -driverController.leftX.processInput()
+            val driverY get() = -driverController.leftY.processInput()
+            val driverOmega get() = -driverController.rightX.processInput()
             val slowMode get() = driverController.leftTrigger()
             val driveMode get() = driverController.rightTrigger()
+            val resetOdometry get() = driverController.a()
 //            val pointHub get() = driverController.rightBumper()
 //            val hubAlign get() = driverController.povUp()
-//            val resetOdometry get() = driverController.back()
 //            val leftTrenchAlign get() = driverController.povLeft()
 //            val rightTrenchAlign get() = driverController.povRight()
 //            val driverX get() = leftJoystick.x.processInput()
@@ -245,21 +258,22 @@ object TeleOp {
         //===== SUBSYSTEMS =====//
             // intake
             val runIntake get() = operatorController.a()
-            val runOuttake get() = operatorController.y()
-            val intakeOut get() = operatorController.rightTrigger()
-            val intakeIn get() = operatorController.rightBumper()
+            val runOuttake get() = operatorController.b()
+            val intakeOut get() = operatorController.leftTrigger()
+            val intakeIn get() = operatorController.leftBumper()
             // spindexer and shooter kicker
-            val indexIn get() = operatorController.b()
-            val indexOut get() = operatorController.x()
+            val indexIn get() = operatorController.x()
+            val indexOut get() = operatorController.y()
             // shooter
-            val runShooter get() = operatorController.leftTrigger()
+            val runShooter get() = operatorController.rightTrigger()
             // shooter hood
             val zeroHood get() = operatorController.povLeft()
             val hoodTest get() = operatorController.povRight()
             val hoodUp get() = operatorController.povUp()
             val hoodDown get() = operatorController.povDown()
+
             // all
-            val alternate get() = operatorController.leftBumper()
+            val alternate get() = operatorController.rightBumper()
         //==== CHILDMODE ====//
             val parentDrive get() = operatorController.leftY.processInput()
             val parentStrafe get() = operatorController.leftX.processInput()
