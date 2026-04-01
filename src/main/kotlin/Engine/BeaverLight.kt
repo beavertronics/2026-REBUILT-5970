@@ -9,6 +9,13 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import kotlin.math.roundToInt
 
+/**
+ * A wrapper for a color for custom color values.
+ * @param red the red value.
+ * @param green the green value.
+ * @param blue the blue value.
+ * @param alpha the brightness value.
+ */
 fun BeaverColor(red: Int, green: Int, blue: Int, alpha: Double = 1.0): Color {
     return Color((green * alpha).roundToInt(), (red * alpha).roundToInt(), (blue * alpha).roundToInt())
 }
@@ -17,11 +24,14 @@ fun BeaverColor(red: Int, green: Int, blue: Int, alpha: Double = 1.0): Color {
  * A class to manage a strip of LED lights.
  * @param port the port that the LED strip is plugged into on the RIO. Note that the RIO can only manage one strip of LEDs at a time.
  * @param length the total length of the strip of LEDs.
+ * @param order the color order for R, G, and B. Refer to your purchased LEDs for this information.
  */
 class BeaverLight(
     port: Int,
-    length: Int
+    length: Int,
+    order: AddressableLED.ColorOrder
 ) : SubsystemBase() {
+
     // create the LED, the total length of the LED, and each of the segments (for different parts)
     val led: AddressableLED = AddressableLED(port)
     val buffer: AddressableLEDBuffer = AddressableLEDBuffer(length)
@@ -30,9 +40,10 @@ class BeaverLight(
     // set the length (which takes a little) and start the lights, default to lights off
     init {
         led.setLength(buffer.length)
+        led.setColorOrder(order)
         led.start()
         defaultCommand = setDefaultCommand(
-            LEDPattern.solid(Color.kOrange)
+            LEDPattern.solid(Color.kBlack)
         )
     }
 
@@ -55,8 +66,8 @@ class BeaverLight(
      * @param buffer The name of the buffer.
      * @param pattern the LED pattern to apply to the buffer.
      */
-    fun applyTo(buffer: String, pattern: LEDPattern) {
-        pattern.applyTo(segments[buffer])
+    fun applyTo(buffer: String, pattern: LEDPattern?) {
+        pattern?.applyTo(segments[buffer])
     }
 
     /**

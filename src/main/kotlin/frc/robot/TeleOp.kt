@@ -4,12 +4,9 @@ import kotlin.math.*
 import beaverlib.utils.Sugar.within
 import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Electrical.volts
-//import edu.wpi.first.math.geometry.Pose2d
-//import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
-//import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
@@ -22,6 +19,8 @@ import frc.robot.subsystems.Shooter
 import frc.robot.subsystems.Hopper
 import frc.robot.subsystems.IntakeArm
 import frc.robot.subsystems.Kicker
+import frc.robot.subsystems.Lights
+
 //import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
 //import frc.robot.triggers.General
 
@@ -66,14 +65,19 @@ object TeleOp {
         Drivetrain.defaultCommand = teleOpDrive
 
         // SUBSYSTEMS!
+        Lights.defaultCommand = Lights.setPattern("system ready", "intake left")
+            .andThen(
+                Lights.setPattern("system ready", "intake right")
+            )
+            .repeatedly()
         // intake
-//        Intake.defaultCommand = Intake.RunIntakeCommand(0.0.volts)
+        Intake.defaultCommand = Intake.RunIntakeCommand(0.0.volts)
         // intake mover
-//        IntakeMover.defaultCommand = IntakeMover.ProtectIntakeCommand() // todo test
+//        IntakeArm.MoveIntakeCommand((-5.0).volts) // todo fix limit switches!
         // hopper
-//        Hopper.defaultCommand = Hopper.AgitateHopperCommand() // todo test
+        Hopper.defaultCommand = Hopper.RunHopperCommand(0.0.volts)
 //         shooter feed
-//        Kicker.defaultCommand = Kicker.RunKickerCommand((-12.0).volts) // todo test
+        Kicker.defaultCommand = Kicker.RunKickerCommand(0.0.volts)
         // hood
 //        Hood.defaultCommand = MoveHoodToAngle( // todo test
 //            Hood.autoCalculateHood(false),
@@ -108,9 +112,7 @@ object TeleOp {
 
         // move the intake in or out
         OI.intakeIn.whileTrue(IntakeArm.MoveIntakeCommand(5.0.volts))
-        OI.intakeOut
-//            .and(HedgieHelmet.trenchDriveTrigger.negate()) // todo test
-            .whileTrue(IntakeArm.MoveIntakeCommand((-5.0).volts))
+        OI.intakeOut.whileTrue(IntakeArm.MoveIntakeCommand((-5.0).volts))
 
         // spindexer and shooter kicker independent controls
         OI.indexIn
@@ -226,9 +228,9 @@ object TeleOp {
          * Values for inputs go here
          */
         //===== DRIVETRAIN =====//
-            val driverX get() = driverController.leftX.processInput()
-            val driverY get() = driverController.leftY.processInput()
-            val driverOmega get() = driverController.rightX.processInput()
+            val driverX get() = -driverController.leftX.processInput()
+            val driverY get() = -driverController.leftY.processInput()
+            val driverOmega get() = -driverController.rightX.processInput()
             val slowMode get() = driverController.leftTrigger()
             val driveMode get() = driverController.rightTrigger()
 //            val pointHub get() = driverController.rightBumper()

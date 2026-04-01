@@ -122,7 +122,7 @@ object Shooter : SubsystemBase() {
         targetRPM = SmartDashboard.getNumber("Subsystems/Shooter/Shooter/Target RPM", 0.0).RPM
         // put data on dashboard
         SmartDashboard.putNumber("Subsystems/Shooter/Shooter RPM", currentRPM.asRPM)
-        SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", targetRPM.asRPM)
+//        SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", targetRPM.asRPM)
     }
 
     /**
@@ -130,7 +130,6 @@ object Shooter : SubsystemBase() {
      */
     @JvmName("BiteMe!!!!")
     fun setTargetRPM(target: AngularVelocity) {
-        targetRPM = target
         SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", target.asRPM)
     }
 
