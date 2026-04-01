@@ -74,9 +74,9 @@ class BeaverLight(
      * A function that returns a command to make set as the default command.
      * @param pattern the new pattern to be the default.
      */
-    fun setDefaultCommand(pattern: LEDPattern) : Command {
+    fun setDefaultCommand(pattern: LEDPattern?) : Command {
         return run {
-            pattern.applyTo(buffer)
+            pattern?.applyTo(buffer)
         }
             .ignoringDisable(true)
     }

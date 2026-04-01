@@ -39,7 +39,7 @@ object Shooter : SubsystemBase() {
     val krakenShooter = TalonFX(ShooterConstants.krakenID) // Kraken X60
 
     val PIDConstants = PIDConstants(0.0, 0.0, 0.0) // todo tune
-    val feedForwardConstants = SimpleMotorFeedForwardConstants(0.3, 1.0, 0.0) // todo tune
+    val feedForwardConstants = SimpleMotorFeedForwardConstants(0.3, 2.0, 0.0) // todo tune
     val pidff = PidFF(PIDConstants, feedForwardConstants)
 
     /**
@@ -54,6 +54,8 @@ object Shooter : SubsystemBase() {
     var targetRPM: AngularVelocity = 0.0.RPM
 
     init {
+        setTargetRPM(0.0.RPM)
+
 //        initMotorControllers(40, SparkBaseConfig.IdleMode.kCoast, shooterMotor)
         val config = TalonFXConfiguration()
             .withCurrentLimits(
@@ -89,6 +91,7 @@ object Shooter : SubsystemBase() {
     fun ShootRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command { // todo test
         return run {
             pidff.setpoint = targetRPM.asRPM
+            setTargetRPM(rpm)
             val calculatedAll = pidff.calculate(
                 currentRPM.asRPM
             )

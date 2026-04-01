@@ -65,11 +65,12 @@ object TeleOp {
         Drivetrain.defaultCommand = teleOpDrive
 
         // SUBSYSTEMS!
-        Lights.defaultCommand = Lights.setPattern("system ready", "intake left")
-            .andThen(
-                Lights.setPattern("system ready", "intake right")
+        Lights.defaultCommand = Lights.setPattern(
+            mutableListOf(
+                Pair("system ready", "intake left"),
+                Pair("system ready", "intake right")
             )
-            .repeatedly()
+        )
         // intake
         Intake.defaultCommand = Intake.RunIntakeCommand(0.0.volts)
         // intake mover
@@ -107,8 +108,28 @@ object TeleOp {
 
         //===== SUBSYSTEMS =====//
         // run the intake
-        OI.runIntake.whileTrue(Intake.RunIntakeCommand(12.0.volts))
-        OI.runOuttake.whileTrue(Intake.RunIntakeCommand((-12.0).volts))
+        OI.runIntake.whileTrue(
+            Intake.RunIntakeCommand(12.0.volts)
+                .alongWith(
+                    Lights.setPattern(
+                        mutableListOf(
+                            Pair("intaking", "intake left"),
+                            Pair("intaking", "intake right")
+                        )
+                    )
+                )
+        )
+        OI.runOuttake.whileTrue(
+            Intake.RunIntakeCommand((-12.0).volts)
+                .alongWith(
+                    Lights.setPattern(
+                        mutableListOf(
+                            Pair("outtaking", "intake left"),
+                            Pair("outtaking", "intake right")
+                        )
+                    )
+                )
+        )
 
         // move the intake in or out
         OI.intakeIn.whileTrue(IntakeArm.MoveIntakeCommand(5.0.volts))
@@ -131,7 +152,17 @@ object TeleOp {
         )
 
         // shooter
-        OI.runShooter.whileTrue(Shooter.ShootRPMCommand(100.0.RPM)) // todo test
+        OI.runShooter.whileTrue(
+            Shooter.ShootRPMCommand(100.0.RPM)
+                .alongWith(
+                    Lights.setPattern(
+                        mutableListOf(
+                            Pair("shooting", "intake left"),
+                            Pair("shooting", "intake right")
+                        )
+                    )
+                )
+        ) // todo test
 //        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
 //        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(0.3.volts))
 //        OI.runShooter.whileTrue((OI.Rumble(

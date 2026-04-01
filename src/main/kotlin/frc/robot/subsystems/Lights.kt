@@ -22,20 +22,26 @@ object Lights : SubsystemBase() {
                 LEDPattern.gradient(
                     LEDPattern.GradientType.kDiscontinuous,
                     Color.kBlack,
-                    Color.kOrange
-                ).scrollAtAbsoluteSpeed(Units.MetersPerSecond.of(3.0), density),
+                    Color.kOrangeRed
+                ).scrollAtAbsoluteSpeed(Units.MetersPerSecond.of(0.5), density),
         "intaking" to
                 LEDPattern.gradient(
                     LEDPattern.GradientType.kDiscontinuous,
                     Color.kBlack,
                     Color.kGreen
-                ).scrollAtAbsoluteSpeed(Units.MetersPerSecond.of(3.0), density),
+                ).scrollAtAbsoluteSpeed(Units.MetersPerSecond.of(1.5), density),
         "outtaking" to
                 LEDPattern.gradient(
                     LEDPattern.GradientType.kDiscontinuous,
                     Color.kBlack,
                     Color.kRed
-                ).scrollAtAbsoluteSpeed(Units.MetersPerSecond.of(3.0), density)
+                ).scrollAtAbsoluteSpeed(Units.MetersPerSecond.of(-1.5), density),
+        "shooting" to
+                LEDPattern.gradient(
+                    LEDPattern.GradientType.kDiscontinuous,
+                    Color.kBlack,
+                    Color.kBlue
+                ).blink(Units.Seconds.of(0.25), Units.Seconds.of(0.25))
     )
 
     /**
@@ -44,15 +50,45 @@ object Lights : SubsystemBase() {
      * @param buffer the buffer to apply the pattern to.
      */
     fun setPattern(name: String, buffer: String) : Command {
-        return run { lights.applyTo(buffer, patterns[name]) }
+        return run { lights.applyTo(buffer, patterns[name]) }//.ignoringDisable(true)
+    }
+
+    /**
+     * A command that sets the pattern for multiple buffer views at once.
+     * @param patterns a dictionary containing the name of the pattern and the name of the buffer.
+     */
+    fun setPattern(patternsIn: MutableList<Pair<String, String>>) : Command {
+        return run {
+            for (pairing in patternsIn) {
+                lights.applyTo(
+                    pairing.second,
+                    patterns[pairing.first]
+                )
+            }
+        }//.ignoringDisable(true)
+    }
+
+    /**
+     * A command that sets the pattern for multiple buffer views at once.
+     * @param patterns a dictionary containing the LED pattern and the name of the buffer.
+     */
+    @JvmName("AAAAAAAAAAAAA")
+    fun setPattern(patternsIn: MutableList<Pair<LEDPattern, String>>) : Command {
+        return run {
+            for (pairing in patternsIn) {
+                lights.applyTo(
+                    pairing.second,
+                    pairing.first
+                )
+            }
+        }//.ignoringDisable(true)
     }
 
     init {
-
         // register buffers for left and right side (mirrored to be matching)
         lights.registerBuffer(
             "intake left",
-            19,
+            18,
             34,
             true
         )
@@ -62,16 +98,5 @@ object Lights : SubsystemBase() {
             17,
             false
         )
-
-//        /**
-//         * A command to set the pattern of multiple buffers at the same time.
-//         * @param names the list of names of each pattern.
-//         * @param buffers the buffers of each pattern.
-//         *
-//         * There should be  1:1 ratio of names to buffers.
-//         */
-//        fun setPatterns(names: List<String>, buffers: List<String>) : Command {
-//            return run {}
-//        }
     }
 }
