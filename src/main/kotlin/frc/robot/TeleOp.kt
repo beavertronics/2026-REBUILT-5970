@@ -21,9 +21,6 @@ import frc.robot.subsystems.IntakeArm
 import frc.robot.subsystems.Kicker
 import frc.robot.subsystems.Lights
 
-//import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
-//import frc.robot.triggers.General
-
 /*
 Sets up the operator interface (controller inputs), as well as
 setting up the commands for running the drivetrain and the subsystems
@@ -65,6 +62,7 @@ object TeleOp {
         Drivetrain.defaultCommand = teleOpDrive
 
         // SUBSYSTEMS!
+        // lights
         Lights.defaultCommand = Lights.setPattern(
             mutableListOf(
                 Pair("system ready", "intake left"),
@@ -85,7 +83,7 @@ object TeleOp {
 //            0.25.volts
 //        )
         // shooter
-//        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM) // todo test
+        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM) // todo test
     }
 
     /**
@@ -140,20 +138,20 @@ object TeleOp {
 //            .and(General.rpmTrigger)  // todo test
             .whileTrue(
             ParallelCommandGroup(
-                Hopper.RunHopperCommand(12.0.volts),
+                Hopper.RunHopperCommand(9.0.volts),
                 Kicker.RunKickerCommand(12.0.volts)
             )
         )
         OI.indexOut.whileTrue(
             ParallelCommandGroup(
-                Hopper.RunHopperCommand((-12.0).volts),
-                Kicker.RunKickerCommand((-12.0).volts)
+                Hopper.RunHopperCommand((-9.0).volts),
+                Kicker.RunKickerCommand((-10.0).volts)
             )
         )
 
         // shooter
         OI.runShooter.whileTrue(
-            Shooter.ShootRPMCommand(100.0.RPM)
+            Autos.shootProtected
                 .alongWith(
                     Lights.setPattern(
                         mutableListOf(
@@ -165,12 +163,6 @@ object TeleOp {
         ) // todo test
 //        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
 //        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(0.3.volts))
-//        OI.runShooter.whileTrue((OI.Rumble(
-//                    OI.operatorController,
-//                    1.0,
-//                    1.0,
-//                    GenericHID.RumbleType.kBothRumble
-//        )))
 
         // alternate features
         OI.alternate
@@ -226,9 +218,7 @@ object TeleOp {
         ) : Command() {
             val timer = Timer()
 
-            init {
-                addRequirements(OI)
-            }
+            init { addRequirements(OI) }
 
             override fun initialize() {
                 timer.restart(); controller.setRumble(rumbleSide, rumblePower)

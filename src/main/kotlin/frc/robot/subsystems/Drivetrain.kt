@@ -1,7 +1,6 @@
 package frc.robot.subsystems
 
 import beaverlib.fieldmap.FieldMapREBUILTWelded
-import beaverlib.fieldmap.Trench
 import beaverlib.utils.Units.Angular.asDegrees
 import beaverlib.utils.Units.Angular.degrees
 import beaverlib.utils.Units.Angular.radians
@@ -9,8 +8,6 @@ import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.Units.Linear.meters
 import beaverlib.utils.Units.Linear.metersPerSecond
-import beaverlib.utils.geometry.vector2
-import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants
 import com.revrobotics.spark.config.AbsoluteEncoderConfig
 import com.revrobotics.spark.config.SparkMaxConfig
 import edu.wpi.first.math.geometry.Pose2d
@@ -25,7 +22,6 @@ import edu.wpi.first.networktables.StructPublisher
 import edu.wpi.first.wpilibj.Filesystem
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.commands.general.MoveTo
@@ -71,8 +67,8 @@ object Drivetrain : SubsystemBase() {
             SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH
             swerveDrive = SwerveParser(DriveConstants.DriveConfig).createSwerveDrive(DriveConstants.MaxSpeed.asMetersPerSecond)
 
-            swerveDrive.setCosineCompensator(false) // todo needed?
-            swerveDrive.setHeadingCorrection(false) // todo needed?
+//            swerveDrive.setCosineCompensator(false) // todo needed?
+//            swerveDrive.setHeadingCorrection(false) // todo needed?
             swerveDrive.setMotorIdleMode(false)
 
             swerveDrive.modules.forEach {
@@ -198,21 +194,21 @@ object Drivetrain : SubsystemBase() {
         /**
          * A command to align to the alliance hub.
          */
-//        fun HubAlignCommand(): MoveTo {
-//            var offset = (-2.0).meters // for blue side
-//            var rotation = (0.0).degrees // for blue side
-//            if (FieldMapREBUILTWelded.teamHub == FieldMapREBUILTWelded.RedHub) {
-//                offset *= -1.0 // invert for red side
-//                rotation = 180.degrees
-//            }
-//            return MoveTo(
-//                Pose2d(
-//                    FieldMapREBUILTWelded.teamHub.center.x.meters.asMeters + offset.asMeters,
-//                    FieldMapREBUILTWelded.teamHub.center.y.meters.asMeters,
-//                    Rotation2d(rotation.asDegrees.radians.asRadians)
-//                )
-//            )
-//        }
+        fun HubAlignCommand(): MoveTo {
+            var offset = (-2.0).meters // for blue side
+            var rotation = (0.0).degrees // for blue side
+            if (FieldMapREBUILTWelded.teamHub == FieldMapREBUILTWelded.RedHub) {
+                offset *= -1.0 // invert for red side
+                rotation = 180.degrees
+            }
+            return MoveTo(
+                Pose2d(
+                    FieldMapREBUILTWelded.teamHub.center.x.meters.asMeters + offset.asMeters,
+                    FieldMapREBUILTWelded.teamHub.center.y.meters.asMeters,
+                    Rotation2d(rotation.asDegrees.radians.asRadians)
+                )
+            )
+        }
 
 //        fun TrenchAlignCommand(right: Boolean = true) {
 //            val trenches = FieldMapREBUILTWelded.teamTrenches()
