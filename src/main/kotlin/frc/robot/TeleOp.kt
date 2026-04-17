@@ -85,7 +85,7 @@ object TeleOp {
 //            0.25.volts
 //        )
         // shooter
-//        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM) // todo test
+        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM) // todo test
     }
 
     /**
@@ -153,7 +153,7 @@ object TeleOp {
 
         // shooter
         OI.runShooter.whileTrue(
-            Shooter.ShootRPMCommand(100.0.RPM)
+            Shooter.ShootRPMCommand(5500.0.RPM)
                 .alongWith(
                     Lights.setPattern(
                         mutableListOf(
