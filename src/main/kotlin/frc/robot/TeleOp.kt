@@ -166,9 +166,9 @@ object TeleOp {
 //        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(0.3.volts))
 
         // alternate features
-        OI.alternate
-            .and(OI.runShooter)
-            .whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
+//        OI.alternate
+//            .and(OI.runShooter)
+//            .whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
         OI.alternate
             .and(OI.zeroHood)
             .whileTrue(Hood.ZeroHoodCommand())
@@ -241,8 +241,8 @@ object TeleOp {
         /**
          * Input devices go here
          */
-        val operatorController = CommandXboxController(0)
-        val driverController = CommandXboxController(1)
+        val driverController = CommandXboxController(0)
+        val operatorController = CommandXboxController(1)
 //        val leftJoystick = CommandJoystick(1)
 //        val rightJoystick = CommandJoystick(2)
 

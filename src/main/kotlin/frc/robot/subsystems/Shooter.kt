@@ -27,7 +27,7 @@ import frc.robot.Constants
 object ShooterConstants {
 //    val shooterID = 9
     val krakenID = 53 // todo kraken ID
-    val MAX_RPM_DIFF = 5.0.RPM
+    val MAX_RPM_DIFF = 500.0.RPM
     val RPM_LIMIT = 6250.0.RPM // for a KrakenX60
     val SUPPLY_CURRENT_LIMIT = 35.0.amps
 }

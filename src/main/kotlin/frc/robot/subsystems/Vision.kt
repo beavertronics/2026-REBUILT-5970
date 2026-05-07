@@ -42,7 +42,7 @@ class TargetPoseProvider(
 
 val Vision = BeaverPhotonVision(
     BeaverVisionCamera( // todo set up
-        name = "Name1",
+        name = "front",
         robotToCamera = Transform3d(
             0.0.inches.asMeters, 0.0.inches.asMeters, 0.0.inches.asMeters,
             Rotation3d(
@@ -54,7 +54,7 @@ val Vision = BeaverPhotonVision(
         fallbackStrategy = PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE
     ),
     BeaverVisionCamera( // todo set up
-        name = "Name2",
+        name = "back",
         robotToCamera = Transform3d(
             0.0.inches.asMeters, 0.0.inches.asMeters, 0.0.inches.asMeters,
             Rotation3d(

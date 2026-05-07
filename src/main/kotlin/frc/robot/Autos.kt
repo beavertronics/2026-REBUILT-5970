@@ -90,7 +90,7 @@ object Autos {
             }
             else { ParallelCommandGroup( Kicker.RunKickerCommand((-10.0).volts) ) },
             // SHOOTER
-            Shooter.ShootRPMCommand(3000.0.RPM) // todo choose a value, test
+            Shooter.ShootRPMCommand(2500.0.RPM)
         )
 
     /**
