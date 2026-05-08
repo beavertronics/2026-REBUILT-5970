@@ -21,12 +21,12 @@ fun BeaverColor(red: Int, green: Int, blue: Int, alpha: Double = 1.0): Color {
 }
 
 /**
- * A class to manage a strip of LED lights.
+ * A class to manage a strip of LED lights. This class must be sub-classed in order to be used.
  * @param port the port that the LED strip is plugged into on the RIO. Note that the RIO can only manage one strip of LEDs at a time.
  * @param length the total length of the strip of LEDs.
  * @param order the color order for R, G, and B. Refer to your purchased LEDs for this information.
  */
-class BeaverLight(
+open class BeaverLight(
     port: Int,
     length: Int,
     order: AddressableLED.ColorOrder
@@ -37,14 +37,29 @@ class BeaverLight(
     val buffer: AddressableLEDBuffer = AddressableLEDBuffer(length)
     val segments: MutableMap<String, AddressableLEDBufferView> = mutableMapOf()
 
+    /**
+     * A mutable map that must be overriden with your patterns.
+     */
+    open val patterns: MutableMap<String, LEDPattern> = mutableMapOf()
+
     // set the length (which takes a little) and start the lights, default to lights off
     init {
         led.setLength(buffer.length)
         led.setColorOrder(order)
         led.start()
-        defaultCommand = setDefaultCommand(
-            LEDPattern.solid(Color.kBlack)
-        )
+        defaultCommand = getCommand(LEDPattern.solid(Color.kBlack))
+    }
+
+    /**
+     * A function that returns a command to make set as the default command.
+     * @param pattern the new pattern to be the default.
+     * @see setDefaultCommand
+     */
+    fun getCommand(pattern: LEDPattern?) : Command {
+        return run {
+            pattern?.applyTo(buffer)
+        }
+            .ignoringDisable(true)
     }
 
     /**
@@ -66,21 +81,51 @@ class BeaverLight(
      * @param buffer The name of the buffer.
      * @param pattern the LED pattern to apply to the buffer.
      */
-    fun applyTo(buffer: String, pattern: LEDPattern?) {
+    fun applyToBuffer(buffer: String, pattern: LEDPattern?) {
         pattern?.applyTo(segments[buffer])
     }
 
     /**
-     * A function that returns a command to make set as the default command.
-     * @param pattern the new pattern to be the default.
+     * A command that sets the pattern for the chosen light buffer.
+     * @param name the name of the pattern.
+     * @param buffer the buffer to apply the pattern to.
      */
-    fun setDefaultCommand(pattern: LEDPattern?) : Command {
-        return run {
-            pattern?.applyTo(buffer)
-        }
-            .ignoringDisable(true)
+    fun applyPattern(name: String, buffer: String) : Command {
+        return run { applyToBuffer(buffer, patterns[name]) }//.ignoringDisable(true) // todo test
     }
 
+    /**
+     * A command that sets the pattern for multiple buffer views at once.
+     * @param patterns a dictionary containing the name of the pattern and the name of the buffer.
+     */
+    fun applyPatterns(patternsIn: MutableList<Pair<String, String>>) : Command {
+        return run {
+            for (pairing in patternsIn) {
+                applyToBuffer(
+                    pairing.second,
+                    patterns[pairing.first]
+                )
+            }
+        }//.ignoringDisable(true) // todo test
+    }
+
+    /**
+     * A command that sets the pattern for multiple buffer views at once.
+     * @param patterns a dictionary containing the LED pattern and the name of the buffer.
+     */
+    @JvmName("Legally dinstinct")
+    fun applyPatterns(patternsIn: MutableList<Pair<LEDPattern, String>>) : Command {
+        return run {
+            for (pairing in patternsIn) {
+                applyToBuffer(
+                    pairing.second,
+                    pairing.first
+                )
+            }
+        }//.ignoringDisable(true) // todo test
+    }
+
+    // runs every frame updating the lights
     override fun periodic() {
         led.setData(buffer)
     }

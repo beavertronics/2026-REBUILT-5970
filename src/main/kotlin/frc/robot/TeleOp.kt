@@ -44,18 +44,18 @@ object TeleOp {
 //            { OI.C_LX },
 //            { OI.C_LT.asBoolean }
 //        )
-    val childDrive: ChildModeDriveCommand =
-        ChildModeDriveCommand(
-            { OI.parentDrive },
-            { OI.parentStrafe },
-            { OI.parentOmega },
-            { OI.toggleChild.asBoolean },
-            { OI.driverY },
-            { OI.driverX },
-            { OI.driverOmega },
-            { OI.toggleFieldOriented.asBoolean },
-            { OI.toggleSlow.asBoolean }
-        )
+//    val childDrive: ChildModeDriveCommand =
+//        ChildModeDriveCommand(
+//            { OI.parentDrive },
+//            { OI.parentStrafe },
+//            { OI.parentOmega },
+//            { OI.toggleChild.asBoolean },
+//            { OI.driverY },
+//            { OI.driverX },
+//            { OI.driverOmega },
+//            { OI.toggleFieldOriented.asBoolean },
+//            { OI.toggleSlow.asBoolean }
+//        )
 
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
@@ -63,7 +63,7 @@ object TeleOp {
 
         // SUBSYSTEMS!
         // lights
-        Lights.defaultCommand = Lights.setPattern(
+        Lights.defaultCommand = Lights.applyPatterns(
             mutableListOf(
                 Pair("system ready", "intake left"),
                 Pair("system ready", "intake right")
@@ -83,7 +83,7 @@ object TeleOp {
 //            0.25.volts
 //        )
         // shooter
-        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM) // todo test
+        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM)
     }
 
     /**
@@ -109,7 +109,7 @@ object TeleOp {
         OI.runIntake.whileTrue(
             Intake.RunIntakeCommand(12.0.volts)
                 .alongWith(
-                    Lights.setPattern(
+                    Lights.applyPatterns(
                         mutableListOf(
                             Pair("intaking", "intake left"),
                             Pair("intaking", "intake right")
@@ -120,7 +120,7 @@ object TeleOp {
         OI.runOuttake.whileTrue(
             Intake.RunIntakeCommand((-12.0).volts)
                 .alongWith(
-                    Lights.setPattern(
+                    Lights.applyPatterns(
                         mutableListOf(
                             Pair("outtaking", "intake left"),
                             Pair("outtaking", "intake right")
@@ -154,16 +154,14 @@ object TeleOp {
 //            Shooter.ShootRPMCommand(5500.0.RPM)
             Autos.shootProtected
                 .alongWith(
-                    Lights.setPattern(
+                    Lights.applyPatterns(
                         mutableListOf(
                             Pair("shooting", "intake left"),
                             Pair("shooting", "intake right")
                         )
                     )
                 )
-        ) // todo test
-//        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
-//        OI.runShooter.whileTrue(Shooter.ShootVoltageCommand(0.3.volts))
+        )
 
         // alternate features
 //        OI.alternate
