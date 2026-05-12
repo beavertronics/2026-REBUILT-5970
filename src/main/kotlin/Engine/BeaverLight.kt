@@ -91,7 +91,7 @@ open class BeaverLight(
      * @param buffer the buffer to apply the pattern to.
      */
     fun applyPattern(name: String, buffer: String) : Command {
-        return run { applyToBuffer(buffer, patterns[name]) }//.ignoringDisable(true) // todo test
+        return run { applyToBuffer(buffer, patterns[name]) }.ignoringDisable(true) // todo test
     }
 
     /**
@@ -106,7 +106,7 @@ open class BeaverLight(
                     patterns[pairing.first]
                 )
             }
-        }//.ignoringDisable(true) // todo test
+        }.ignoringDisable(true) // todo test
     }
 
     /**
@@ -122,7 +122,7 @@ open class BeaverLight(
                     pairing.first
                 )
             }
-        }//.ignoringDisable(true) // todo test
+        }.ignoringDisable(true) // todo test
     }
 
     // runs every frame updating the lights

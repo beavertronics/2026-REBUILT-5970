@@ -20,6 +20,7 @@ import frc.robot.subsystems.Hopper
 import frc.robot.subsystems.IntakeArm
 import frc.robot.subsystems.Kicker
 import frc.robot.subsystems.Lights
+import frc.robot.triggers.General
 
 /*
 Sets up the operator interface (controller inputs), as well as
@@ -83,7 +84,7 @@ object TeleOp {
 //            0.25.volts
 //        )
         // shooter
-        Shooter.defaultCommand = Shooter.ShootRPMCommand(0.0.RPM)
+        Shooter.defaultCommand = Shooter.ShootRPMCommand()
     }
 
     /**
@@ -152,7 +153,18 @@ object TeleOp {
         // shooter
         OI.runShooter.whileTrue(
 //            Shooter.ShootRPMCommand(5500.0.RPM)
-            Autos.shootProtected
+            ParallelCommandGroup(
+                // HOPPER AND KICKER
+                if (General.rpmTrigger.asBoolean) {
+                    ParallelCommandGroup(
+                        Hopper.RunHopperCommand(9.0.volts),
+                        Kicker.RunKickerCommand(12.0.volts)
+                    )
+                }
+                else { ParallelCommandGroup( Kicker.RunKickerCommand((-10.0).volts) ) },
+                // SHOOTER
+                Shooter.ShootRPMCommand(2500.0.RPM)
+            )
                 .alongWith(
                     Lights.applyPatterns(
                         mutableListOf(

@@ -51,6 +51,11 @@ object Shooter : SubsystemBase() {
     @get:JvmName("BiteMe!!")
     var targetRPM: AngularVelocity = 0.0.RPM
 
+    /**
+     * Whether to block the shoot RPM command while setting an RPM.
+     */
+    var block: Boolean = false
+
     init {
         setTargetRPM(0.0.RPM)
 
@@ -119,7 +124,7 @@ object Shooter : SubsystemBase() {
 //            println("Calc " + calculatedAll)
 //            runShooter((calculatedAll * Constants.MAX_VOLTS.asVolts).volts)
             krakenShooter.setControl(
-                MotionMagicVelocityVoltage(rpm.asRotationsPerSecond)
+                MotionMagicVelocityVoltage(targetRPM.asRotationsPerSecond)
             )
         }
             .repeatedly()
@@ -137,10 +142,19 @@ object Shooter : SubsystemBase() {
                 }
             )
             .finallyDo({ interrupted ->
-                runShooter(0.0.volts)
+                setTargetRPM(0.0.RPM)
             })
     }
 
+    /**
+     * A command that sets the target rpm.
+     * param rpm the RPM to run the shooter at. This function only sets the value.
+     * The default command for the shooter will run the shooter.
+     * @see ShootRPMCommand
+     */
+    fun doSetTargetRPM(rpm: AngularVelocity) : Command {
+        return run { setTargetRPM(rpm) }
+    }
     override fun periodic() {
         // get current RPM
 //        currentRPM = (shooterMotor.encoder.velocity * -1.0).RPM

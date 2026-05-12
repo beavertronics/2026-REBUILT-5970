@@ -1,6 +1,7 @@
 package frc.robot
 
 import beaverlib.fieldmap.FieldMapREBUILTWelded
+import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Linear.meters
 import com.ctre.phoenix6.SignalLogger
 import com.ctre.phoenix6.hardware.TalonFX
@@ -161,6 +162,10 @@ object RobotController : TimedRobot() {
         if (!AutoTypeChooser.selected && selectedManualAuto != null) { selectedManualAuto?.cancel() }
         else if (AutoTypeChooser.selected && selectedPathAuto != null) { selectedPathAuto?.cancel() }
         Orchestrator.stop()
+        commandScheduler.schedule(
+            Hood.ZeroHoodCommand()
+                .alongWith(Shooter.ShootRPMCommand())
+        )
     }
 
     override fun testInit() { commandScheduler.cancelAll() }

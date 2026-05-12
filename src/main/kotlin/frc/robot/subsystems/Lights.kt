@@ -49,7 +49,7 @@ object Lights : BeaverLight(
         registerBuffer(
             "intake left",
             18,
-            34,
+            33,
             true
         )
         registerBuffer(

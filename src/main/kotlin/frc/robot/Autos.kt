@@ -79,20 +79,6 @@ object Autos {
 //            )
 //        )
 
-    val shootProtected =
-        ParallelCommandGroup(
-            // HOPPER AND KICKER
-            if (General.rpmTrigger.asBoolean) {
-                ParallelCommandGroup(
-                    Hopper.RunHopperCommand(9.0.volts),
-                    Kicker.RunKickerCommand(12.0.volts)
-                )
-            }
-            else { ParallelCommandGroup( Kicker.RunKickerCommand((-10.0).volts) ) },
-            // SHOOTER
-            Shooter.ShootRPMCommand(2500.0.RPM)
-        )
-
     /**
      * A command to play never gonna give you up using the TalonFX motors.
      */

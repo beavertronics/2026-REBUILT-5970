@@ -78,14 +78,14 @@ object Hood : SubsystemBase() {
      * A command to zero the angle of the hood.
      */
     fun ZeroHoodCommand() : Command {
-        return run { runHood(-(0.225).volts) }
+        return run { runHood(-(0.15).volts) }
             .until {
                 lowerLimitSwitch.get()
 //                        ||
 //                Stall.hoodStall.asBoolean
             }
             .andThen(
-                run { runHood(0.05.volts) }
+                run { runHood(0.0725.volts) }
                     .until {
                         !lowerLimitSwitch.get()
 //                                ||
@@ -115,6 +115,8 @@ object Hood : SubsystemBase() {
     }
 
     override fun periodic() {
+        autoCalculateHood()
+
         currentAngle = getCurrentAngle()
         targetAngle = SmartDashboard.getNumber("Subsystems/Shooter/Target Hood Angle", 0.0).degrees // todo test
         SmartDashboard.putNumber("Subsystems/Shooter/Hood Angle", currentAngle.asDegrees) // adjusted by 90 degrees - zero
@@ -168,7 +170,7 @@ object Hood : SubsystemBase() {
 
     // todo test
     fun autoCalculateHood(dynamic: Boolean = false): AngleUnit {
-        var velocity = 0.0
+        var velocity: Double
         // get flywheel velocity (inches / min)
         if (dynamic) { velocity = Shooter.currentRPM.asRPM * (PI * 4) } // live RPM
         else { velocity = Shooter.targetRPM.asRPM * (PI * 4) } // fixed RPM
@@ -213,7 +215,7 @@ object Hood : SubsystemBase() {
                 ).degrees
 
         val negAngle =
-            (90.0.degrees.asDegrees - calculatedPos.radians.asDegrees)
+            (90.0.degrees.asDegrees - calculatedNeg.radians.asDegrees)
                 .clamp(
                     0.0.degrees.asDegrees, HoodConstants.HOOD_MAX.asDegrees
                 ).degrees

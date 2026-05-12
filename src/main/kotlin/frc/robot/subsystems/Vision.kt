@@ -44,7 +44,7 @@ val Vision = BeaverPhotonVision(
     BeaverVisionCamera( // todo set up
         name = "front",
         robotToCamera = Transform3d(
-            0.0.inches.asMeters, 0.0.inches.asMeters, 0.0.inches.asMeters,
+            -4.5.inches.asMeters, 11.5.inches.asMeters, 15.5.inches.asMeters,
             Rotation3d(
                 0.0.degrees.asRadians, 0.0.degrees.asRadians, 0.0.degrees.asRadians
             )
@@ -56,9 +56,9 @@ val Vision = BeaverPhotonVision(
     BeaverVisionCamera( // todo set up
         name = "back",
         robotToCamera = Transform3d(
-            0.0.inches.asMeters, 0.0.inches.asMeters, 0.0.inches.asMeters,
+            -7.0.inches.asMeters, 11.5.inches.asMeters, 15.5.inches.asMeters,
             Rotation3d(
-                0.0.degrees.asRadians, 0.0.degrees.asRadians, 0.0.degrees.asRadians
+                0.0.degrees.asRadians, 0.0.degrees.asRadians, 180.0.degrees.asRadians
             )
         ),
         layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded),
