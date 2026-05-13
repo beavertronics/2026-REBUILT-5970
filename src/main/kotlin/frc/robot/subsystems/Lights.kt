@@ -1,6 +1,6 @@
 package frc.robot.subsystems
 
-import Engine.BeaverLight
+import beaverlib.controls.BeaverLight
 import edu.wpi.first.units.Units
 import edu.wpi.first.wpilibj.AddressableLED
 import edu.wpi.first.wpilibj.LEDPattern
