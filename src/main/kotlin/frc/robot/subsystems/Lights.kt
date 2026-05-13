@@ -40,7 +40,7 @@ object Lights : BeaverLight(
                     LEDPattern.GradientType.kDiscontinuous,
                     Color.kBlack,
                     Color.kBlue
-                ).blink(Units.Seconds.of(0.25), Units.Seconds.of(0.25))
+                ).blink(Units.Seconds.of(0.125), Units.Seconds.of(0.125))
     )
 
     init {

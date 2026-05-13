@@ -28,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
 import frc.robot.Constants
 import frc.robot.TeleOp
-import frc.robot.triggers.Stall
 import kotlin.math.PI
 import kotlin.math.atan
 import kotlin.math.sqrt
@@ -62,16 +61,24 @@ object Hood : SubsystemBase() {
      * this is the current angle for the shooter hood, in degrees
      */
     var currentAngle: AngleUnit = 0.0.degrees
+        get() = getCurrentAngle(false)
 
     /**
      * Thi is the target angle for the shooter hood, in degrees
      */
     @get:JvmName("BiteMe!")
-    var targetAngle: AngleUnit = 0.0.degrees
+    var targetAngle: AngleUnit
+        get() = SmartDashboard.getNumber("Subsystems/Shooter/Target Hood Angle", 0.0).degrees
+        set(angle) {
+            angle.asDegrees.clamp(
+                HoodConstants.HOOD_MIN.asDegrees,
+                HoodConstants.HOOD_MAX.asDegrees
+            ).degrees
+        }
 
     init {
         initMotorControllers(30, SparkBaseConfig.IdleMode.kBrake, hoodMotor)
-        hoodPID.setTolerance(3.0) // tolerant to 0.05 degrees (encoder uses rotations)
+        hoodPID.setTolerance(3.0) // tolerant to x degrees (encoder uses rotations)
     }
 
     /**
@@ -81,19 +88,15 @@ object Hood : SubsystemBase() {
         return run { runHood(-(0.15).volts) }
             .until {
                 lowerLimitSwitch.get()
-//                        ||
-//                Stall.hoodStall.asBoolean
             }
             .andThen(
                 run { runHood(0.0725.volts) }
                     .until {
                         !lowerLimitSwitch.get()
-//                                ||
-//                        Stall.hoodStall.asBoolean
                     }
                     .finallyDo({ interrupted ->
                         runHood(0.0.volts)
-                        zeroValue = getCurrentAngle(raw = true)
+                        setZero(false)
                     })
             )
     }
@@ -106,8 +109,6 @@ object Hood : SubsystemBase() {
         return run { runHood(voltage) }
             .until {
                 lowerLimitSwitch.get() && TeleOp.OI.hoodUp.asBoolean == false
-//                        ||
-//                Stall.hoodStall.asBoolean
             }
             .finallyDo({ interrupted ->
                 runHood(0.0.volts)
@@ -115,10 +116,8 @@ object Hood : SubsystemBase() {
     }
 
     override fun periodic() {
-        autoCalculateHood()
+        autoCalculateHood() // TODO TESTING ONLY
 
-        currentAngle = getCurrentAngle()
-        targetAngle = SmartDashboard.getNumber("Subsystems/Shooter/Target Hood Angle", 0.0).degrees // todo test
         SmartDashboard.putNumber("Subsystems/Shooter/Hood Angle", currentAngle.asDegrees) // adjusted by 90 degrees - zero
         SmartDashboard.putNumber("Subsystems/Shooter/Target Hood Angle", targetAngle.asDegrees)
         SmartDashboard.putBoolean("Subsystems/Shooter/Hood limit switch", lowerLimitSwitch.get())

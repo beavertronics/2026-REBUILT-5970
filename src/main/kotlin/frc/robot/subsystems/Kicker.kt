@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
 import frc.robot.Constants
-import frc.robot.triggers.Stall
 
 object KickerConstants {
     val feederID = 10
@@ -31,8 +30,6 @@ object Kicker: SubsystemBase() {
      */
     fun RunKickerCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
         return run {
-//            if (Stall.kickerStall.asBoolean && stall) { runKicker(-voltage) }
-//            else { runKicker(voltage) }
             runKicker(voltage)
         }
             .finallyDo({ interrupted ->

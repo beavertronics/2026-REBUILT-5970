@@ -3,6 +3,7 @@ package frc.robot
 import beaverlib.fieldmap.FieldMapREBUILTWelded
 import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.degrees
+import beaverlib.utils.Units.Electrical.ohms
 import beaverlib.utils.Units.Electrical.volts
 import beaverlib.utils.Units.Linear.meters
 import com.revrobotics.spark.SparkMaxAlternateEncoder
@@ -15,8 +16,10 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.commands.general.MoveTo
+import frc.robot.commands.vision.MoveHoodToAngle
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Hopper
+import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Kicker
 import frc.robot.subsystems.Orchestrator
 import frc.robot.subsystems.Shooter
@@ -26,6 +29,7 @@ import frc.robot.triggers.General
  * All pre-made commands and autos that can be used.
  */
 object Autos {
+
     /**
      * A command that runs for 17.5 seconds to score preloads.
      */
@@ -49,6 +53,41 @@ object Autos {
                     // full thing ends after 17.5 seconds
                     WaitCommand(17.5)               )
             )
+
+    /**
+     * An auto to run every motor at once for testing.
+     */
+    val testAll =
+        Shooter.ShootRPMCommand(5000.0.RPM)
+            .alongWith(
+                Intake.RunIntakeCommand(12.0.volts)
+            .alongWith(
+                Hopper.RunHopperCommand(12.0.volts)
+            .alongWith(
+                Kicker.RunKickerCommand(12.0.volts)
+            .alongWith(
+                Hood.ZeroHoodCommand()
+                    .andThen(
+                        MoveHoodToAngle(45.0.degrees, 0.25.volts)
+                    )
+            )
+            )
+            )
+            )
+
+    /**
+     * An auto to align to the hub.
+     */
+    val alignToHub =
+        SequentialCommandGroup(
+            MoveTo(
+                Pose2d(
+                    FieldMapREBUILTWelded.teamHub.center.x - 2.0.meters.asMeters,
+                    FieldMapREBUILTWelded.teamHub.center.y,
+                    Rotation2d()
+                )
+            )
+        )
 
     /**
      * A command that has predefined inputs for the alignment to the hub.

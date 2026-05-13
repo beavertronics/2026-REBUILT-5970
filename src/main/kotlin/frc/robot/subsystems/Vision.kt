@@ -41,7 +41,7 @@ class TargetPoseProvider(
 // +X is forwards, +Y is left, +Z is up
 
 val Vision = BeaverPhotonVision(
-    BeaverVisionCamera( // todo set up
+    BeaverVisionCamera(
         name = "front",
         robotToCamera = Transform3d(
             -4.5.inches.asMeters, 11.5.inches.asMeters, 15.5.inches.asMeters,
@@ -53,7 +53,7 @@ val Vision = BeaverPhotonVision(
         strategy = PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
         fallbackStrategy = PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE
     ),
-    BeaverVisionCamera( // todo set up
+    BeaverVisionCamera(
         name = "back",
         robotToCamera = Transform3d(
             -7.0.inches.asMeters, 11.5.inches.asMeters, 15.5.inches.asMeters,

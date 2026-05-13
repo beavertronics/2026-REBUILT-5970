@@ -1,7 +1,6 @@
 package frc.robot
 
 import beaverlib.fieldmap.FieldMapREBUILTWelded
-import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Linear.meters
 import com.ctre.phoenix6.SignalLogger
 import com.ctre.phoenix6.hardware.TalonFX
@@ -23,7 +22,6 @@ import frc.robot.subsystems.Hopper
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Kicker
 import frc.robot.subsystems.Lights
-//import frc.robot.subsystems.Lights
 import frc.robot.subsystems.Orchestrator
 import frc.robot.subsystems.Phatplanner
 import frc.robot.subsystems.Shooter
@@ -83,23 +81,14 @@ object RobotController : TimedRobot() {
 
         // load manual autos
         ManualAutoChooser.setDefaultOption("no auto", Commands.none())
-        ManualAutoChooser.addOption("Align to hub",
-            SequentialCommandGroup(
-                MoveTo(
-                    Pose2d(
-                        FieldMapREBUILTWelded.teamHub.center.x - 2.0.meters.asMeters,
-                        FieldMapREBUILTWelded.teamHub.center.y,
-                        Rotation2d()
-                    )
-                )
-            )
-        )
-        ManualAutoChooser.addOption("Drive Sys ID",
-            Drivetrain.sysIdDriveMotor()
-        )
-        ManualAutoChooser.addOption("Angle Sys ID",
-            Drivetrain.sysIdAngleMotorCommand()
-        )
+        ManualAutoChooser.addOption("Align to hub", Autos.alignToHub)
+        ManualAutoChooser.addOption("test all", Autos.testAll)
+//        ManualAutoChooser.addOption("Drive Sys ID",
+//            Drivetrain.sysIdDriveMotor()
+//        )
+//        ManualAutoChooser.addOption("Angle Sys ID",
+//            Drivetrain.sysIdAngleMotorCommand()
+//        )
 //        ManualAutoChooser.addOption("Shooter quasistatic reverse (forwards)",
 //            Shooter.shooterSysID()[2]
 //            )
@@ -119,16 +108,18 @@ object RobotController : TimedRobot() {
         ManualAutoChooser.addOption("Orchestra - Silver Springs by Fleetwood Mac",
             InstantCommand( { Orchestrator.loadnplay("orchestra/silver_springs_fleetwood_mac.chrp")}, Orchestrator)
         )
-        SmartDashboard.putData("Autos/Manual auto choices", ManualAutoChooser)
 
         // load pathplanner autos
         Phatplanner.autoChooser.setDefaultOption("no auto", Commands.none())
-        SmartDashboard.putData("Autos/Pathplanner auto choices", Phatplanner.autoChooser)
 
         // make thing to choose between pathplanner and manual autos
         AutoTypeChooser.setDefaultOption("Default - Manual", false)
         AutoTypeChooser.addOption("Manual", false)
         AutoTypeChooser.addOption("Pathplanner", true)
+
+        // put everything onto dashboard
+        SmartDashboard.putData("Autos/Pathplanner auto choices", Phatplanner.autoChooser)
+        SmartDashboard.putData("Autos/Manual auto choices", ManualAutoChooser)
         SmartDashboard.putData("Autos/Auto chooser", AutoTypeChooser)
 
     }

@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
 import frc.robot.Constants
 import frc.robot.subsystems.general.HedgieHelmet
-import frc.robot.triggers.Stall
 import kotlin.math.sign
 
 object IntakeArmConstants {
@@ -38,16 +37,16 @@ object IntakeArm : SubsystemBase() {
      * @param stall whether to invert the direction when a stall is detected.
      * @param voltage the voltage to move the arm at.
      */
-    fun MoveIntakeCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
+    fun MoveIntakeCommand(voltage: VoltageUnit = 1.0.volts, safe: Boolean = true) : Command {
         return run {
-//            if (Stall.intakeArmStall.asBoolean && stall) { runIntakeMotors(0.0.volts) }
-//            else { runIntakeMotors(voltage) }
             runIntakeMotors(voltage)
             }
             .until {
-                if (Stall.intakeArmStall.asBoolean) { Stall.intakeArmStall.asBoolean }
-                else if (voltage.asVolts.sign > 0.0) { upperLimitSwitch.get() }
-                else { lowerLimitSwitch.get() }
+                if (safe) {
+                    if (voltage.asVolts.sign > 0.0) { upperLimitSwitch.get() }
+                    else { lowerLimitSwitch.get() }
+                }
+                else { false }
             }
             .finallyDo({ interrupted ->
                 runIntakeMotors(0.0.volts)

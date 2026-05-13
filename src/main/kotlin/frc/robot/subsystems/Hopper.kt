@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitCommand
 import frc.engine.utils.initMotorControllers
 import frc.robot.Constants
-import frc.robot.triggers.Stall
 
 object HopperConstants {
     val hopperID = 15
@@ -32,8 +31,6 @@ object Hopper : SubsystemBase() {
      */
     fun RunHopperCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
         return run {
-//            if (Stall.hopperStall.asBoolean && stall) { runHopper(-voltage) }
-//            else { runHopper(voltage) }
             runHopper(voltage)
         }
             .finallyDo({ interrupted ->

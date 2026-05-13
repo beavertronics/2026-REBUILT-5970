@@ -22,8 +22,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.Constants
 
 object ShooterConstants {
-//    val shooterID = 9
-    val krakenID = 53 // todo kraken ID
+    val krakenID = 53
     val MAX_RPM_DIFF = 500.0.RPM
     val RPM_LIMIT = 6250.0.RPM // for a KrakenX60
     val SUPPLY_CURRENT_LIMIT = 35.0.amps
@@ -34,32 +33,30 @@ object ShooterConstants {
  * So therefore, "BiteMe!"
  */
 object Shooter : SubsystemBase() {
-//    val shooterMotor = SparkMax(ShooterConstants.shooterID, SparkLowLevel.MotorType.kBrushless) // NEO
     val krakenShooter = TalonFX(ShooterConstants.krakenID) // Kraken X60
-//    val PIDConstants = PIDConstants(0.0, 0.0, 0.0) // todo tune
-//    val feedForwardConstants = SimpleMotorFeedForwardConstants(0.3, 2.0, 0.0) // todo tune
-//    val pidff = PidFF(PIDConstants, feedForwardConstants)
 
     /**
      * This is the current RPM for the shooter flywheel, in RPM
      */
     var currentRPM: AngularVelocity = 0.0.RPM
+        get() = (krakenShooter.velocity.valueAsDouble.rotationsPerSecond.asRPM.RPM)
 
     /**
      * This is the target RPM for the shooter flywheel, in RPM
      */
     @get:JvmName("BiteMe!!")
-    var targetRPM: AngularVelocity = 0.0.RPM
-
-    /**
-     * Whether to block the shoot RPM command while setting an RPM.
-     */
-    var block: Boolean = false
+    var targetRPM: AngularVelocity
+        get() = SmartDashboard.getNumber("Subsystems/Shooter/Target RPM", 0.0).RPM
+        set(rpm) {
+            rpm.asRPM.clamp(
+                -ShooterConstants.RPM_LIMIT.asRPM,
+                ShooterConstants.RPM_LIMIT.asRPM
+            ).RPM
+        }
 
     init {
+        // initially set shooter to 0 RPM
         setTargetRPM(0.0.RPM)
-
-//        initMotorControllers(40, SparkBaseConfig.IdleMode.kCoast, shooterMotor)
 
         // configure base features of kraken
         val config = TalonFXConfiguration()
@@ -112,17 +109,11 @@ object Shooter : SubsystemBase() {
      */
     fun ShootRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command { // todo test
         return run {
-//            pidff.setpoint = targetRPM.asRPM
-            setTargetRPM(
-                rpm.asRPM.clamp(
-                -ShooterConstants.RPM_LIMIT.asRPM,
-                ShooterConstants.RPM_LIMIT.asRPM
-            ).RPM)
-//            val calculatedAll = pidff.calculate(
-//                currentRPM.asRPM
-//            )
-//            println("Calc " + calculatedAll)
-//            runShooter((calculatedAll * Constants.MAX_VOLTS.asVolts).volts)
+//            setTargetRPM(
+//                rpm.asRPM.clamp(
+//                -ShooterConstants.RPM_LIMIT.asRPM,
+//                ShooterConstants.RPM_LIMIT.asRPM
+//            ).RPM)
             krakenShooter.setControl(
                 MotionMagicVelocityVoltage(targetRPM.asRotationsPerSecond)
             )
@@ -131,17 +122,12 @@ object Shooter : SubsystemBase() {
             .beforeStarting(
                 {
                     run {
-                        setTargetRPM(
-                            rpm.asRPM.clamp(
-                                -ShooterConstants.RPM_LIMIT.asRPM,
-                                ShooterConstants.RPM_LIMIT.asRPM
-                            ).RPM
-                        )
-//                        pidff.setpoint = targetRPM.asRPM
+                        setTargetRPM(rpm)
                     }
                 }
             )
             .finallyDo({ interrupted ->
+                ShootVoltageCommand(0.0.volts)
                 setTargetRPM(0.0.RPM)
             })
     }
@@ -155,15 +141,12 @@ object Shooter : SubsystemBase() {
     fun doSetTargetRPM(rpm: AngularVelocity) : Command {
         return run { setTargetRPM(rpm) }
     }
+
     override fun periodic() {
-        // get current RPM
-//        currentRPM = (shooterMotor.encoder.velocity * -1.0).RPM
-        currentRPM = (krakenShooter.velocity.valueAsDouble.rotationsPerSecond.asRPM.RPM) // todo need to invert?
         // get current RPM from dashboard
         targetRPM = SmartDashboard.getNumber("Subsystems/Shooter/Target RPM", 0.0).RPM
-        // put data on dashboard
+        // put current rpm on dashboard
         SmartDashboard.putNumber("Subsystems/Shooter/Shooter RPM", currentRPM.asRPM)
-//        SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", targetRPM.asRPM)
     }
 
     /**
@@ -180,9 +163,8 @@ object Shooter : SubsystemBase() {
      * Positive is to shoot, negative is to reverse.
      */
     fun runShooter(voltage: VoltageUnit = 1.0.volts) {
-//        shooterMotor.setVoltage(
         krakenShooter.setVoltage(
-        voltage.asVolts.clamp( // REMEMBER TO INVERT VOLTAGE FOR THE NEO BUT NOT FOR KRAKEN!
+        voltage.asVolts.clamp(
             -Constants.MAX_VOLTS.asVolts,
             Constants.MAX_VOLTS.asVolts
         ))
