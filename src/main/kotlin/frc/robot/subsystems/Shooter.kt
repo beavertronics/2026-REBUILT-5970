@@ -109,11 +109,11 @@ object Shooter : SubsystemBase() {
      */
     fun ShootRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command { // todo test
         return run {
-//            setTargetRPM(
-//                rpm.asRPM.clamp(
-//                -ShooterConstants.RPM_LIMIT.asRPM,
-//                ShooterConstants.RPM_LIMIT.asRPM
-//            ).RPM)
+            setTargetRPM(
+                rpm.asRPM.clamp(
+                -ShooterConstants.RPM_LIMIT.asRPM,
+                ShooterConstants.RPM_LIMIT.asRPM
+            ).RPM)
             krakenShooter.setControl(
                 MotionMagicVelocityVoltage(targetRPM.asRotationsPerSecond)
             )

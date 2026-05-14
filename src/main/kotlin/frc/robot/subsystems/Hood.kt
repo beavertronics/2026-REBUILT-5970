@@ -174,6 +174,8 @@ object Hood : SubsystemBase() {
         if (dynamic) { velocity = Shooter.currentRPM.asRPM * (PI * 4) } // live RPM
         else { velocity = Shooter.targetRPM.asRPM * (PI * 4) } // fixed RPM
 
+        println(Shooter.targetRPM.asRPM)
+
         // inches per min to meters per sec^2
         val vsq = (velocity / 2362.0)  // todo is this right?
             .metersPerSecond

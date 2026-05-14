@@ -161,9 +161,11 @@ object TeleOp {
                         Kicker.RunKickerCommand(12.0.volts)
                     )
                 }
-                else { ParallelCommandGroup( Kicker.RunKickerCommand((-10.0).volts) ) },
+                else { ParallelCommandGroup(
+                    Kicker.RunKickerCommand((-10.0).volts),
+                    Hopper.RunHopperCommand(0.0.volts) )},
                 // SHOOTER
-                Shooter.ShootRPMCommand(2500.0.RPM)
+                Shooter.ShootRPMCommand(500.0.RPM)
             )
                 .alongWith(
                     Lights.applyPatterns(
