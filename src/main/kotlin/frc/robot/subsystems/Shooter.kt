@@ -48,15 +48,17 @@ object Shooter : SubsystemBase() {
     var targetRPM: AngularVelocity
         get() = SmartDashboard.getNumber("Subsystems/Shooter/Target RPM", 0.0).RPM
         set(rpm) {
-            rpm.asRPM.clamp(
-                -ShooterConstants.RPM_LIMIT.asRPM,
-                ShooterConstants.RPM_LIMIT.asRPM
-            ).RPM
+            SmartDashboard.putNumber("Subsystems/Shooter/Target RPM",
+                rpm.asRPM.clamp(
+                    -ShooterConstants.RPM_LIMIT.asRPM,
+                    ShooterConstants.RPM_LIMIT.asRPM
+                )
+            )
         }
 
     init {
         // initially set shooter to 0 RPM
-        setTargetRPM(0.0.RPM)
+        targetRPM = 0.0.RPM
 
         // configure base features of kraken
         val config = TalonFXConfiguration()
@@ -107,55 +109,46 @@ object Shooter : SubsystemBase() {
      * @see targetRPM
      * @see frc.robot.triggers.General.rpmTrigger
      */
-    fun ShootRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command { // todo test
+    fun ShootRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command {
+        val request = MotionMagicVelocityVoltage(0.0.rotationsPerSecond.asRotationsPerSecond)
         return run {
-            setTargetRPM(
-                rpm.asRPM.clamp(
-                -ShooterConstants.RPM_LIMIT.asRPM,
-                ShooterConstants.RPM_LIMIT.asRPM
-            ).RPM)
             krakenShooter.setControl(
-                MotionMagicVelocityVoltage(targetRPM.asRotationsPerSecond)
+                request.withVelocity(rpm.asRotationsPerSecond)
             )
         }
-            .repeatedly()
-            .beforeStarting(
-                {
-                    run {
-                        setTargetRPM(rpm)
-                    }
-                }
-            )
+            .beforeStarting( runOnce { targetRPM = rpm } )
             .finallyDo({ interrupted ->
-                ShootVoltageCommand(0.0.volts)
-                setTargetRPM(0.0.RPM)
+                targetRPM = 0.0.RPM
+                krakenShooter.setControl(
+                    request.withVelocity(0.0.rotationsPerSecond.asRotationsPerSecond)
+                )
             })
     }
 
-    /**
-     * A command that sets the target rpm.
-     * param rpm the RPM to run the shooter at. This function only sets the value.
-     * The default command for the shooter will run the shooter.
-     * @see ShootRPMCommand
-     */
-    fun doSetTargetRPM(rpm: AngularVelocity) : Command {
-        return run { setTargetRPM(rpm) }
-    }
+//    /**
+//     * A command that sets the target rpm.
+//     * param rpm the RPM to run the shooter at. This function only sets the value.
+//     * The default command for the shooter will run the shooter.
+//     * @see ShootRPMCommand
+//     */
+//    fun doSetTargetRPM(rpm: AngularVelocity) : Command {
+//        return run { setTargetRPM(rpm) }
+//    }
 
     override fun periodic() {
         // get current RPM from dashboard
-        targetRPM = SmartDashboard.getNumber("Subsystems/Shooter/Target RPM", 0.0).RPM
+//        targetRPM = SmartDashboard.getNumber("Subsystems/Shooter/Target RPM", 0.0).RPM
         // put current rpm on dashboard
         SmartDashboard.putNumber("Subsystems/Shooter/Shooter RPM", currentRPM.asRPM)
     }
 
-    /**
-     * Sets the target RPM for the shooter flywheel, in RPM.
-     */
-    @JvmName("BiteMe!!!!")
-    fun setTargetRPM(target: AngularVelocity) {
-        SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", target.asRPM)
-    }
+//    /**
+//     * Sets the target RPM for the shooter flywheel, in RPM.
+//     */
+//    @JvmName("BiteMe!!!!")
+//    fun setTargetRPM(target: AngularVelocity) {
+//        SmartDashboard.putNumber("Subsystems/Shooter/Target RPM", target.asRPM)
+//    }
 
     /**
      * Runs the shooter flywheel with a voltage.

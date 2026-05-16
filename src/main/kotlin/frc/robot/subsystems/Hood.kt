@@ -64,16 +64,18 @@ object Hood : SubsystemBase() {
         get() = getCurrentAngle(false)
 
     /**
-     * Thi is the target angle for the shooter hood, in degrees
+     * This is the target angle for the shooter hood, in degrees
      */
     @get:JvmName("BiteMe!")
     var targetAngle: AngleUnit
         get() = SmartDashboard.getNumber("Subsystems/Shooter/Target Hood Angle", 0.0).degrees
         set(angle) {
-            angle.asDegrees.clamp(
-                HoodConstants.HOOD_MIN.asDegrees,
-                HoodConstants.HOOD_MAX.asDegrees
-            ).degrees
+            SmartDashboard.putNumber("Subsystems/Shooter/Target Hood Angle",
+                angle.asDegrees.clamp(
+                    HoodConstants.HOOD_MIN.asDegrees,
+                    HoodConstants.HOOD_MAX.asDegrees
+                )
+            )
         }
 
     init {
@@ -86,19 +88,18 @@ object Hood : SubsystemBase() {
      */
     fun ZeroHoodCommand() : Command {
         return run { runHood(-(0.15).volts) }
-            .until {
-                lowerLimitSwitch.get()
-            }
+            .until { lowerLimitSwitch.get() }
+            .withTimeout(5.0) // seconds
             .andThen(
                 run { runHood(0.0725.volts) }
-                    .until {
-                        !lowerLimitSwitch.get()
-                    }
-                    .finallyDo({ interrupted ->
-                        runHood(0.0.volts)
-                        setZero(false)
-                    })
+                    .until { !lowerLimitSwitch.get() }
+                    .withTimeout(3.0) // seconds
             )
+            .finallyDo({ interrupted ->
+                runHood(0.0.volts)
+                if (!interrupted) { setZero(false) }
+
+            })
     }
 
     /**
@@ -119,7 +120,6 @@ object Hood : SubsystemBase() {
         autoCalculateHood() // TODO TESTING ONLY
 
         SmartDashboard.putNumber("Subsystems/Shooter/Hood Angle", currentAngle.asDegrees) // adjusted by 90 degrees - zero
-        SmartDashboard.putNumber("Subsystems/Shooter/Target Hood Angle", targetAngle.asDegrees)
         SmartDashboard.putBoolean("Subsystems/Shooter/Hood limit switch", lowerLimitSwitch.get())
     }
 
@@ -134,12 +134,6 @@ object Hood : SubsystemBase() {
         if (override) { zeroValue = angle }
         else { zeroValue = getCurrentAngle(true) }
     }
-
-    /**
-     * Sets the target angle for the hood, in degrees.
-     */
-    @JvmName("BiteMe!!!")
-    fun setTargetAngle(target: AngleUnit) { targetAngle = target }
 
     /**
      * returns the current angle of the shooter hood with the ratio (4/87).

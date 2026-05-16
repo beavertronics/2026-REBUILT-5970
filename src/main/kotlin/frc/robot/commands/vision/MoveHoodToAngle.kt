@@ -23,15 +23,9 @@ class MoveHoodToAngle(
 
     init { addRequirements(Hood) }
 
-    var clamped: AngleUnit = 0.0.degrees
-
     override fun initialize() {
-        // keep inputted angle within safe tolerances
-        clamped = angle.asDegrees.clamp(
-            HoodConstants.HOOD_MIN.asDegrees,
-            HoodConstants.HOOD_MAX.asDegrees
-        ).degrees // degrees
-        Hood.hoodPID.setpoint = clamped.asDegrees
+        Hood.targetAngle = angle
+        Hood.hoodPID.setpoint = Hood.targetAngle.asDegrees
     }
 
     override fun execute() {
