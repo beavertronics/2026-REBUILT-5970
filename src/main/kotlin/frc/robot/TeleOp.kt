@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
+import frc.robot.commands.vision.MoveHoodToAngle
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Intake
@@ -178,9 +179,6 @@ object TeleOp {
         )
 
         // alternate features
-//        OI.alternate
-//            .and(OI.runShooter)
-//            .whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
         OI.alternate
             .and(OI.zeroHood)
             .whileTrue(Hood.ZeroHoodCommand())
@@ -190,6 +188,16 @@ object TeleOp {
         OI.alternate
             .and(OI.hoodDown)
             .whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
+        OI.alternate
+            .and(OI.hoodTest)
+            .whileTrue(MoveHoodToAngle(
+                Hood.autoCalculateHood(),
+                0.25.volts
+            )
+                .alongWith(
+                    Shooter.ShootRPMCommand(200.RPM)
+                )
+        )
     }
 
     /**
