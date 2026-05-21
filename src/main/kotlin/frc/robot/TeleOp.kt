@@ -84,7 +84,7 @@ object TeleOp {
 //            Hood.autoCalculateHood(false),
 //            0.25.volts
 //        )
-        // shooter
+//         shooter
         Shooter.defaultCommand = Shooter.ShootRPMCommand()
     }
 
@@ -166,7 +166,13 @@ object TeleOp {
                     Kicker.RunKickerCommand((-10.0).volts),
                     Hopper.RunHopperCommand(0.0.volts) )},
                 // SHOOTER
-                Shooter.ShootRPMCommand(500.0.RPM)
+                Shooter.ShootRPMCommand(3000.0.RPM)
+                    .alongWith(
+            MoveHoodToAngle( // todo test
+                        Hood.autoCalculateHood(false),
+                0.25.volts
+                        )
+                    )
             )
                 .alongWith(
                     Lights.applyPatterns(
@@ -188,16 +194,16 @@ object TeleOp {
         OI.alternate
             .and(OI.hoodDown)
             .whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
-        OI.alternate
-            .and(OI.hoodTest)
-            .whileTrue(MoveHoodToAngle(
-                Hood.autoCalculateHood(),
-                0.25.volts
-            )
-                .alongWith(
-                    Shooter.ShootRPMCommand(200.RPM)
-                )
-        )
+//        OI.alternate
+//            .and(OI.hoodTest)
+//            .whileTrue(MoveHoodToAngle(
+//                Hood.autoCalculateHood(),
+//                0.25.volts
+//            )
+//                .alongWith(
+//                    Shooter.ShootRPMCommand(200.RPM)
+//                )
+//        )
     }
 
     /**

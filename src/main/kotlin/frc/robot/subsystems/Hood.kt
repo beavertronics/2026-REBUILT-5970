@@ -111,7 +111,8 @@ object Hood : SubsystemBase() {
     fun MoveHoodVoltageCommand(voltage: VoltageUnit = 1.0.volts) : Command {
         return run { runHood(voltage) }
             .until {
-                lowerLimitSwitch.get() && TeleOp.OI.hoodUp.asBoolean == false
+                lowerLimitSwitch.get() && !TeleOp.OI.hoodUp.asBoolean
+                        || currentAngle.asDegrees >= 50.0
             }
             .finallyDo({ interrupted ->
                 runHood(0.0.volts)
@@ -168,6 +169,8 @@ object Hood : SubsystemBase() {
         // get flywheel velocity (inches / min)
         if (dynamic) { velocity = Shooter.currentRPM.asRPM * (PI * 4) } // live RPM
         else { velocity = Shooter.targetRPM.asRPM * (PI * 4) } // fixed RPM
+
+        println(velocity)
 
         // inches per min to meters per sec^2
         val vsq = (velocity / 2362.0)  // todo is this right?
