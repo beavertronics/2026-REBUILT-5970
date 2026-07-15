@@ -5,6 +5,7 @@ import beaverlib.controls.toPID
 import beaverlib.fieldmap.FieldMapREBUILTWelded
 import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.AngleUnit
+import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.asDegrees
 import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Angular.degrees
@@ -79,6 +80,7 @@ object Hood : SubsystemBase() {
         }
 
     init {
+        targetAngle = 0.0.degrees
         initMotorControllers(30, SparkBaseConfig.IdleMode.kBrake, hoodMotor)
         hoodPID.setTolerance(3.0) // tolerant to x degrees (encoder uses rotations)
     }
@@ -109,7 +111,8 @@ object Hood : SubsystemBase() {
     fun MoveHoodVoltageCommand(voltage: VoltageUnit = 1.0.volts) : Command {
         return run { runHood(voltage) }
             .until {
-                lowerLimitSwitch.get() && TeleOp.OI.hoodUp.asBoolean == false
+                lowerLimitSwitch.get() && !TeleOp.OI.hoodUp.asBoolean
+                        || currentAngle.asDegrees >= 50.0
             }
             .finallyDo({ interrupted ->
                 runHood(0.0.volts)
@@ -117,8 +120,6 @@ object Hood : SubsystemBase() {
     }
 
     override fun periodic() {
-        autoCalculateHood() // TODO TESTING ONLY
-
         SmartDashboard.putNumber("Subsystems/Shooter/Hood Angle", currentAngle.asDegrees) // adjusted by 90 degrees - zero
         SmartDashboard.putBoolean("Subsystems/Shooter/Hood limit switch", lowerLimitSwitch.get())
     }
@@ -164,11 +165,12 @@ object Hood : SubsystemBase() {
     // todo test
     fun autoCalculateHood(dynamic: Boolean = false): AngleUnit {
         var velocity: Double
+
         // get flywheel velocity (inches / min)
         if (dynamic) { velocity = Shooter.currentRPM.asRPM * (PI * 4) } // live RPM
         else { velocity = Shooter.targetRPM.asRPM * (PI * 4) } // fixed RPM
 
-        println(Shooter.targetRPM.asRPM)
+        println(velocity)
 
         // inches per min to meters per sec^2
         val vsq = (velocity / 2362.0)  // todo is this right?
