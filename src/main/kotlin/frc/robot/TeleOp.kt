@@ -40,24 +40,19 @@ object TeleOp {
             { OI.driveMode.asBoolean },
             { OI.slowMode.asBoolean }
         )
-//    val swankDrive: SwankDriveCommand =
-//        SwankDriveCommand(
-//            { OI.C_LY },
-//            { OI.C_LX },
-//            { OI.C_LT.asBoolean }
-//        )
-//    val childDrive: ChildModeDriveCommand =
-//        ChildModeDriveCommand(
-//            { OI.parentDrive },
-//            { OI.parentStrafe },
-//            { OI.parentOmega },
-//            { OI.toggleChild.asBoolean },
-//            { OI.driverY },
-//            { OI.driverX },
-//            { OI.driverOmega },
-//            { OI.toggleFieldOriented.asBoolean },
-//            { OI.toggleSlow.asBoolean }
-//        )
+
+    val childDrive: ChildModeDriveCommand =
+        ChildModeDriveCommand(
+            { OI.parentDrive },
+            { OI.parentStrafe },
+            { OI.parentOmega },
+            { OI.toggleChild.asBoolean },
+            { OI.driverY },
+            { OI.driverX },
+            { OI.driverOmega },
+            { OI.toggleFieldOriented.asBoolean },
+            { OI.toggleSlow.asBoolean }
+        )
 
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
@@ -79,11 +74,6 @@ object TeleOp {
         Hopper.defaultCommand = Hopper.RunHopperCommand(0.0.volts)
 //         shooter feed
         Kicker.defaultCommand = Kicker.RunKickerCommand(0.0.volts)
-        // hood
-//        Hood.defaultCommand = MoveHoodToAngle( // todo test
-//            Hood.autoCalculateHood(false),
-//            0.25.volts
-//        )
 //         shooter
         Shooter.defaultCommand = Shooter.ShootRPMCommand()
     }
@@ -93,18 +83,6 @@ object TeleOp {
      */
     fun configureBindings() {
         //===== DRIVETRAIN =====//
-//        OI.pointHub.whileTrue( // todo test
-//            TeleopDriveCommand(
-//                { OI.driverY },
-//                { OI.driverX },
-//                { Drivetrain.facingHubPID() },
-//                { OI.driveMode.asBoolean },
-//                { OI.slowMode.asBoolean }
-//            )
-//        )
-//        OI.hubAlign.whileTrue(Drivetrain.HubAlignCommand())
-//        OI.leftTrenchAlign.whileTrue(Drivetrain.TrenchAlignCommand(false))
-//        OI.rightTrenchAlign.whileTrue(Drivetrain.TrenchAlignCommand(true))
 
         //===== SUBSYSTEMS =====//
         // run the intake
@@ -137,7 +115,7 @@ object TeleOp {
 
         // spindexer and shooter kicker independent controls
         OI.indexIn
-//            .and(General.rpmTrigger)  // todo test
+            .and(General.rpmTrigger)  // todo test
             .whileTrue(
             ParallelCommandGroup(
                 Hopper.RunHopperCommand(9.0.volts),
@@ -168,9 +146,9 @@ object TeleOp {
                 // SHOOTER
                 Shooter.ShootRPMCommand(3000.0.RPM)
                     .alongWith(
-            MoveHoodToAngle( // todo test
-                        Hood.autoCalculateHood(false),
-                0.25.volts
+                        MoveHoodToAngle( // todo test
+                            Hood.autoCalculateHood(false),
+                            0.25.volts
                         )
                     )
             )
@@ -194,16 +172,6 @@ object TeleOp {
         OI.alternate
             .and(OI.hoodDown)
             .whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
-//        OI.alternate
-//            .and(OI.hoodTest)
-//            .whileTrue(MoveHoodToAngle(
-//                Hood.autoCalculateHood(),
-//                0.25.volts
-//            )
-//                .alongWith(
-//                    Shooter.ShootRPMCommand(200.RPM)
-//                )
-//        )
     }
 
     /**
@@ -281,17 +249,6 @@ object TeleOp {
             val driverOmega get() = -driverController.rightX.processInput()
             val slowMode get() = driverController.leftTrigger()
             val driveMode get() = driverController.rightTrigger()
-//            val pointHub get() = driverController.rightBumper()
-//            val hubAlign get() = driverController.povUp()
-//            val resetOdometry get() = driverController.back()
-//            val leftTrenchAlign get() = driverController.povLeft()
-//            val rightTrenchAlign get() = driverController.povRight()
-//            val driverX get() = leftJoystick.x.processInput()
-//            val driverY get() = leftJoystick.y.processInput()
-//            val driverOmega get() = rightJoystick.x.processInput()
-//            val slowMode get() = leftJoystick.trigger()
-//            val driveMode get() = rightJoystick.trigger()
-//            val pointHub get() = leftJoystick.button(0) // todo figure out a button
         //===== SUBSYSTEMS =====//
             // intake
             val runIntake get() = operatorController.a()

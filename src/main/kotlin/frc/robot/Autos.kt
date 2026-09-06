@@ -36,6 +36,7 @@ object Autos {
     val scorePreload =
         // zero hood
         Hood.ZeroHoodCommand()
+            .withTimeout(5.0)
             // then wait for shooter to spool up for 2.5 seconds
             .andThen(
                 ParallelRaceGroup(

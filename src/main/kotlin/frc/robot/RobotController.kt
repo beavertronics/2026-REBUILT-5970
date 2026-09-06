@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import frc.robot.commands.general.MoveTo
 import frc.robot.subsystems.Drivetrain
@@ -83,24 +84,6 @@ object RobotController : TimedRobot() {
         ManualAutoChooser.setDefaultOption("no auto", Commands.none())
         ManualAutoChooser.addOption("Align to hub", Autos.alignToHub)
         ManualAutoChooser.addOption("test all", Autos.testAll)
-//        ManualAutoChooser.addOption("Drive Sys ID",
-//            Drivetrain.sysIdDriveMotor()
-//        )
-//        ManualAutoChooser.addOption("Angle Sys ID",
-//            Drivetrain.sysIdAngleMotorCommand()
-//        )
-//        ManualAutoChooser.addOption("Shooter quasistatic reverse (forwards)",
-//            Shooter.shooterSysID()[2]
-//            )
-//        ManualAutoChooser.addOption("Shooter quasistatic forwards (reverse)",
-//            Shooter.shooterSysID()[3]
-//            )
-//        ManualAutoChooser.addOption("Shooter dynamic reverse (forwards)",
-//            Shooter.shooterSysID()[0]
-//            )
-//        ManualAutoChooser.addOption("Shooter dynamic forwards (reverse)",
-//            Shooter.shooterSysID()[1]
-//            )
 
         ManualAutoChooser.addOption("Orchestra - Never Gonna Give You Up by Rick Astley",
             InstantCommand( { Orchestrator.loadnplay("orchestra/never_gonna_give_you_up.chrp")}, Orchestrator)
@@ -113,7 +96,7 @@ object RobotController : TimedRobot() {
         Phatplanner.autoChooser.setDefaultOption("no auto", Commands.none())
 
         // make thing to choose between pathplanner and manual autos
-        AutoTypeChooser.setDefaultOption("Default - Manual", false)
+        AutoTypeChooser.setDefaultOption("Default (Manual)", false)
         AutoTypeChooser.addOption("Manual", false)
         AutoTypeChooser.addOption("Pathplanner", true)
 
@@ -154,8 +137,10 @@ object RobotController : TimedRobot() {
         else if (AutoTypeChooser.selected && selectedPathAuto != null) { selectedPathAuto?.cancel() }
         Orchestrator.stop()
         commandScheduler.schedule(
-            Hood.ZeroHoodCommand()
-                .alongWith(Shooter.ShootRPMCommand())
+            ParallelCommandGroup(
+                Hood.ZeroHoodCommand().withTimeout(5.0),
+                Shooter.ShootRPMCommand().withTimeout(5.0)
+            )
         )
     }
 
