@@ -9,10 +9,10 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
+import frc.robot.commands.vision.MoveHoodToAngle
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Intake
@@ -46,22 +46,22 @@ object TeleOp {
 //            { OI.C_LX },
 //            { OI.C_LT.asBoolean }
 //        )
-    val childDrive: ChildModeDriveCommand =
-        ChildModeDriveCommand(
-            { OI.parentDrive },
-            { OI.parentStrafe },
-            { OI.parentOmega },
-            { OI.toggleChild.asBoolean },
-            { OI.driverY },
-            { OI.driverX },
-            { OI.driverOmega },
-            { OI.toggleFieldOriented.asBoolean },
-            { OI.toggleSlow.asBoolean }
-        )
+//    val childDrive: ChildModeDriveCommand =
+//        ChildModeDriveCommand(
+//            { OI.parentDrive },
+//            { OI.parentStrafe },
+//            { OI.parentOmega },
+//            { OI.toggleChild.asBoolean },
+//            { OI.driverY },
+//            { OI.driverX },
+//            { OI.driverOmega },
+//            { OI.toggleFieldOriented.asBoolean },
+//            { OI.toggleSlow.asBoolean }
+//        )
 
     init {
         // SWAP THIS WITH WHATEVER COMMAND YOU WANT TO BE DRIVING THE ROBOT!
-        Drivetrain.defaultCommand = childDrive
+        Drivetrain.defaultCommand = teleOpDrive
 
         // SUBSYSTEMS!
         // lights
@@ -84,7 +84,7 @@ object TeleOp {
 //            Hood.autoCalculateHood(false),
 //            0.25.volts
 //        )
-        // shooter
+//         shooter
         Shooter.defaultCommand = Shooter.ShootRPMCommand()
     }
 
@@ -166,7 +166,13 @@ object TeleOp {
                     Kicker.RunKickerCommand((-10.0).volts),
                     Hopper.RunHopperCommand(0.0.volts) )},
                 // SHOOTER
-                Shooter.ShootRPMCommand(6000.0.RPM)
+                Shooter.ShootRPMCommand(3000.0.RPM)
+                    .alongWith(
+            MoveHoodToAngle( // todo test
+                        Hood.autoCalculateHood(false),
+                0.25.volts
+                        )
+                    )
             )
                 .alongWith(
                     Lights.applyPatterns(
@@ -179,9 +185,6 @@ object TeleOp {
         )
 
         // alternate features
-//        OI.alternate
-//            .and(OI.runShooter)
-//            .whileTrue(Shooter.ShootVoltageCommand(12.0.volts))
         OI.alternate
             .and(OI.zeroHood)
             .whileTrue(Hood.ZeroHoodCommand())
@@ -191,6 +194,16 @@ object TeleOp {
         OI.alternate
             .and(OI.hoodDown)
             .whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
+//        OI.alternate
+//            .and(OI.hoodTest)
+//            .whileTrue(MoveHoodToAngle(
+//                Hood.autoCalculateHood(),
+//                0.25.volts
+//            )
+//                .alongWith(
+//                    Shooter.ShootRPMCommand(200.RPM)
+//                )
+//        )
     }
 
     /**
@@ -254,10 +267,10 @@ object TeleOp {
         /**
          * Input devices go here
          */
-        val driverController = CommandXboxController(2)
-        val operatorController = CommandXboxController(3)
-        val leftJoystick = CommandJoystick(0)
-        val rightJoystick = CommandJoystick(1)
+        val driverController = CommandXboxController(0)
+        val operatorController = CommandXboxController(1)
+//        val leftJoystick = CommandJoystick(1)
+//        val rightJoystick = CommandJoystick(2)
 
         /**
          * Values for inputs go here
@@ -298,12 +311,12 @@ object TeleOp {
             // all
             val alternate get() = operatorController.leftBumper()
         //==== CHILDMODE ====//
-            val parentDrive get() = -driverController.leftY.processInput()
-            val parentStrafe get() = -driverController.leftX.processInput()
-            val parentOmega get() = -driverController.rightX.processInput()
-            val toggleChild get() = driverController.rightTrigger()
-            val toggleSlow get() = driverController.leftTrigger()
-            val toggleFieldOriented get() = driverController.leftBumper()
+            val parentDrive get() = operatorController.leftY.processInput()
+            val parentStrafe get() = operatorController.leftX.processInput()
+            val parentOmega get() = operatorController.rightX.processInput()
+            val toggleChild get() = operatorController.rightTrigger()
+            val toggleSlow get() = operatorController.leftTrigger()
+            val toggleFieldOriented get() = operatorController.leftBumper()
     }
 }
 
