@@ -3,10 +3,8 @@ package frc.robot
 import beaverlib.fieldmap.FieldMapREBUILTWelded
 import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.degrees
-import beaverlib.utils.Units.Electrical.ohms
 import beaverlib.utils.Units.Electrical.volts
 import beaverlib.utils.Units.Linear.meters
-import com.revrobotics.spark.SparkMaxAlternateEncoder
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.wpilibj2.command.InstantCommand
@@ -14,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.WaitCommand
-import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.commands.general.MoveTo
 import frc.robot.commands.vision.MoveHoodToAngle
 import frc.robot.subsystems.Hood
@@ -23,7 +20,6 @@ import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Kicker
 import frc.robot.subsystems.Orchestrator
 import frc.robot.subsystems.Shooter
-import frc.robot.triggers.General
 
 /**
  * All pre-made commands and autos that can be used.
@@ -53,6 +49,18 @@ object Autos {
                     ),
                     // full thing ends after 17.5 seconds
                     WaitCommand(17.5)               )
+            )
+
+    /**
+     * Shoots and juggles a ball repeatedly
+     */
+    val juggle =
+        Hood.ZeroHoodCommand()
+            .andThen(
+                Shooter.ShootRPMCommand(300.0.RPM)
+                    .alongWith(
+                        Hopper.RunHopperCommand(12.0.volts)
+                    )
             )
 
     /**

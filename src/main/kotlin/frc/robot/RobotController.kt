@@ -1,12 +1,8 @@
 package frc.robot
 
-import beaverlib.fieldmap.FieldMapREBUILTWelded
-import beaverlib.utils.Units.Linear.meters
 import com.ctre.phoenix6.SignalLogger
 import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.util.StatusLogger
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.wpilibj.TimedRobot
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -15,8 +11,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
-import frc.robot.commands.general.MoveTo
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Hopper
@@ -82,6 +76,8 @@ object RobotController : TimedRobot() {
 
         // load manual autos
         ManualAutoChooser.setDefaultOption("no auto", Commands.none())
+        ManualAutoChooser.addOption("score preload", Autos.scorePreload)
+        ManualAutoChooser.addOption("juggle", Autos.juggle)
         ManualAutoChooser.addOption("Align to hub", Autos.alignToHub)
         ManualAutoChooser.addOption("test all", Autos.testAll)
 
