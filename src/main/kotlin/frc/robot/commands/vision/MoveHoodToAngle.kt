@@ -30,8 +30,7 @@ class MoveHoodToAngle(
 
     override fun execute() {
         // position of encoder for shooter hood
-        val pos = Hood.currentAngle
-        val calculated = Hood.hoodPID.calculate(pos.asDegrees)
+        val calculated = Hood.hoodPID.calculate(Hood.currentAngle.asDegrees)
         Hood.runHood((calculated * abs(voltage.asVolts)).volts)
     }
 
