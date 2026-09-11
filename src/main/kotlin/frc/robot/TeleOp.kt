@@ -109,8 +109,8 @@ object TeleOp {
         )
 
         // move the intake in or out
-        OI.intakeIn.whileTrue(IntakeArm.MoveIntakeCommand(5.0.volts))
-        OI.intakeOut.whileTrue(IntakeArm.MoveIntakeCommand((-5.0).volts))
+        OI.intakeIn.whileTrue(IntakeArm.MoveIntakeCommand(5.0.volts, false))
+        OI.intakeOut.whileTrue(IntakeArm.MoveIntakeCommand((-5.0).volts, false))
 
         // spindexer and shooter kicker independent controls
         OI.indexIn
