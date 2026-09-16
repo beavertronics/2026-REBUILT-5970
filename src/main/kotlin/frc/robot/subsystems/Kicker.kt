@@ -25,8 +25,8 @@ object Kicker: SubsystemBase() {
     /**
      * A command to run the shooter feed at the inputted voltage.
      * This commands will reverse the kicker if it is stalled
-     * @param stall whether to invert direction when a stall is detected.
      * @param voltage the voltage to run the feeder motor at.
+     * @param stall whether to invert direction when a stall is detected.
      */
     fun RunKickerCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
         return run {

@@ -34,8 +34,8 @@ object IntakeArm : SubsystemBase() {
 
     /**
      * A command to move the intake arm up or down.
-     * @param stall whether to invert the direction when a stall is detected.
      * @param voltage the voltage to move the arm at.
+     * @param safe whether to stop when a limit switch is hit.
      */
     fun MoveIntakeCommand(voltage: VoltageUnit = 1.0.volts, safe: Boolean = true) : Command {
         return run {

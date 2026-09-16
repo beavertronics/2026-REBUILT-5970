@@ -26,8 +26,8 @@ object Hopper : SubsystemBase() {
 
     /**
      * A command to run the spindexer at the inputted voltage.
-     * @param stall whether to invert the direction when a stall is detected.
      * @param voltage the voltage to run the spindexer motor at.
+     * @param stall whether to invert the direction when a stall is detected.
      */
     fun RunHopperCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
         return run {
