@@ -117,6 +117,13 @@ object Hood : SubsystemBase() {
     }
 
     /**
+     * Returns the interpolated guess for the hood angle
+     */
+    fun getInterpolatedAngle() : AngleUnit {
+        return distanceInterpolator.get(getPoseToHub().magnitude).degrees
+    }
+
+    /**
      * A command to run the hood motor at the inputted voltage.
      * @param voltage to voltage to run the hood motor at.
      */
