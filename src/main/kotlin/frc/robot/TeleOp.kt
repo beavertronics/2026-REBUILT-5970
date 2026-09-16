@@ -3,21 +3,17 @@ package frc.robot
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
 import beaverlib.utils.Units.Angular.RPM
-import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.ConditionalCommand
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
-import edu.wpi.first.wpilibj2.command.WaitCommand
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
-import frc.robot.commands.vision.MoveHoodToAngle
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Intake
@@ -26,7 +22,6 @@ import frc.robot.subsystems.Hopper
 import frc.robot.subsystems.IntakeArm
 import frc.robot.subsystems.Kicker
 import frc.robot.subsystems.Lights
-import frc.robot.subsystems.ShooterConstants
 import frc.robot.triggers.General
 
 /*
@@ -74,13 +69,11 @@ object TeleOp {
         )
         // intake
         Intake.defaultCommand = Intake.RunIntakeCommand(0.0.volts)
-        // intake mover
-//        IntakeArm.MoveIntakeCommand((-5.0).volts) // todo fix limit switches!
         // hopper
         Hopper.defaultCommand = Hopper.RunHopperCommand(0.0.volts)
-//         shooter feed
+        // shooter feed
         Kicker.defaultCommand = Kicker.RunKickerCommand(0.0.volts)
-//         shooter
+        // shooter
         Shooter.defaultCommand = Shooter.ShootRPMCommand()
     }
 
@@ -88,8 +81,6 @@ object TeleOp {
      * configures things to run on specific inputs
      */
     fun configureBindings() {
-        ////////////////// NORMAL USE
-
         //===== DRIVETRAIN =====//
         //===== SUBSYSTEMS =====//
         // run the intake
@@ -117,13 +108,12 @@ object TeleOp {
         )
 
         // move the intake in or out
+        // safe is false due to the absence of limit switches
         OI.intakeIn.whileTrue(IntakeArm.MoveIntakeCommand(5.0.volts, false))
         OI.intakeOut.whileTrue(IntakeArm.MoveIntakeCommand((-5.0).volts, false))
 
         // spindexer and shooter kicker independent controls
-        OI.indexIn
-//            .and(General.rpmTrigger)  // todo test
-            .whileTrue(
+        OI.indexIn.whileTrue(
             ParallelCommandGroup(
                 Hopper.RunHopperCommand(9.0.volts),
                 Kicker.RunKickerCommand(12.0.volts)
@@ -139,18 +129,15 @@ object TeleOp {
         // shooter
         OI.runShooter.whileTrue(
             InstantCommand({Shooter.targetRPM = 6000.0.RPM}).andThen(
-                ParallelCommandGroup(
-                    WaitUntilCommand(General.rpmTrigger).andThen(
-                        ParallelCommandGroup(
-                            Hopper.RunHopperCommand(9.0.volts),
-                            Kicker.RunKickerCommand(12.0.volts)
+                Shooter.ShootRPMCommand(6000.0.RPM).alongWith(
+                    Lights.applyPatterns(mutableListOf(
+                        Pair("shooting", "intake left"),
+                        Pair("shooting", "intake right")
                         )
                     ),
-                    Shooter.ShootRPMCommand(6000.0.RPM),
-                    Lights.applyPatterns(
-                        mutableListOf(
-                            Pair("shooting", "intake left"),
-                            Pair("shooting", "intake right")
+                    WaitUntilCommand(General.rpmTrigger).andThen(
+                        Hopper.RunHopperCommand(9.0.volts).alongWith(
+                            Kicker.RunKickerCommand(12.0.volts)
                         )
                     )
                 )
@@ -158,9 +145,9 @@ object TeleOp {
         )
 
         // alternate features
-//        OI.alternate
-//            .and(OI.zeroHood)
-//            .whileTrue(Hood.ZeroHoodCommand())
+        OI.alternate
+            .and(OI.zeroHood)
+            .whileTrue(Hood.ZeroHoodCommand())
         OI.alternate
             .and(OI.hoodUp)
             .whileTrue(Hood.MoveHoodVoltageCommand(0.3.volts))
