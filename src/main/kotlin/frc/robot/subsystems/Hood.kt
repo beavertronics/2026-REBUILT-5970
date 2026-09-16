@@ -5,23 +5,22 @@ import beaverlib.controls.toPID
 import beaverlib.fieldmap.FieldMapREBUILTWelded
 import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.AngleUnit
-import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.asDegrees
-import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Angular.degrees
-import beaverlib.utils.Units.Angular.radians
 import beaverlib.utils.Units.Electrical.VoltageUnit
 import beaverlib.utils.Units.Electrical.volts
-import beaverlib.utils.Units.Linear.earthGravity
 import beaverlib.utils.Units.Linear.feet
 import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.Units.Linear.meters
-import beaverlib.utils.Units.Linear.metersPerSecond
-import beaverlib.utils.Units.Linear.metersPerSecondSquared
 import beaverlib.utils.geometry.Vector2
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Transform2d
+import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
@@ -29,15 +28,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
 import frc.robot.Constants
 import frc.robot.TeleOp
-import kotlin.math.PI
-import kotlin.math.atan
-import kotlin.math.sqrt
 
 object HoodConstants {
     val hoodID = 11
     val HOOD_MIN = 0.0.degrees
     val HOOD_MAX = 55.0.degrees
     val hoodLimitSwitchID = 0
+    val shooterToRobot = Transform2d(Translation2d(-26.0/2, 26.0/2), Rotation2d()) // todo
 }
 
 object AAC {
@@ -52,6 +49,7 @@ object Hood : SubsystemBase() {
     val lowerLimitSwitch = DigitalInput(HoodConstants.hoodLimitSwitchID)
     val hoodPIDConstants = PIDConstants(0.05, 0.0, 0.0)
     val hoodPID = hoodPIDConstants.toPID()
+    val distanceInterpolator = InterpolatingDoubleTreeMap.ofEntries() // pairs of <distance (meters), hood angle (degrees)>
 
     /**
      * This is the zero value for the encoder for the shooter hood, in degrees
@@ -102,6 +100,20 @@ object Hood : SubsystemBase() {
                 if (!interrupted) { setZero(false) }
 
             })
+    }
+
+    /**
+     * Gets the true distance from the shooter in the back-left corner to the hub.
+     */
+    fun getTruePose() : Pose2d {
+        return Drivetrain.swerveDrive.pose.plus(HoodConstants.shooterToRobot)
+    }
+
+    /**
+     * Gets the angle to rotate to face the hub.
+     */
+    fun getPoseToHub() : Vector2 {
+        return FieldMapREBUILTWelded.teamHub.center.minus(getTruePose())
     }
 
     /**
@@ -161,70 +173,4 @@ object Hood : SubsystemBase() {
             Constants.MAX_VOLTS.asVolts
         )
     )}
-
-    // todo test
-    fun autoCalculateHood(dynamic: Boolean = false): AngleUnit {
-        var velocity: Double
-
-        // get flywheel velocity (inches / min)
-        if (dynamic) { velocity = Shooter.currentRPM.asRPM * (PI * 4) } // live RPM
-        else { velocity = Shooter.targetRPM.asRPM * (PI * 4) } // fixed RPM
-
-        println(velocity)
-
-        // inches per min to meters per sec^2
-        val vsq = (velocity / 2362.0)  // todo is this right?
-            .metersPerSecond
-            .asMetersPerSecond
-            .metersPerSecondSquared
-
-        // get distance (hypotenuse) from hub
-        val distance = Vector2(
-            `according to all known laws of aviation, our robot should not be able to fly`.pose)
-            .distance(FieldMapREBUILTWelded.teamHub.center)
-            .meters
-
-        // calculated the sqrt
-        val calculatedSqrt = sqrt(
-            vsq.asMetersPerSecondSquared * vsq.asMetersPerSecondSquared
-                    - earthGravity.asMetersPerSecondSquared
-                    * (
-                    earthGravity.asMetersPerSecondSquared
-                            * distance.asMeters
-                            * distance.asMeters
-                            + 2
-                            * AAC.heightDiff.asMeters
-                            * vsq.asMetersPerSecondSquared
-                    )
-        )
-
-        // get the positive and negative parts of sqrt
-        val calculatedPos = atan((vsq.asMetersPerSecondSquared + calculatedSqrt) /
-                (earthGravity.asMetersPerSecondSquared * distance.asMeters))
-        val calculatedNeg = atan((vsq.asMetersPerSecondSquared - calculatedSqrt) /
-                (earthGravity.asMetersPerSecondSquared * distance.asMeters))
-
-        // clamp to constrained degrees
-        val posAngle =
-            (90.0.degrees.asDegrees - calculatedPos.radians.asDegrees)
-                .clamp(
-                    0.0.degrees.asDegrees, HoodConstants.HOOD_MAX.asDegrees
-                ).degrees
-
-        val negAngle =
-            (90.0.degrees.asDegrees - calculatedNeg.radians.asDegrees)
-                .clamp(
-                    0.0.degrees.asDegrees, HoodConstants.HOOD_MAX.asDegrees
-                ).degrees
-
-        // get final (bigger) angle
-        val hoodAngle = when {
-            (posAngle.asDegrees > negAngle.asDegrees) -> posAngle
-            (negAngle.asDegrees > posAngle.asDegrees) -> negAngle
-            (negAngle.asDegrees == posAngle.asDegrees) -> posAngle
-            else -> 0.0.degrees
-        }
-
-        return hoodAngle
-    }
 }
