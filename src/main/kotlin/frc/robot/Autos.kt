@@ -55,16 +55,16 @@ object Autos {
      * Shoots and juggles a ball repeatedly
      */
     val juggle =
-        Hood.ZeroHoodCommand().andThen(MoveHoodToAngle(45.0.degrees))
-            .andThen(
-                Shooter.ShootRPMCommand(500.0.RPM)
+//        Hood.ZeroHoodCommand().andThen(MoveHoodToAngle(45.0.degrees))
+//            .andThen(
+                Shooter.ShootRPMCommand(525.0.RPM)
                     .alongWith(
                         Hopper.RunHopperCommand(6.0.volts)
                     )
                     .alongWith(
                         Kicker.RunKickerCommand(9.0.volts)
                     )
-            )
+//            )
 
     /**
      * An auto to run every motor at once for testing.

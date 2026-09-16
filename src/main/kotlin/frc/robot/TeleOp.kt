@@ -3,12 +3,17 @@ package frc.robot
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
 import beaverlib.utils.Units.Angular.RPM
+import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
+import edu.wpi.first.wpilibj2.command.ConditionalCommand
+import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import edu.wpi.first.wpilibj2.command.WaitCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
@@ -21,6 +26,7 @@ import frc.robot.subsystems.Hopper
 import frc.robot.subsystems.IntakeArm
 import frc.robot.subsystems.Kicker
 import frc.robot.subsystems.Lights
+import frc.robot.subsystems.ShooterConstants
 import frc.robot.triggers.General
 
 /*
@@ -43,13 +49,13 @@ object TeleOp {
 
     val childDrive: ChildModeDriveCommand =
         ChildModeDriveCommand(
-            { OI.parentDrive },
-            { OI.parentStrafe },
-            { OI.parentOmega },
-            { OI.toggleChild.asBoolean },
             { OI.driverY },
             { OI.driverX },
             { OI.driverOmega },
+            { OI.toggleChild.asBoolean },
+            { OI.childDrive },
+            { OI.childStrafe },
+            { OI.childOmega },
             { OI.toggleFieldOriented.asBoolean },
             { OI.toggleSlow.asBoolean }
         )
@@ -82,6 +88,8 @@ object TeleOp {
      * configures things to run on specific inputs
      */
     fun configureBindings() {
+        ////////////////// NORMAL USE
+
         //===== DRIVETRAIN =====//
         //===== SUBSYSTEMS =====//
         // run the intake
@@ -109,8 +117,8 @@ object TeleOp {
         )
 
         // move the intake in or out
-        OI.intakeIn.whileTrue(IntakeArm.MoveIntakeCommand(5.0.volts))
-        OI.intakeOut.whileTrue(IntakeArm.MoveIntakeCommand((-5.0).volts))
+        OI.intakeIn.whileTrue(IntakeArm.MoveIntakeCommand(5.0.volts, false))
+        OI.intakeOut.whileTrue(IntakeArm.MoveIntakeCommand((-5.0).volts, false))
 
         // spindexer and shooter kicker independent controls
         OI.indexIn
@@ -130,28 +138,15 @@ object TeleOp {
 
         // shooter
         OI.runShooter.whileTrue(
-//            Shooter.ShootRPMCommand(5500.0.RPM)
-            ParallelCommandGroup(
-                // HOPPER AND KICKER
-                if (General.rpmTrigger.asBoolean) {
-                    ParallelCommandGroup(
-                        Hopper.RunHopperCommand(9.0.volts),
-                        Kicker.RunKickerCommand(12.0.volts)
-                    )
-                }
-                else { ParallelCommandGroup(
-                    Kicker.RunKickerCommand((-10.0).volts),
-                    Hopper.RunHopperCommand(0.0.volts) )},
-                // SHOOTER
-                Shooter.ShootRPMCommand(3000.0.RPM)
-                    .alongWith(
-            MoveHoodToAngle( // todo test
-                        Hood.autoCalculateHood(false),
-                0.25.volts
+            InstantCommand({Shooter.targetRPM = 6000.0.RPM}).andThen(
+                ParallelCommandGroup(
+                    WaitUntilCommand(General.rpmTrigger).andThen(
+                        ParallelCommandGroup(
+                            Hopper.RunHopperCommand(9.0.volts),
+                            Kicker.RunKickerCommand(12.0.volts)
                         )
-                    )
-            )
-                .alongWith(
+                    ),
+                    Shooter.ShootRPMCommand(6000.0.RPM),
                     Lights.applyPatterns(
                         mutableListOf(
                             Pair("shooting", "intake left"),
@@ -159,18 +154,19 @@ object TeleOp {
                         )
                     )
                 )
+            )
         )
 
         // alternate features
-        OI.alternate
-            .and(OI.zeroHood)
-            .whileTrue(Hood.ZeroHoodCommand())
+//        OI.alternate
+//            .and(OI.zeroHood)
+//            .whileTrue(Hood.ZeroHoodCommand())
         OI.alternate
             .and(OI.hoodUp)
-            .whileTrue(Hood.MoveHoodVoltageCommand(0.25.volts))
+            .whileTrue(Hood.MoveHoodVoltageCommand(0.3.volts))
         OI.alternate
             .and(OI.hoodDown)
-            .whileTrue(Hood.MoveHoodVoltageCommand((-0.25).volts))
+            .whileTrue(Hood.MoveHoodVoltageCommand((-0.3).volts))
     }
 
     /**
@@ -267,12 +263,12 @@ object TeleOp {
             // all
             val alternate get() = operatorController.leftBumper()
         //==== CHILDMODE ====//
-            val parentDrive get() = operatorController.leftY.processInput()
-            val parentStrafe get() = operatorController.leftX.processInput()
-            val parentOmega get() = operatorController.rightX.processInput()
-            val toggleChild get() = operatorController.rightTrigger()
-            val toggleSlow get() = operatorController.leftTrigger()
-            val toggleFieldOriented get() = operatorController.leftBumper()
+            val childDrive get() = -operatorController.leftY.processInput()
+            val childStrafe get() = -operatorController.leftX.processInput()
+            val childOmega get() = -operatorController.rightX.processInput()
+            val toggleChild get() = driverController.rightTrigger()
+            val toggleSlow get() = driverController.leftTrigger()
+            val toggleFieldOriented get() = driverController.leftBumper()
     }
 }
 

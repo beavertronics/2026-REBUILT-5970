@@ -17,7 +17,7 @@ object General {
      * @see ShooterConstants.MAX_RPM_DIFF
      */
     val rpmTrigger = Trigger {
-        abs(Shooter.currentRPM.asRPM - Shooter.targetRPM.asRPM) <= ShooterConstants.MAX_RPM_DIFF.asRPM
+        abs(Shooter.targetRPM.asRPM - Shooter.currentRPM.asRPM) <= ShooterConstants.MAX_RPM_DIFF.asRPM
     }
 
     /**
