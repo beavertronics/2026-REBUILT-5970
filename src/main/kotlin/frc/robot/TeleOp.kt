@@ -130,7 +130,7 @@ object TeleOp {
 
         // shooter
         OI.runShooter.whileTrue(
-            // zeroes the hood
+            // moves hood to angle
             MoveHoodToAngle(
                 Odometry.getApproxHoodAngle()
             // with timeout, along with,
