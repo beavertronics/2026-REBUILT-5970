@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Drivetrain
-import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
+import frc.robot.subsystems.Odometry
 
 // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
 /**
@@ -44,21 +44,21 @@ class MoveTo(val target: Pose2d, val speedLimit: Double = 1.0) : Command() {
         // removes full rotations and whatnot? keeps it within 0-360 (or 0-2pi)
         oPID.setpoint = MathUtil.angleModulus(target.rotation.radians)
         // disable vision updating odometry
-        `according to all known laws of aviation, our robot should not be able to fly`.doEnableVisionOdometry(false)
+        Odometry.doEnableVisionOdometry(false)
     }
 
     override fun execute() {
         // calculate the errors
         val xDrive = xPID.calculate(
-            `according to all known laws of aviation, our robot should not be able to fly`.pose.x
+            Odometry.pose.x
                     * 1.0 // inversion
         )
         val yDrive = yPID.calculate(
-            `according to all known laws of aviation, our robot should not be able to fly`.pose.y
+            Odometry.pose.y
                     * 1.0 // inversion
         )
         val oDrive = oPID.calculate(
-            `according to all known laws of aviation, our robot should not be able to fly`.pose.rotation.radians
+            Odometry.pose.rotation.radians
                     * 1.0 // inversion
         )
         // drive the robot
@@ -78,7 +78,7 @@ class MoveTo(val target: Pose2d, val speedLimit: Double = 1.0) : Command() {
 
     override fun end(interrupted: Boolean) {
         Drivetrain.stop()
-        `according to all known laws of aviation, our robot should not be able to fly`.doEnableVisionOdometry(true)
+        Odometry.doEnableVisionOdometry(true)
         return
     }
 }

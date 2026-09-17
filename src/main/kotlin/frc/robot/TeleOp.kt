@@ -23,7 +23,7 @@ import frc.robot.subsystems.Hopper
 import frc.robot.subsystems.IntakeArm
 import frc.robot.subsystems.Kicker
 import frc.robot.subsystems.Lights
-import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
+import frc.robot.subsystems.Odometry
 import frc.robot.triggers.General
 
 /*
@@ -130,27 +130,37 @@ object TeleOp {
 
         // shooter
         OI.runShooter.whileTrue(
-            InstantCommand({
-                Shooter.targetRPM = `according to all known laws of aviation, our robot should not be able to fly`.getApproxFlywheelRPM()
-            }).andThen(
-                Shooter.ShootRPMCommand(Shooter.targetRPM).alongWith(
-                    MoveTo(
-                        `according to all known laws of aviation, our robot should not be able to fly`.getRotationToHub()
-                    ).andThen(
-                        WaitUntilCommand(General.rpmTrigger).andThen(
-                            Hopper.RunHopperCommand(9.0.volts).alongWith(
-                                Kicker.RunKickerCommand(12.0.volts)
+            // zeroes the hood
+            MoveHoodToAngle(
+                Odometry.getApproxHoodAngle()
+            // with timeout, along with,
+            ).withTimeout(5.0).alongWith(
+                // sets target RPM
+                InstantCommand({
+                    Shooter.targetRPM = Odometry.getApproxFlywheelRPM()
+                // and then,
+                }).andThen(
+                    // runs shooter flywheel to target RPM
+                    Shooter.ShootRPMCommand(Shooter.targetRPM).alongWith(
+                        // while rotating to face the hub
+                        MoveTo(
+                            Odometry.getRotationToHub()
+                        // and then,
+                        ).andThen(
+                            // one General.rmpTrigger,
+                            WaitUntilCommand(General.rpmTrigger).andThen(
+                                // run the hopper
+                                Hopper.RunHopperCommand(9.0.volts).alongWith(
+                                    // while running the kicker
+                                    Kicker.RunKickerCommand(12.0.volts)
+                                )
                             )
-                        )
-                    ),
-                    Lights.applyPatterns(mutableListOf(
+                        ),
+                        // while running the LEDs
+                        Lights.applyPatterns(mutableListOf(
                             Pair("shooting", "intake left"),
                             Pair("shooting", "intake right")
                         )
-                    ),
-                    Hood.ZeroHoodCommand().andThen(
-                        MoveHoodToAngle(
-                            `according to all known laws of aviation, our robot should not be able to fly`.getApproxHoodAngle()
                         )
                     )
                 )

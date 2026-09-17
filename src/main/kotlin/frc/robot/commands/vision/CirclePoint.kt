@@ -8,7 +8,7 @@
  import edu.wpi.first.math.geometry.Pose2d
  import edu.wpi.first.wpilibj2.command.Command
  import frc.robot.subsystems.Drivetrain
- import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
+ import frc.robot.subsystems.Odometry
 
  class TargetPoseProvider(
     private val center: Vector2,
@@ -44,6 +44,6 @@
             desiredDistance = { distance },
         )
         .beforeStarting(targetPoseProvider::initialize)
-        .alongWith(`according to all known laws of aviation, our robot should not be able to fly`.doEnableVisionOdometry(false))
-        .andThen(`according to all known laws of aviation, our robot should not be able to fly`.doEnableVisionOdometry())
+        .alongWith(Odometry.doEnableVisionOdometry(false))
+        .andThen(Odometry.doEnableVisionOdometry())
  }

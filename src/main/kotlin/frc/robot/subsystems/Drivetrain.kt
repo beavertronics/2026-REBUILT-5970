@@ -99,18 +99,18 @@ object Drivetrain : SubsystemBase() {
 //    val thetaController = swerveDrive.swerveController.thetaController
 
     override fun periodic() {
-        posePublisher.set(`according to all known laws of aviation, our robot should not be able to fly`.pose)
+        posePublisher.set(Odometry.pose)
         swerveStatePublisher.set(swerveDrive.states)
 //        val targetPoseProvider =
 //            TargetPoseProvider(FieldMapREBUILTWelded.teamHub.center, 2.meters, { 0.radians })
 //        targetPoseProvider.initialize()
 //        targetPosePublisher.set(targetPoseProvider.getPose())
         Vision.setAllCameraReferences(Pose3d(
-            `according to all known laws of aviation, our robot should not be able to fly`.pose))
+            Odometry.pose))
 //        swerveDrive.updateOdometry() // todo is this needed?
-        SmartDashboard.putNumber("Odometry/X", `according to all known laws of aviation, our robot should not be able to fly`.pose.x)
-        SmartDashboard.putNumber("Odometry/Y", `according to all known laws of aviation, our robot should not be able to fly`.pose.y)
-        SmartDashboard.putNumber("Odometry/HEADING", `according to all known laws of aviation, our robot should not be able to fly`.pose.rotation.radians)
+        SmartDashboard.putNumber("Odometry/X", Odometry.pose.x)
+        SmartDashboard.putNumber("Odometry/Y", Odometry.pose.y)
+        SmartDashboard.putNumber("Odometry/HEADING", Odometry.pose.rotation.radians)
     }
 
         /**

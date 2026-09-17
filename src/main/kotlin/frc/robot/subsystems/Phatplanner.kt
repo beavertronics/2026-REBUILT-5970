@@ -31,7 +31,7 @@ object Phatplanner : SubsystemBase() {
         }
         // Configure AutoBuilder last
         AutoBuilder.configure(
-            { `according to all known laws of aviation, our robot should not be able to fly`.pose },  // Robot pose supplier
+            { Odometry.pose },  // Robot pose supplier
             { newPose : Pose2d -> Drivetrain.swerveDrive.resetOdometry(newPose) },  // Method to reset odometry (will be called if your auto has a starting pose)
             { Drivetrain.swerveDrive.robotVelocity },  // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             { speeds, feedforwards -> Drivetrain.drive(speeds) },  // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards

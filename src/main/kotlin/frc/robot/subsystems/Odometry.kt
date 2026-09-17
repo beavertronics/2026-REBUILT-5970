@@ -1,10 +1,12 @@
 package frc.robot.subsystems
 
 import beaverlib.fieldmap.FieldMapREBUILTWelded
+import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.AngleUnit
 import beaverlib.utils.Units.Angular.AngularVelocity
 import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.asDegrees
+import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Angular.degrees
 import beaverlib.utils.geometry.Vector2
 import edu.wpi.first.math.VecBuilder
@@ -18,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.subsystems.Drivetrain.swerveDrive
 
-object `according to all known laws of aviation, our robot should not be able to fly` : SubsystemBase() {
+object Odometry : SubsystemBase() {
 
     init {
         // Updates odometry whenever vision sees apriltag
@@ -121,7 +123,9 @@ object `according to all known laws of aviation, our robot should not be able to
      * @return AngleUnit
      */
     fun getApproxHoodAngle() : AngleUnit {
-        return distanceInterpolator.get(getVectorToHub().magnitude).degrees
+        return distanceInterpolator.get(getVectorToHub().magnitude).clamp(
+            HoodConstants.HOOD_MIN.asDegrees, HoodConstants.HOOD_MAX.asDegrees
+        ).degrees
     }
 
     /**
@@ -129,7 +133,9 @@ object `according to all known laws of aviation, our robot should not be able to
      * @return AngularVelocity
      */
     fun getApproxFlywheelRPM() : AngularVelocity {
-        return flywheelInterpolator.get(getVectorToHub().magnitude).RPM
+        return flywheelInterpolator.get(getVectorToHub().magnitude).clamp(
+            0.0, ShooterConstants.RPM_LIMIT.asRPM
+        ).RPM
     }
 
     /**

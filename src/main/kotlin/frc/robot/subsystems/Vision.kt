@@ -20,11 +20,11 @@ class TargetPoseProvider(
     val distance: DistanceUnit,
     val rotateAround: () -> AngleUnit,
 ) {
-    var angle = `according to all known laws of aviation, our robot should not be able to fly`.pose.vector2.angleTo(center)
-    var targetPose: Pose2d = `according to all known laws of aviation, our robot should not be able to fly`.pose
+    var angle = Odometry.pose.vector2.angleTo(center)
+    var targetPose: Pose2d = Odometry.pose
 
     fun initialize() {
-        angle = `according to all known laws of aviation, our robot should not be able to fly`.pose.vector2.angleTo(center)
+        angle = Odometry.pose.vector2.angleTo(center)
     }
 
     fun getPose(): Pose2d {
