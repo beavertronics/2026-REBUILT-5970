@@ -8,6 +8,7 @@ import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.asDegrees
 import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Angular.degrees
+import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.geometry.Vector2
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.geometry.*
@@ -52,7 +53,10 @@ object Odometry : SubsystemBase() {
     var updateVisionOdometry = true
     val field = Field2d()
     // offset from robot to shooter
-    val robotToShooter = Transform2d(Translation2d(-26.0/2, 26.0/2), Rotation2d()) // todo
+    val robotToShooter = Transform2d(Translation2d(
+        (-26.0/2).inches.asMeters,
+        (26.0/2).inches.asMeters
+    ), Rotation2d()) // todo
     // interpolater for guessing hood angle for distance
     val distanceInterpolator = InterpolatingDoubleTreeMap.ofEntries(
     ) // pairs of <distance (meters), hood angle (degrees)>
@@ -108,13 +112,13 @@ object Odometry : SubsystemBase() {
     }
 
     /**
-     * Gets the same pose as the robot with rotation applied to face the hub
+     * Gets the same pose as the robot with rotation applied to face the hub (rotation in radians!)
      */
     fun getRotationToHub() : Pose2d {
         return Pose2d(
             pose.x,
             pose.y,
-            Rotation2d(getVectorToHub().angle.asDegrees)
+            Rotation2d(getVectorToHub().angle.asRadians)
         )
     }
 

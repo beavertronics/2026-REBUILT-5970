@@ -2,6 +2,8 @@ package frc.robot
 
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
+import beaverlib.utils.Units.Angular.asDegrees
+import beaverlib.utils.Units.Angular.degrees
 import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
@@ -132,7 +134,7 @@ object TeleOp {
         OI.runShooter.whileTrue(
             // moves hood to angle
             MoveHoodToAngle(
-                Odometry.getApproxHoodAngle()
+                Odometry.getApproxHoodAngle().asDegrees.degrees
             // with timeout, along with,
             ).withTimeout(5.0).alongWith(
                 // sets target RPM
