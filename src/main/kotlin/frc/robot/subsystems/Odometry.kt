@@ -1,7 +1,15 @@
 package frc.robot.subsystems
 
+import beaverlib.fieldmap.FieldMapREBUILTWelded
+import beaverlib.utils.Units.Angular.AngleUnit
+import beaverlib.utils.Units.Angular.AngularVelocity
+import beaverlib.utils.Units.Angular.RPM
+import beaverlib.utils.Units.Angular.asDegrees
+import beaverlib.utils.Units.Angular.degrees
+import beaverlib.utils.geometry.Vector2
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.geometry.*
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.util.sendable.SendableRegistry
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
@@ -26,7 +34,7 @@ object `according to all known laws of aviation, our robot should not be able to
                 addVisionMeasurement(newPose.toPose2d(), result.timestampSeconds, true)
             },
         )
-        setVisionMeasurementStdDevs(1.0, 1.0, 0.25) // todo tune
+        setVisionMeasurementStdDevs(1.0, 1.0, 0.25)
 
 //        swerveDrive.setGyroOffset( // todo
 //            Rotation3d(
@@ -41,6 +49,13 @@ object `according to all known laws of aviation, our robot should not be able to
     val pose get() = swerveDrive.pose
     var updateVisionOdometry = true
     val field = Field2d()
+    // offset from robot to shooter
+    val robotToShooter = Transform2d(Translation2d(-26.0/2, 26.0/2), Rotation2d()) // todo
+    // interpolater for guessing hood angle for distance
+    val distanceInterpolator = InterpolatingDoubleTreeMap.ofEntries(
+    ) // pairs of <distance (meters), hood angle (degrees)>
+    val flywheelInterpolator = InterpolatingDoubleTreeMap.ofEntries(
+    ) // pairs of <distance (meters), flywheel rpm (rpm)<
 
     override fun periodic() {
         field.robotPose = pose
@@ -71,6 +86,50 @@ object `according to all known laws of aviation, our robot should not be able to
                 Pose2d(measurement.x, measurement.y, swerveDrive.pose.rotation),
                 timestamp,
             )
+    }
+
+    /**
+     * Gets the true distance from the shooter in the back-left corner to the hub.
+     * @return Pose2d
+     */
+    fun getShooterPose() : Pose2d {
+        return swerveDrive.pose.plus(robotToShooter)
+    }
+
+    /**
+     * Gets the pose to be facing the hub, with offsets.
+     * @return Vector2
+     */
+    fun getVectorToHub() : Vector2 {
+        // will get the difference in poses
+        return FieldMapREBUILTWelded.teamHub.center.minus(getShooterPose())
+    }
+
+    /**
+     * Gets the same pose as the robot with rotation applied to face the hub
+     */
+    fun getRotationToHub() : Pose2d {
+        return Pose2d(
+            pose.x,
+            pose.y,
+            Rotation2d(getVectorToHub().angle.asDegrees)
+        )
+    }
+
+    /**
+     * Returns the interpolated guess for the hood angle (degrees)
+     * @return AngleUnit
+     */
+    fun getApproxHoodAngle() : AngleUnit {
+        return distanceInterpolator.get(getVectorToHub().magnitude).degrees
+    }
+
+    /**
+     * Returns the interpolated guess for the flywheel rpm
+     * @return AngularVelocity
+     */
+    fun getApproxFlywheelRPM() : AngularVelocity {
+        return flywheelInterpolator.get(getVectorToHub().magnitude).RPM
     }
 
     /**

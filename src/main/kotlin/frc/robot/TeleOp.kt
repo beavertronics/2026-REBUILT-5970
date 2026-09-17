@@ -2,7 +2,6 @@ package frc.robot
 
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
-import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
@@ -15,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
 import frc.robot.commands.general.MoveTo
+import frc.robot.commands.vision.MoveHoodToAngle
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Intake
@@ -23,6 +23,7 @@ import frc.robot.subsystems.Hopper
 import frc.robot.subsystems.IntakeArm
 import frc.robot.subsystems.Kicker
 import frc.robot.subsystems.Lights
+import frc.robot.subsystems.`according to all known laws of aviation, our robot should not be able to fly`
 import frc.robot.triggers.General
 
 /*
@@ -129,20 +130,27 @@ object TeleOp {
 
         // shooter
         OI.runShooter.whileTrue(
-            InstantCommand({Shooter.targetRPM = 6000.0.RPM}, Shooter).andThen(
-                MoveTo(
-                    Hood.getPoseToHub().toPose2d(Hood.getPoseToHub().angle)
-                ).withTimeout(5.0).andThen(
-                    Shooter.ShootRPMCommand(6000.0.RPM).alongWith(
-                        Lights.applyPatterns(mutableListOf(
-                            Pair("shooting", "intake left"),
-                            Pair("shooting", "intake right")
-                        )
-                        ),
+            InstantCommand({
+                Shooter.targetRPM = `according to all known laws of aviation, our robot should not be able to fly`.getApproxFlywheelRPM()
+            }).andThen(
+                Shooter.ShootRPMCommand(Shooter.targetRPM).alongWith(
+                    MoveTo(
+                        `according to all known laws of aviation, our robot should not be able to fly`.getRotationToHub()
+                    ).andThen(
                         WaitUntilCommand(General.rpmTrigger).andThen(
                             Hopper.RunHopperCommand(9.0.volts).alongWith(
                                 Kicker.RunKickerCommand(12.0.volts)
                             )
+                        )
+                    ),
+                    Lights.applyPatterns(mutableListOf(
+                            Pair("shooting", "intake left"),
+                            Pair("shooting", "intake right")
+                        )
+                    ),
+                    Hood.ZeroHoodCommand().andThen(
+                        MoveHoodToAngle(
+                            `according to all known laws of aviation, our robot should not be able to fly`.getApproxHoodAngle()
                         )
                     )
                 )

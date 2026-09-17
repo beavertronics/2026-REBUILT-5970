@@ -2,7 +2,6 @@ package frc.robot.subsystems
 
 import beaverlib.controls.PIDConstants
 import beaverlib.controls.toPID
-import beaverlib.fieldmap.FieldMapREBUILTWelded
 import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.AngleUnit
 import beaverlib.utils.Units.Angular.asDegrees
@@ -12,15 +11,9 @@ import beaverlib.utils.Units.Electrical.volts
 import beaverlib.utils.Units.Linear.feet
 import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.Units.Linear.meters
-import beaverlib.utils.geometry.Vector2
 import com.revrobotics.spark.SparkLowLevel
 import com.revrobotics.spark.SparkMax
 import com.revrobotics.spark.config.SparkBaseConfig
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Transform2d
-import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
@@ -34,14 +27,6 @@ object HoodConstants {
     val HOOD_MIN = 0.0.degrees
     val HOOD_MAX = 55.0.degrees
     val hoodLimitSwitchID = 0
-    val shooterToRobot = Transform2d(Translation2d(-26.0/2, 26.0/2), Rotation2d()) // todo
-}
-
-object AAC {
-    val shooterHeight = 6.0.feet.asMeters.meters
-    val hubHeight = 72.0.inches.asMeters.meters
-    val heightDiff = hubHeight - shooterHeight
-    val yOffset = 1.7.meters // todo how is this used?
 }
 
 object Hood : SubsystemBase() {
@@ -49,7 +34,6 @@ object Hood : SubsystemBase() {
     val lowerLimitSwitch = DigitalInput(HoodConstants.hoodLimitSwitchID)
     val hoodPIDConstants = PIDConstants(0.05, 0.0, 0.0)
     val hoodPID = hoodPIDConstants.toPID()
-    val distanceInterpolator = InterpolatingDoubleTreeMap.ofEntries() // pairs of <distance (meters), hood angle (degrees)>
 
     /**
      * This is the zero value for the encoder for the shooter hood, in degrees
@@ -100,27 +84,6 @@ object Hood : SubsystemBase() {
                 if (!interrupted) { setZero(false) }
 
             })
-    }
-
-    /**
-     * Gets the true distance from the shooter in the back-left corner to the hub.
-     */
-    fun getTruePose() : Pose2d {
-        return Drivetrain.swerveDrive.pose.plus(HoodConstants.shooterToRobot)
-    }
-
-    /**
-     * Gets the angle to rotate to face the hub.
-     */
-    fun getPoseToHub() : Vector2 {
-        return FieldMapREBUILTWelded.teamHub.center.minus(getTruePose())
-    }
-
-    /**
-     * Returns the interpolated guess for the hood angle
-     */
-    fun getInterpolatedAngle() : AngleUnit {
-        return distanceInterpolator.get(getPoseToHub().magnitude).degrees
     }
 
     /**
