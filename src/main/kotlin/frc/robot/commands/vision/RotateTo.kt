@@ -6,6 +6,7 @@ import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.degrees
 import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Drivetrain
@@ -19,13 +20,9 @@ import frc.robot.subsystems.Odometry
  * @param speedLimit the speed, in m/s, to limit the robot to.
  * */
 // todo tune, get working
-class MoveTo(val target: Pose2d, val speedLimit: Double = 1.0) : Command() {
-    val kXPID = PIDConstants(1.0, 0.0, 0.0)
-    val kYPID = PIDConstants(1.0, 0.0, 0.0)
+class RotateTo(val target: () -> Rotation2d, val speedLimit: Double = 0.0) : Command() {
     val kOPID = PIDConstants(1.0, 0.0, 0.0)
     // create all PID controllers
-    val xPID = kXPID.toPID()
-    val yPID = kYPID.toPID()
     val oPID = kOPID.toPID()
 
     init {
@@ -35,32 +32,18 @@ class MoveTo(val target: Pose2d, val speedLimit: Double = 1.0) : Command() {
 
     override fun initialize() {
         // reset all PID controllers
-        xPID.reset()
-        yPID.reset()
         oPID.reset()
         // set tolerances
-        xPID.setTolerance(1.0)
-        yPID.setTolerance(1.0)
-        oPID.setTolerance(1.0)
+        oPID.setTolerance(0.25)
         // set the setpoints for PID
-        xPID.setpoint = target.x
-        yPID.setpoint = target.y
         // removes full rotations and whatnot? keeps it within 0-360 (or 0-2pi)
-        oPID.setpoint = MathUtil.angleModulus(target.rotation.radians)
+        oPID.setpoint = MathUtil.angleModulus(target().radians)
         // disable vision updating odometry
         Odometry.doEnableVisionOdometry(false)
     }
 
     override fun execute() {
         // calculate the errors
-        val xDrive = xPID.calculate(
-            Odometry.pose.x
-                    * 1.0 // inversion
-        )
-        val yDrive = yPID.calculate(
-            Odometry.pose.y
-                    * 1.0 // inversion
-        )
         val oDrive = oPID.calculate(
             Odometry.pose.rotation.radians
                     * 1.0 // inversion
@@ -68,8 +51,8 @@ class MoveTo(val target: Pose2d, val speedLimit: Double = 1.0) : Command() {
         // drive the robot
         Drivetrain.drive(
             ChassisSpeeds(
-                xDrive.clamp(-speedLimit, speedLimit),
-                yDrive.clamp(-speedLimit, speedLimit),
+                0.0,
+                0.0,
                 oDrive.clamp(-speedLimit, speedLimit)
             ),
             fieldOriented = true // todo necessary?
@@ -77,7 +60,7 @@ class MoveTo(val target: Pose2d, val speedLimit: Double = 1.0) : Command() {
     }
 
     override fun isFinished(): Boolean {
-        return xPID.atSetpoint() && yPID.atSetpoint() && oPID.atSetpoint()
+        return oPID.atSetpoint()
     }
 
     override fun end(interrupted: Boolean) {

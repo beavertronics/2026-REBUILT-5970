@@ -2,6 +2,7 @@ package frc.robot
 
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
+import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.asDegrees
 import beaverlib.utils.Units.Angular.degrees
 import beaverlib.utils.Units.Electrical.volts
@@ -16,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
 import frc.robot.commands.general.MoveTo
+import frc.robot.commands.general.RotateTo
 import frc.robot.commands.vision.MoveHoodToAngle
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Hood
@@ -133,22 +135,25 @@ object TeleOp {
         // shooter
         OI.runShooter.whileTrue(
             // moves hood to angle
-            MoveHoodToAngle(
-                Odometry.getApproxHoodAngle().asDegrees.degrees
-            // with timeout, along with,
-            ).withTimeout(5.0).alongWith(
+//            MoveHoodToAngle(
+////                Odometry.getApproxHoodAngle().asDegrees.degrees
+//                0.0.degrees,
+//                voltage = 0.5.volts
+//            // with timeout, along with,
+//            ).withTimeout(5.0).alongWith(
                 // sets target RPM
                 InstantCommand({
-                    Shooter.targetRPM = Odometry.getApproxFlywheelRPM()
+//                    Shooter.targetRPM = Odometry.getApproxFlywheelRPM()
+                    Shooter.targetRPM = 6000.0.RPM
                 // and then,
-                }).andThen(
+                }, Shooter).andThen(
                     // runs shooter flywheel to target RPM
-                    Shooter.ShootRPMCommand(Shooter.targetRPM).alongWith(
+                    Shooter.ShootRPMCommand(6000.0.RPM).alongWith(
                         // while rotating to face the hub
-                        MoveTo(
-                            Odometry.getRotationToHub()
-                        // and then,
-                        ).andThen(
+//                        RotateTo ({
+//                            Odometry.getRotationToHub()
+//                            // and then,
+//                        }).andThen(
                             // one General.rmpTrigger,
                             WaitUntilCommand(General.rpmTrigger).andThen(
                                 // run the hopper
@@ -166,8 +171,8 @@ object TeleOp {
                         )
                     )
                 )
-            )
-        )
+//            )
+//        )
 
         // alternate features
         OI.alternate

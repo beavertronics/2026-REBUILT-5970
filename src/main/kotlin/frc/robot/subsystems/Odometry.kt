@@ -114,12 +114,8 @@ object Odometry : SubsystemBase() {
     /**
      * Gets the same pose as the robot with rotation applied to face the hub (rotation in radians!)
      */
-    fun getRotationToHub() : Pose2d {
-        return Pose2d(
-            pose.x,
-            pose.y,
-            Rotation2d(getVectorToHub().angle.asRadians)
-        )
+    fun getRotationToHub() : Rotation2d {
+        return Rotation2d(getVectorToHub().angle.asRadians)
     }
 
     /**
