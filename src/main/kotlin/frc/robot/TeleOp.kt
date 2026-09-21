@@ -135,31 +135,37 @@ object TeleOp {
         // shooter
         OI.runShooter.whileTrue(
             // moves hood to angle
-//            MoveHoodToAngle(
-////                Odometry.getApproxHoodAngle().asDegrees.degrees
-//                0.0.degrees,
-//                voltage = 0.5.volts
+            MoveHoodToAngle(
+//                Odometry.getApproxHoodAngle().asDegrees.degrees // todo get data first
+                0.0.degrees,
+                voltage = 0.5.volts
 //            // with timeout, along with,
-//            ).withTimeout(5.0).alongWith(
+            ).withTimeout(5.0).alongWith(
                 // sets target RPM
                 InstantCommand({
-//                    Shooter.targetRPM = Odometry.getApproxFlywheelRPM()
+//                    Shooter.targetRPM = Odometry.getApproxFlywheelRPM() // todo get data first
                     Shooter.targetRPM = 6000.0.RPM
                 // and then,
                 }, Shooter).andThen(
                     // runs shooter flywheel to target RPM
                     Shooter.ShootRPMCommand(6000.0.RPM).alongWith(
                         // while rotating to face the hub
-//                        RotateTo ({
-//                            Odometry.getRotationToHub()
-//                            // and then,
-//                        }).andThen(
+                        RotateTo(
+                            { Odometry.getRotationToHub() }
+                            // and then,
+                        ).andThen(
                             // one General.rmpTrigger,
                             WaitUntilCommand(General.rpmTrigger).andThen(
                                 // run the hopper
-                                Hopper.RunHopperCommand(9.0.volts).alongWith(
+                                Hopper.RunHopperCommand(
+//                                    Odometry.getApproxHopperVoltage() // todo get data first
+                                    9.0.volts
+                                ).alongWith(
                                     // while running the kicker
-                                    Kicker.RunKickerCommand(12.0.volts)
+                                    Kicker.RunKickerCommand(
+//                                        Odometry.getApproxKickerVoltage() // todo get data first
+                                        12.0.volts
+                                    )
                                 )
                             )
                         ),
@@ -171,8 +177,8 @@ object TeleOp {
                         )
                     )
                 )
-//            )
-//        )
+            )
+        )
 
         // alternate features
         OI.alternate

@@ -15,12 +15,11 @@ import frc.robot.subsystems.Odometry
 // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
 /**
  * Moves the robot to an absolute point on the field.
- * @param target the target pose you want to move the robot to.
- * - An absolute point is a fixed point on the field. The right-blue corner of the field is the origin.
+ * @param target the rotation (in radians) you want to move the robot to.
  * @param speedLimit the speed, in m/s, to limit the robot to.
  * */
 // todo tune, get working
-class RotateTo(val target: () -> Rotation2d, val speedLimit: Double = 0.0) : Command() {
+class RotateTo(val target: () -> Rotation2d, val speedLimit: Double = 1.0) : Command() {
     val kOPID = PIDConstants(1.0, 0.0, 0.0)
     // create all PID controllers
     val oPID = kOPID.toPID()

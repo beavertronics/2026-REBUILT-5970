@@ -8,6 +8,8 @@ import beaverlib.utils.Units.Angular.RPM
 import beaverlib.utils.Units.Angular.asDegrees
 import beaverlib.utils.Units.Angular.asRPM
 import beaverlib.utils.Units.Angular.degrees
+import beaverlib.utils.Units.Electrical.VoltageUnit
+import beaverlib.utils.Units.Electrical.volts
 import beaverlib.utils.Units.Linear.inches
 import beaverlib.utils.geometry.Vector2
 import edu.wpi.first.math.VecBuilder
@@ -57,11 +59,18 @@ object Odometry : SubsystemBase() {
         (-26.0/2).inches.asMeters,
         (26.0/2).inches.asMeters
     ), Rotation2d()) // todo
-    // interpolater for guessing hood angle for distance
-    val distanceInterpolator = InterpolatingDoubleTreeMap.ofEntries(
-    ) // pairs of <distance (meters), hood angle (degrees)>
-    val flywheelInterpolator = InterpolatingDoubleTreeMap.ofEntries(
-    ) // pairs of <distance (meters), flywheel rpm (rpm)<
+    // interpolators
+    val distanceApprox = InterpolatingDoubleTreeMap.ofEntries( // pairs of <distance (meters), hood angle (degrees)>
+    )
+    val flywheelApprox = InterpolatingDoubleTreeMap.ofEntries( // pairs of <distance (meters), flywheel rpm (rpm)>
+    )
+    val hopperApprox = InterpolatingDoubleTreeMap.ofEntries( // pairs of <distance (meters), hopper voltage>
+
+    )
+    val kickerApprox = InterpolatingDoubleTreeMap.ofEntries( // pairs of <distance (meters), kicker voltage>
+
+    )
+
 
     override fun periodic() {
         field.robotPose = pose
@@ -123,7 +132,7 @@ object Odometry : SubsystemBase() {
      * @return AngleUnit
      */
     fun getApproxHoodAngle() : AngleUnit {
-        return distanceInterpolator.get(getVectorToHub().magnitude).clamp(
+        return distanceApprox.get(getVectorToHub().magnitude).clamp(
             HoodConstants.HOOD_MIN.asDegrees, HoodConstants.HOOD_MAX.asDegrees
         ).degrees
     }
@@ -133,9 +142,29 @@ object Odometry : SubsystemBase() {
      * @return AngularVelocity
      */
     fun getApproxFlywheelRPM() : AngularVelocity {
-        return flywheelInterpolator.get(getVectorToHub().magnitude).clamp(
+        return flywheelApprox.get(getVectorToHub().magnitude).clamp(
             0.0, ShooterConstants.RPM_LIMIT.asRPM
         ).RPM
+    }
+
+    /**
+     * Returns the interpolated guess for the hopper voltage
+     * @return VoltageUnit
+     */
+    fun getApproxHopperVoltage() : VoltageUnit {
+        return hopperApprox.get(getVectorToHub().magnitude).clamp(
+            0.0, 12.0
+        ).volts
+    }
+
+    /**
+     * Returns the interpolated guess for the hopper voltage
+     * @return VoltageUnit
+     */
+    fun getApproxKickerVoltage() : VoltageUnit {
+        return kickerApprox.get(getVectorToHub().magnitude).clamp(
+            0.0, 12.0
+        ).volts
     }
 
     /**
