@@ -151,7 +151,8 @@ object TeleOp {
                     Shooter.ShootRPMCommand(6000.0.RPM).alongWith(
                         // while rotating to face the hub
                         RotateTo(
-                            { Odometry.getRotationToHub() }
+                            { Odometry.getRotationToHub() },
+                            3.0
                             // and then,
                         ).andThen(
                             // one General.rmpTrigger,

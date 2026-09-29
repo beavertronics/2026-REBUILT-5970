@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj2.command.Command
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Odometry
+import kotlin.math.PI
 
 // https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html
 /**
@@ -33,7 +34,7 @@ class RotateTo(val target: () -> Rotation2d, val speedLimit: Double = 1.0) : Com
         // reset all PID controllers
         oPID.reset()
         // set tolerances
-        oPID.setTolerance(0.25)
+        oPID.setTolerance(PI/8)
         // set the setpoints for PID
         // removes full rotations and whatnot? keeps it within 0-360 (or 0-2pi)
         oPID.setpoint = MathUtil.angleModulus(target().radians)
