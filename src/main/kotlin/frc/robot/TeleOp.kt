@@ -3,7 +3,6 @@ package frc.robot
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
 import beaverlib.utils.Units.Angular.RPM
-import beaverlib.utils.Units.Angular.asDegrees
 import beaverlib.utils.Units.Angular.degrees
 import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.GenericHID
@@ -16,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.commands.drive.ChildModeDriveCommand
 import frc.robot.commands.drive.TeleopDriveCommand
-import frc.robot.commands.general.MoveTo
 import frc.robot.commands.general.RotateTo
 import frc.robot.commands.vision.MoveHoodToAngle
 import frc.robot.subsystems.Drivetrain
