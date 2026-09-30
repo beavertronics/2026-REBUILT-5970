@@ -34,7 +34,7 @@ class RotateTo(val target: () -> Rotation2d, val speedLimit: Double = 1.0) : Com
         // reset all PID controllers
         oPID.reset()
         // set tolerances
-        oPID.setTolerance(PI/8)
+        oPID.setTolerance(PI/5)
         // set the setpoints for PID
         // removes full rotations and whatnot? keeps it within 0-360 (or 0-2pi)
         oPID.setpoint = MathUtil.angleModulus(target().radians)
@@ -57,6 +57,8 @@ class RotateTo(val target: () -> Rotation2d, val speedLimit: Double = 1.0) : Com
             ),
             fieldOriented = true // todo necessary?
         )
+
+        println(oDrive)
     }
 
     override fun isFinished(): Boolean {

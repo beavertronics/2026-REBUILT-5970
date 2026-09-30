@@ -140,19 +140,17 @@ object TeleOp {
                 0.0.degrees,
                 voltage = 0.5.volts
 //            // with timeout, along with,
-            ).withTimeout(5.0).alongWith(
-                // sets target RPM
-                InstantCommand({
-//                    Shooter.targetRPM = Odometry.getApproxFlywheelRPM() // todo get data first
-                    Shooter.targetRPM = 6000.0.RPM
-                // and then,
-                }, Shooter).andThen(
+            ).withTimeout(5.0).andThen(
                     // runs shooter flywheel to target RPM
-                    Shooter.ShootRPMCommand(6000.0.RPM).alongWith(
-                        // while rotating to face the hub
+                    Shooter.ShootRPMCommand(3000.0.RPM).alongWith(
+
+//                         while rotating to face the hub
                         RotateTo(
-                            { Odometry.getRotationToHub() },
-                            3.0
+                            {
+//                                Odometry.getRotationToHub()
+                                Odometry.pose.rotation
+                            },
+                            6.0
                             // and then,
                         ).andThen(
                             // one General.rmpTrigger,
@@ -160,7 +158,7 @@ object TeleOp {
                                 // run the hopper
                                 Hopper.RunHopperCommand(
 //                                    Odometry.getApproxHopperVoltage() // todo get data first
-                                    9.0.volts
+                                    12.0.volts
                                 ).alongWith(
                                     // while running the kicker
                                     Kicker.RunKickerCommand(
@@ -179,7 +177,6 @@ object TeleOp {
                     )
                 )
             )
-        )
 
         // alternate features
         OI.alternate

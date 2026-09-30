@@ -59,15 +59,22 @@ object Odometry : SubsystemBase() {
         (-26.0/2).inches.asMeters,
         (26.0/2).inches.asMeters
     ), Rotation2d()) // todo
-    // interpolators
-    val distanceApprox = InterpolatingDoubleTreeMap.ofEntries( // pairs of <distance (meters), hood angle (degrees)>
-    )
-    val flywheelApprox = InterpolatingDoubleTreeMap.ofEntries( // pairs of <distance (meters), flywheel rpm (rpm)>
-    )
-    val hopperApprox = InterpolatingDoubleTreeMap.ofEntries( // pairs of <distance (meters), hopper voltage>
+    // interpolating values
+    // pairs of <distance (meters), hood angle (degrees)>
+    // distance from the front bumpers to hub
+    val distanceApprox = InterpolatingDoubleTreeMap.ofEntries(
 
     )
-    val kickerApprox = InterpolatingDoubleTreeMap.ofEntries( // pairs of <distance (meters), kicker voltage>
+    // pairs of <distance (meters), flywheel rpm (rpm)>
+    val flywheelApprox = InterpolatingDoubleTreeMap.ofEntries(
+
+    )
+    // pairs of <distance (meters), hopper voltage>
+    val hopperApprox = InterpolatingDoubleTreeMap.ofEntries(
+
+    )
+    // pairs of <distance (meters), kicker voltage>
+    val kickerApprox = InterpolatingDoubleTreeMap.ofEntries(
 
     )
 
