@@ -5,7 +5,6 @@ import beaverlib.controls.toPID
 import beaverlib.utils.Sugar.clamp
 import beaverlib.utils.Units.Angular.degrees
 import edu.wpi.first.math.MathUtil
-import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj2.command.Command
@@ -19,7 +18,6 @@ import kotlin.math.PI
  * @param target the rotation (in radians) you want to move the robot to.
  * @param speedLimit the speed, in m/s, to limit the robot to.
  * */
-// todo tune, get working
 class RotateTo(val target: () -> Rotation2d, val speedLimit: Double = 1.0) : Command() {
     val kOPID = PIDConstants(1.0, 0.0, 0.0)
     // create all PID controllers
