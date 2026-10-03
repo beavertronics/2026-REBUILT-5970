@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.engine.utils.initMotorControllers
 import frc.robot.Constants
-import frc.robot.subsystems.general.HedgieHelmet
+//import frc.robot.subsystems.general.HedgieHelmet
 import kotlin.math.sign
 
 object IntakeArmConstants {
@@ -51,15 +51,6 @@ object IntakeArm : SubsystemBase() {
             .finallyDo({ interrupted ->
                 runIntakeMotors(0.0.volts)
             })
-    }
-
-    /**
-     * A command to protect the intake when appraoching the trench, bump or hub. // todo test!
-     */
-    fun ProtectIntakeCommand() : Command {
-        return MoveIntakeCommand(9.0.volts)
-            .until { !HedgieHelmet.trenchDriveTrigger.asBoolean }
-            .repeatedly()
     }
 
     override fun periodic() {

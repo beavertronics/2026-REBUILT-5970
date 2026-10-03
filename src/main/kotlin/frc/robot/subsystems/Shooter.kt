@@ -109,14 +109,14 @@ object Shooter : SubsystemBase() {
      * @see targetRPM
      * @see frc.robot.triggers.General.rpmTrigger
      */
-    fun ShootRPMCommand(rpm: AngularVelocity = 0.0.RPM) : Command {
+    fun ShootRPMCommand(rpm: () -> AngularVelocity = { 0.0.RPM }) : Command {
         val request = MotionMagicVelocityVoltage(0.0.rotationsPerSecond.asRotationsPerSecond)
         return run {
             krakenShooter.setControl(
-                request.withVelocity(rpm.asRotationsPerSecond)
+                request.withVelocity(rpm().asRotationsPerSecond)
             )
         }
-            .beforeStarting( runOnce { targetRPM = rpm } )
+            .beforeStarting( runOnce { targetRPM = rpm() } )
             .finallyDo({ interrupted ->
                 targetRPM = 0.0.RPM
                 krakenShooter.setControl(

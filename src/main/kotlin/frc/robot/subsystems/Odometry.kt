@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.*
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.util.sendable.SendableRegistry
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.Field2d
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.InstantCommand
@@ -24,6 +25,25 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.subsystems.Drivetrain.swerveDrive
 
 object Odometry : SubsystemBase() {
+
+    val pose get() = swerveDrive.pose
+    var updateVisionOdometry = true
+    val field = Field2d()
+    // offset from robot to shooter
+    val robotToShooter = Transform2d(Translation2d(
+        (-26.0/2).inches.asMeters,
+        (8.0).inches.asMeters
+    ), Rotation2d()) // todo
+    // interpolating values
+    // pairs of <distance (meters), hood angle (degrees)>
+    // distance from the front bumpers to hub
+    val hoodApprox = InterpolatingDoubleTreeMap()
+    // pairs of <distance (meters), flywheel rpm (rpm)>
+    val flywheelApprox = InterpolatingDoubleTreeMap()
+    // pairs of <distance (meters), hopper voltage>
+    val hopperApprox = InterpolatingDoubleTreeMap()
+    // pairs of <distance (meters), kicker voltage>
+    val kickerApprox = InterpolatingDoubleTreeMap()
 
     init {
         // Updates odometry whenever vision sees apriltag
@@ -48,36 +68,29 @@ object Odometry : SubsystemBase() {
 //                0.0
 //            )
 //        )
+
+        // put in hood values
+        // for d = 0
+        hoodApprox.put(0.0, 0.0)
+        hopperApprox.put(0.0, 12.0)
+        kickerApprox.put(0.0, 12.0)
+        flywheelApprox.put(0.0, 3000.0)
+        // for d = 17 inches (converted to meters)
+        hoodApprox.put(15.0.inches.asMeters, 5.0)
+        hopperApprox.put(15.0.inches.asMeters, 12.0)
+        kickerApprox.put(15.0.inches.asMeters, 12.0)
+        flywheelApprox.put(15.0.inches.asMeters, 3000.0)
+        // for d = 19 inches
+        hoodApprox.put(19.0.inches.asMeters, 5.0)
+        hopperApprox.put(19.0.inches.asMeters, 12.0)
+        kickerApprox.put(19.0.inches.asMeters, 12.0)
+        flywheelApprox.put(19.0.inches.asMeters, 3000.0)
+        // for d = 40 inches
+        hoodApprox.put(40.0.inches.asMeters, 7.0)
+        hopperApprox.put(40.0.inches.asMeters, 12.0)
+        kickerApprox.put(40.0.inches.asMeters, 12.0)
+        flywheelApprox.put(40.0.inches.asMeters, 3350.0)
     }
-
-    // pose of the robot
-    val pose get() = swerveDrive.pose
-    var updateVisionOdometry = true
-    val field = Field2d()
-    // offset from robot to shooter
-    val robotToShooter = Transform2d(Translation2d(
-        (-26.0/2).inches.asMeters,
-        (26.0/2).inches.asMeters
-    ), Rotation2d()) // todo
-    // interpolating values
-    // pairs of <distance (meters), hood angle (degrees)>
-    // distance from the front bumpers to hub
-    val distanceApprox = InterpolatingDoubleTreeMap.ofEntries(
-
-    )
-    // pairs of <distance (meters), flywheel rpm (rpm)>
-    val flywheelApprox = InterpolatingDoubleTreeMap.ofEntries(
-
-    )
-    // pairs of <distance (meters), hopper voltage>
-    val hopperApprox = InterpolatingDoubleTreeMap.ofEntries(
-
-    )
-    // pairs of <distance (meters), kicker voltage>
-    val kickerApprox = InterpolatingDoubleTreeMap.ofEntries(
-
-    )
-
 
     override fun periodic() {
         field.robotPose = pose
@@ -120,18 +133,27 @@ object Odometry : SubsystemBase() {
 
     /**
      * Gets the pose to be facing the hub, with offsets.
+     * @param flip whether to flip to the opposite hub or not.
      * @return Vector2
      */
-    fun getVectorToHub() : Vector2 {
-        // will get the difference in poses
-        return FieldMapREBUILTWelded.teamHub.center.minus(getShooterPose())
+    fun getVectorToHub(flip: Boolean = false) : Vector2 {
+        // for some reason it can be weird sometimes and the hub will be the opposite so we can flip it here
+        if (flip) {
+            if (FieldMapREBUILTWelded.getAllianceSafe() == DriverStation.Alliance.Red) {
+                return FieldMapREBUILTWelded.BlueHub.center.minus(getShooterPose())
+            }
+            return FieldMapREBUILTWelded.RedHub.center.minus(getShooterPose())
+        }
+        else {
+            return FieldMapREBUILTWelded.teamHub.center.minus(getShooterPose())
+        }
     }
 
     /**
      * Gets the same pose as the robot with rotation applied to face the hub (rotation in radians!)
      */
     fun getRotationToHub() : Rotation2d {
-        return Rotation2d(getVectorToHub().angle.asRadians)
+        return Rotation2d(getVectorToHub(true).angle.asRadians)
     }
 
     /**
@@ -139,7 +161,7 @@ object Odometry : SubsystemBase() {
      * @return AngleUnit
      */
     fun getApproxHoodAngle() : AngleUnit {
-        return distanceApprox.get(getVectorToHub().magnitude).clamp(
+        return hoodApprox.get(getVectorToHub(true).magnitude).clamp(
             HoodConstants.HOOD_MIN.asDegrees, HoodConstants.HOOD_MAX.asDegrees
         ).degrees
     }
@@ -149,7 +171,7 @@ object Odometry : SubsystemBase() {
      * @return AngularVelocity
      */
     fun getApproxFlywheelRPM() : AngularVelocity {
-        return flywheelApprox.get(getVectorToHub().magnitude).clamp(
+        return flywheelApprox.get(getVectorToHub(true).magnitude).clamp(
             0.0, ShooterConstants.RPM_LIMIT.asRPM
         ).RPM
     }
@@ -159,7 +181,7 @@ object Odometry : SubsystemBase() {
      * @return VoltageUnit
      */
     fun getApproxHopperVoltage() : VoltageUnit {
-        return hopperApprox.get(getVectorToHub().magnitude).clamp(
+        return hopperApprox.get(getVectorToHub(true).magnitude).clamp(
             0.0, 12.0
         ).volts
     }
@@ -169,7 +191,7 @@ object Odometry : SubsystemBase() {
      * @return VoltageUnit
      */
     fun getApproxKickerVoltage() : VoltageUnit {
-        return kickerApprox.get(getVectorToHub().magnitude).clamp(
+        return kickerApprox.get(getVectorToHub(true).magnitude).clamp(
             0.0, 12.0
         ).volts
     }

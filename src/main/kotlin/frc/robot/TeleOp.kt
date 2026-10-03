@@ -2,13 +2,10 @@ package frc.robot
 
 import kotlin.math.*
 import beaverlib.utils.Sugar.within
-import beaverlib.utils.Units.Angular.RPM
-import beaverlib.utils.Units.Angular.degrees
 import beaverlib.utils.Units.Electrical.volts
 import edu.wpi.first.wpilibj.GenericHID
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand
@@ -74,9 +71,9 @@ object TeleOp {
         // intake
         Intake.defaultCommand = Intake.RunIntakeCommand(0.0.volts)
         // hopper
-        Hopper.defaultCommand = Hopper.RunHopperCommand(0.0.volts)
+        Hopper.defaultCommand = Hopper.RunHopperCommand({ 0.0.volts })
         // shooter feed
-        Kicker.defaultCommand = Kicker.RunKickerCommand(0.0.volts)
+        Kicker.defaultCommand = Kicker.RunKickerCommand({ 0.0.volts })
         // shooter
         Shooter.defaultCommand = Shooter.ShootRPMCommand()
     }
@@ -85,6 +82,7 @@ object TeleOp {
      * configures things to run on specific inputs
      */
     fun configureBindings() {
+
         //===== DRIVETRAIN =====//
         //===== SUBSYSTEMS =====//
         // run the intake
@@ -113,20 +111,24 @@ object TeleOp {
 
         // move the intake in or out
         // safe is false due to the absence of limit switches
-        OI.intakeIn.whileTrue(IntakeArm.MoveIntakeCommand(5.0.volts, false))
-        OI.intakeOut.whileTrue(IntakeArm.MoveIntakeCommand((-5.0).volts, false))
+        OI.intakeIn.whileTrue(
+            IntakeArm.MoveIntakeCommand(5.0.volts, false)
+        )
+        OI.intakeOut.whileTrue(
+            IntakeArm.MoveIntakeCommand((-5.0).volts, false)
+        )
 
         // spindexer and shooter kicker independent controls
         OI.indexIn.whileTrue(
             ParallelCommandGroup(
-                Hopper.RunHopperCommand(9.0.volts),
-                Kicker.RunKickerCommand(12.0.volts)
+                Hopper.RunHopperCommand({ 9.0.volts }),
+                Kicker.RunKickerCommand({ 12.0.volts })
             )
         )
         OI.indexOut.whileTrue(
             ParallelCommandGroup(
-                Hopper.RunHopperCommand((-9.0).volts),
-                Kicker.RunKickerCommand((-10.0).volts)
+                Hopper.RunHopperCommand({ (-9.0).volts }),
+                Kicker.RunKickerCommand({ (-10.0).volts })
             )
         )
 
@@ -134,34 +136,27 @@ object TeleOp {
         OI.runShooter.whileTrue(
             // moves hood to angle
             MoveHoodToAngle(
-//                Odometry.getApproxHoodAngle().asDegrees.degrees // todo get data first
-                0.0.degrees,
-                voltage = 0.5.volts
+                { Odometry.getApproxHoodAngle() },
+                voltage = 0.35.volts
 //            // with timeout, along with,
             ).withTimeout(5.0).andThen(
                     // runs shooter flywheel to target RPM
-                    Shooter.ShootRPMCommand(3000.0.RPM).alongWith(
-
-//                         while rotating to face the hub
+                    Shooter.ShootRPMCommand({Odometry.getApproxFlywheelRPM()}).alongWith(
+                        // while rotating to face the hub
                         RotateTo(
-                            {
-//                                Odometry.getRotationToHub()
-                                Odometry.pose.rotation
-                            },
+                            { Odometry.getRotationToHub() },
                             6.0
-                            // and then,
+                        // and then,
                         ).andThen(
                             // one General.rmpTrigger,
                             WaitUntilCommand(General.rpmTrigger).andThen(
                                 // run the hopper
                                 Hopper.RunHopperCommand(
-//                                    Odometry.getApproxHopperVoltage() // todo get data first
-                                    12.0.volts
+                                    { Odometry.getApproxHopperVoltage() }
                                 ).alongWith(
                                     // while running the kicker
                                     Kicker.RunKickerCommand(
-//                                        Odometry.getApproxKickerVoltage() // todo get data first
-                                        12.0.volts
+                                        { Odometry.getApproxKickerVoltage() }
                                     )
                                 )
                             )

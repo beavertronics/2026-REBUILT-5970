@@ -28,9 +28,9 @@ object Kicker: SubsystemBase() {
      * @param voltage the voltage to run the feeder motor at.
      * @param stall whether to invert direction when a stall is detected.
      */
-    fun RunKickerCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
+    fun RunKickerCommand(voltage: () -> VoltageUnit = { 1.0.volts }, stall: Boolean = true) : Command {
         return run {
-            runKicker(voltage)
+            runKicker(voltage())
         }
             .finallyDo({ interrupted ->
                 runKicker(0.0.volts)

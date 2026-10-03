@@ -42,8 +42,8 @@ object Autos {
                             // then feed shooter
                             .andThen(
                                 ParallelCommandGroup(
-                                    Hopper.RunHopperCommand(10.0.volts),
-                                    Kicker.RunKickerCommand(9.0.volts)
+                                    Hopper.RunHopperCommand({ 10.0.volts }),
+                                    Kicker.RunKickerCommand({ 9.0.volts })
                                 )
                             )
                     ),
@@ -57,12 +57,12 @@ object Autos {
     val juggle =
 //        Hood.ZeroHoodCommand().andThen(MoveHoodToAngle(45.0.degrees))
 //            .andThen(
-                Shooter.ShootRPMCommand(525.0.RPM)
+                Shooter.ShootRPMCommand({ 525.0.RPM })
                     .alongWith(
-                        Hopper.RunHopperCommand(6.0.volts)
+                        Hopper.RunHopperCommand({ 6.0.volts })
                     )
                     .alongWith(
-                        Kicker.RunKickerCommand(9.0.volts)
+                        Kicker.RunKickerCommand({ 9.0.volts })
                     )
 //            )
 
@@ -70,17 +70,17 @@ object Autos {
      * An auto to run every motor at once for testing.
      */
     val testAll =
-        Shooter.ShootRPMCommand(5000.0.RPM)
+        Shooter.ShootRPMCommand({ 5000.0.RPM })
             .alongWith(
                 Intake.RunIntakeCommand(12.0.volts)
             .alongWith(
-                Hopper.RunHopperCommand(12.0.volts)
+                Hopper.RunHopperCommand({ 12.0.volts })
             .alongWith(
-                Kicker.RunKickerCommand(12.0.volts)
+                Kicker.RunKickerCommand({ 12.0.volts })
             .alongWith(
                 Hood.ZeroHoodCommand()
                     .andThen(
-                        MoveHoodToAngle(45.0.degrees, 0.25.volts)
+                        MoveHoodToAngle({ 45.0.degrees }, 0.25.volts)
                     )
             )
             )

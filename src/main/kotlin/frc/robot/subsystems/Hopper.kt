@@ -29,9 +29,9 @@ object Hopper : SubsystemBase() {
      * @param voltage the voltage to run the spindexer motor at.
      * @param stall whether to invert the direction when a stall is detected.
      */
-    fun RunHopperCommand(voltage: VoltageUnit = 1.0.volts, stall: Boolean = true) : Command {
+    fun RunHopperCommand(voltage: () -> VoltageUnit = { 1.0.volts }, stall: Boolean = true) : Command {
         return run {
-            runHopper(voltage)
+            runHopper(voltage())
         }
             .finallyDo({ interrupted ->
                 runHopper(0.0.volts)
@@ -44,12 +44,12 @@ object Hopper : SubsystemBase() {
      */
     fun AgitateHopperCommand(volts: VoltageUnit = 3.0.volts) : Command {
         return ParallelRaceGroup(
-            RunHopperCommand(volts),
+            RunHopperCommand({ volts }),
             WaitCommand(5.0)
         )
             .andThen(
                 ParallelRaceGroup(
-                    RunHopperCommand(-volts),
+                    RunHopperCommand({ -volts }),
                     WaitCommand(2.0)
                 )
             )
