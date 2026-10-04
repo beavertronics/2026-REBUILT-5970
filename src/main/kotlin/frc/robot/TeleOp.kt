@@ -224,8 +224,7 @@ object TeleOp {
             val driverY get() = -driverController.leftY.processInput()
             val driverOmega get() = -driverController.rightX.processInput()
             val slowMode get() = driverController.leftTrigger()
-            val driveMode get() = driverController.rightTrigger()
-        //===== SUBSYSTEMS =====//
+            val driveMode get() = driverController.rightTrigger().negate()
             // intake
             val runIntake get() = operatorController.a()
             val runOuttake get() = operatorController.y()

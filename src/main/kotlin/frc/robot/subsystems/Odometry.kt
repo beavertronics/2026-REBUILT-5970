@@ -153,7 +153,7 @@ object Odometry : SubsystemBase() {
      * Gets the same pose as the robot with rotation applied to face the hub (rotation in radians!)
      */
     fun getRotationToHub() : Rotation2d {
-        return Rotation2d(getVectorToHub(true).angle.asRadians)
+        return Rotation2d(getVectorToHub(false).angle.asRadians)
     }
 
     /**
@@ -161,7 +161,7 @@ object Odometry : SubsystemBase() {
      * @return AngleUnit
      */
     fun getApproxHoodAngle() : AngleUnit {
-        return hoodApprox.get(getVectorToHub(true).magnitude).clamp(
+        return hoodApprox.get(getVectorToHub(false).magnitude).clamp(
             HoodConstants.HOOD_MIN.asDegrees, HoodConstants.HOOD_MAX.asDegrees
         ).degrees
     }
@@ -171,7 +171,7 @@ object Odometry : SubsystemBase() {
      * @return AngularVelocity
      */
     fun getApproxFlywheelRPM() : AngularVelocity {
-        return flywheelApprox.get(getVectorToHub(true).magnitude).clamp(
+        return flywheelApprox.get(getVectorToHub(false).magnitude).clamp(
             0.0, ShooterConstants.RPM_LIMIT.asRPM
         ).RPM
     }
@@ -181,7 +181,7 @@ object Odometry : SubsystemBase() {
      * @return VoltageUnit
      */
     fun getApproxHopperVoltage() : VoltageUnit {
-        return hopperApprox.get(getVectorToHub(true).magnitude).clamp(
+        return hopperApprox.get(getVectorToHub(false).magnitude).clamp(
             0.0, 12.0
         ).volts
     }
@@ -191,7 +191,7 @@ object Odometry : SubsystemBase() {
      * @return VoltageUnit
      */
     fun getApproxKickerVoltage() : VoltageUnit {
-        return kickerApprox.get(getVectorToHub(true).magnitude).clamp(
+        return kickerApprox.get(getVectorToHub(false).magnitude).clamp(
             0.0, 12.0
         ).volts
     }
