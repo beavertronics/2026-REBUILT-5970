@@ -12,14 +12,19 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup
 import edu.wpi.first.wpilibj2.command.WaitCommand
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand
 import frc.robot.commands.general.MoveTo
+import frc.robot.commands.general.RotateTo
 import frc.robot.commands.vision.MoveHoodToAngle
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Hopper
 import frc.robot.subsystems.Intake
 import frc.robot.subsystems.Kicker
+import frc.robot.subsystems.Lights
+import frc.robot.subsystems.Odometry
 import frc.robot.subsystems.Orchestrator
 import frc.robot.subsystems.Shooter
+import frc.robot.triggers.General
 
 /**
  * All pre-made commands and autos that can be used.
@@ -49,6 +54,83 @@ object Autos {
                     ),
                     // full thing ends after 17.5 seconds
                     WaitCommand(17.5)               )
+            )
+
+    /**
+     * An advanced shooting command
+     */
+    val shootAdvanced =
+        // moves hood to angle
+        MoveHoodToAngle(
+            { Odometry.getApproxHoodAngle() },
+            voltage = 0.35.volts
+        // with timeout, along with,
+        ).withTimeout(5.0).andThen(
+            // runs shooter flywheel to target RPM
+            Shooter.ShootRPMCommand({Odometry.getApproxFlywheelRPM()}).alongWith(
+                // while rotating to face the hub
+                RotateTo(
+                    { Odometry.getRotationToHub() },
+                    6.0
+                    // and then,
+                ).andThen(
+                    // one General.rmpTrigger,
+                    WaitUntilCommand(General.rpmTrigger).andThen(
+                        // run the hopper
+                        Hopper.RunHopperCommand(
+                            { Odometry.getApproxHopperVoltage() }
+                        ).alongWith(
+                            // while running the kicker
+                            Kicker.RunKickerCommand(
+                                { Odometry.getApproxKickerVoltage() }
+                            )
+                        ).alongWith(
+                            Intake.RunIntakeCommand(12.0.volts, false)
+                        )
+                    )
+                ),
+                // while running the LEDs
+                Lights.applyPatterns(mutableListOf(
+                    Pair("shooting", "intake left"),
+                    Pair("shooting", "intake right")
+                )
+                )
+            )
+        )
+
+    /**
+     * A command to shoot balls in a given direction
+     */
+    val ferry =
+        // moves hood to angle
+        MoveHoodToAngle(
+            { 25.0.degrees },
+            voltage = 0.35.volts
+        // with timeout, along with,
+        ).withTimeout(5.0).andThen(
+            // runs shooter flywheel to target RPM
+            Shooter.ShootRPMCommand({5000.0.RPM}).andThen(
+                    // one General.rmpTrigger,
+                    WaitUntilCommand(General.rpmTrigger).andThen(
+                        // run the hopper
+                        Hopper.RunHopperCommand(
+                            { 12.0.volts }
+                        ).alongWith(
+                            // while running the kicker
+                            Kicker.RunKickerCommand(
+                                { 12.0.volts }
+                            )
+                        ).alongWith(
+                            Intake.RunIntakeCommand(12.0.volts, false)
+                        )
+                    )
+                ),
+                // while running the LEDs
+                Lights.applyPatterns(mutableListOf(
+                    Pair("shooting", "intake left"),
+                    Pair("shooting", "intake right")
+                )
+                )
             )
 
     /**

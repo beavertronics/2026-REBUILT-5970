@@ -133,45 +133,12 @@ object TeleOp {
         )
 
         // shooter
-        OI.runShooter.whileTrue(
-            // moves hood to angle
-            MoveHoodToAngle(
-                { Odometry.getApproxHoodAngle() },
-                voltage = 0.35.volts
-//            // with timeout, along with,
-            ).withTimeout(5.0).andThen(
-                    // runs shooter flywheel to target RPM
-                    Shooter.ShootRPMCommand({Odometry.getApproxFlywheelRPM()}).alongWith(
-                        // while rotating to face the hub
-                        RotateTo(
-                            { Odometry.getRotationToHub() },
-                            6.0
-                        // and then,
-                        ).andThen(
-                            // one General.rmpTrigger,
-                            WaitUntilCommand(General.rpmTrigger).andThen(
-                                // run the hopper
-                                Hopper.RunHopperCommand(
-                                    { Odometry.getApproxHopperVoltage() }
-                                ).alongWith(
-                                    // while running the kicker
-                                    Kicker.RunKickerCommand(
-                                        { Odometry.getApproxKickerVoltage() }
-                                    )
-                                )
-                            )
-                        ),
-                        // while running the LEDs
-                        Lights.applyPatterns(mutableListOf(
-                            Pair("shooting", "intake left"),
-                            Pair("shooting", "intake right")
-                        )
-                        )
-                    )
-                )
-            )
+        OI.runShooter.whileTrue(Autos.shootAdvanced)
 
         // alternate features
+        OI.alternate
+            .and(OI.runShooter)
+            .whileTrue(Autos.ferry)
         OI.alternate
             .and(OI.zeroHood)
             .whileTrue(Hood.ZeroHoodCommand())
