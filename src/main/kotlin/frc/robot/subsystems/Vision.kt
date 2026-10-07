@@ -42,7 +42,7 @@ class TargetPoseProvider(
 
 val Vision = BeaverPhotonVision(
     BeaverVisionCamera(
-        name = "front",
+        name = "back",
         robotToCamera = Transform3d(
             -4.5.inches.asMeters, 11.5.inches.asMeters, 15.5.inches.asMeters,
             Rotation3d(
@@ -52,17 +52,17 @@ val Vision = BeaverPhotonVision(
         layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded),
         strategy = PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
         fallbackStrategy = PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE
-    ),
-    BeaverVisionCamera(
-        name = "back",
-        robotToCamera = Transform3d(
-            -7.0.inches.asMeters, 11.5.inches.asMeters, 15.5.inches.asMeters,
-            Rotation3d(
-                0.0.degrees.asRadians, 0.0.degrees.asRadians, 180.0.degrees.asRadians
-            )
-        ),
-        layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded),
-        strategy = PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-        fallbackStrategy = PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE
     )
+//    BeaverVisionCamera(
+//        name = "back",
+//        robotToCamera = Transform3d(
+//            -7.0.inches.asMeters, 11.5.inches.asMeters, 15.5.inches.asMeters,
+//            Rotation3d(
+//                0.0.degrees.asRadians, 0.0.degrees.asRadians, 180.0.degrees.asRadians
+//            )
+//        ),
+//        layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded),
+//        strategy = PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+//        fallbackStrategy = PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_REFERENCE_POSE
+//    )
 )

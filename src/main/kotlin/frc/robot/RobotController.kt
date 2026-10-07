@@ -1,8 +1,12 @@
 package frc.robot
 
+import beaverlib.fieldmap.FieldMapREBUILTWelded
 import com.ctre.phoenix6.SignalLogger
 import com.ctre.phoenix6.hardware.TalonFX
 import com.revrobotics.util.StatusLogger
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.TimedRobot
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -11,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup
+import frc.robot.subsystems.DriveConstants
 import frc.robot.subsystems.Drivetrain
 import frc.robot.subsystems.Hood
 import frc.robot.subsystems.Hopper
@@ -138,6 +143,30 @@ object RobotController : TimedRobot() {
                 Shooter.ShootRPMCommand().withTimeout(5.0)
             )
         )
+        Drivetrain.swerveDrive.resetOdometry(Pose2d())
+
+//        if (FieldMapREBUILTWelded.getAllianceSafe() == DriverStation.Alliance.Blue) {
+//            Drivetrain.swerveDrive.resetOdometry(
+//                Pose2d(
+//                    FieldMapREBUILTWelded.RedHub.center.x
+//                            + DriveConstants.robotWidth.asMeters
+//                            + DriveConstants.bumperThickness.asMeters,
+//                    FieldMapREBUILTWelded.RedHub.center.y,
+//                    Rotation2d(0.0)
+//                )
+//            )
+//        }
+//        else {
+//            Drivetrain.swerveDrive.resetOdometry(
+//                Pose2d(
+//                    FieldMapREBUILTWelded.RedHub.center.x
+//                            - DriveConstants.robotWidth.asMeters
+//                            - DriveConstants.bumperThickness.asMeters,
+//                    FieldMapREBUILTWelded.RedHub.center.y,
+//                    Rotation2d(0.0)
+//                )
+//            )
+//        }
     }
 
     override fun testInit() { commandScheduler.cancelAll() }
